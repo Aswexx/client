@@ -1,28 +1,34 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <NavBar/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import NavBar from './components/NavBar'
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
+  components: {NavBar}
 }
 </script>
 
-<style>
+<style lang="scss">
+@import "./assets/scss/base.scss";
+
+// 178 px / 639 px / 273 px
+// 16 % / 60 % / 24 %
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  max-width: 1140px;
+  margin: 0 auto;
+  border: 1px solid red;
+
+  display: grid;
+  grid-template-columns: 16% 60% 24%;
+
+  @include respond($bp-mobile){
+    grid-template-columns: 100%
+  }
 }
+
 </style>
