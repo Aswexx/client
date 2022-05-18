@@ -13,6 +13,7 @@ html {
 
 body {
   font-size: 1.6rem;
+  height: 100%;
 }
 
 h1 {
@@ -65,4 +66,10 @@ button {
   &:hover {
     background-color: $color-sup-orange
   }
+}
+
+img {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
 }

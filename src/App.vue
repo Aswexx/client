@@ -1,22 +1,19 @@
 <template>
   <div id="app">
     <NavBar/>
+    <router-view/>
   </div>
 </template>
 
 <script>
-import NavBar from './components/NavBar'
+import NavBar from './components/NavBar.vue'
 export default {
-  name: 'App',
   components: {NavBar}
 }
 </script>
 
 <style lang="scss">
-@import "./assets/scss/base.scss";
-
-// 178 px / 639 px / 273 px
-// 16 % / 60 % / 24 %
+@import './assets/scss/base.scss';
 
 #app {
   max-width: 1140px;
@@ -26,7 +23,7 @@ export default {
   display: grid;
   grid-template-columns: 16% 60% 24%;
 
-  @include respond($bp-mobile){
+  @include respond($bp-mobile) {
     grid-template-columns: 100%
   }
 }
