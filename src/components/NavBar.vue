@@ -5,21 +5,24 @@
     </svg>
     <ul>
       <li>
-        <a href="#">
+        <router-link to="/home" active-class="active">
           <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-home"></use></svg><span>首頁</span>
-        </a>
+        </router-link>
       </li>
       <li>
-        <a href="#">
+        <router-link 
+          to="/profile" 
+          active-class="active"
+        >
           <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-user"></use></svg><span>個人資料</span>
-        </a>
+        </router-link>
       </li>
       <li>
-        <a href="#">
+        <router-link to="/setting" active-class="active">
           <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-setting"></use></svg><span>設定</span>
-        </a>
+        </router-link>
       </li>
-    <button>
+    <button @click="post">
       <span>推文</span>
       <svg class="post-icon" v-if="matchTablet"><use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use></svg>
     </button>
@@ -37,8 +40,13 @@
 export default {
   data(){
     return {
-      matchTablet: window.matchMedia("(max-width: 768px)").matches
+      matchTablet: window.matchMedia("(max-width: 768px)").matches,
     }
+  },
+  methods:{
+    post(){
+      this.$bus.$emit('activatePost','post')
+    },
   },
   mounted(){
     window.addEventListener('resize',()=>{
@@ -51,15 +59,25 @@ export default {
 <style lang="scss" scoped>
 @import "./../assets/scss/abstracts.scss";
 
+  .active {
+    color: $color-brand;
+    fill: $color-brand;
+  }
+
   div.nav {
     height: 98vh;
-    border: 1px solid red;
     display: flex;
     flex-direction: column;
+    align-items: center;
+
+    .brand-logo {
+      align-self: flex-start;
+    }
     
     @include respond($bp-tablet){
-      align-items: center;
-      height: 60vh;
+      .brand-logo {
+        align-self: center;
+      }
     }
 
     @include respond($bp-mobile){
@@ -67,6 +85,13 @@ export default {
       .brand-logo,.logout {
         display: none;
       }
+
+      border-top: 1px solid $color-gray-200;
+      background-color: blue;
+
+      position: fixed;
+      width: 100%;
+      bottom: 0;
     }
   }
 
@@ -97,11 +122,17 @@ export default {
     align-items: center;
   }
 
-    svg {
+  a {
+    text-decoration: none;
+    color: $color-gray-900;
+  }
+
+  svg {
     width: 2.4rem;
     height: 2.4rem;
     margin-left: 1.5rem;
     margin-right: 1.5rem;
+    
 
     &.brand-logo {
       width: 5rem;

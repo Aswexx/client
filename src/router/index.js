@@ -1,7 +1,14 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import PrimaryView from '../views/PrimaryView.vue'
+import MainView from '../views/MainView.vue'
+import HomePage from '../views/HomePage.vue'
 import NotFound from '../views/NotFound.vue'
+import UserLoginPage from '../views/UserLoginPage.vue'
+import ProfilePage from '../views/ProfilePage.vue'
+import SettingPage from '../views/SettingPage.vue'
+import UserPostsPage from '../views/UserPostsPage.vue'
+import UserRepliesPage from '../views/UserRepliesPage.vue'
+import UserLikesPage from '../views/UserLikesPage.vue'
 
 Vue.use(VueRouter)
 
@@ -9,7 +16,46 @@ const routes = [
   {
     path: '/',
     name: 'primary',
-    component: PrimaryView
+    component: MainView,
+    children: [
+      {
+        path: 'home',
+        name: 'home',
+        component: HomePage
+      },
+      {
+        path: 'profile',
+        name: 'profile',
+        component: ProfilePage,
+        children: [
+          {
+            path: 'posts',
+            name: 'posts',
+            component: UserPostsPage
+          },
+          {
+            path: 'replies',
+            name: 'replies',
+            component: UserRepliesPage
+          },
+          {
+            path: 'likes',
+            name: 'likes',
+            component: UserLikesPage
+          },
+        ]
+      },
+      {
+        path: 'setting',
+        name: 'setting',
+        component: SettingPage
+      }
+    ]
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: UserLoginPage,
   },
   {
     path: '*',
