@@ -30,8 +30,24 @@
 export default {
   data(){
     return {
-      matchMobile: window.matchMedia("(max-width: 576px)").matches
+      viewport: this.$store.state.viewport
     }
+  },
+  computed: {
+    matchMobile(){
+      return this.viewport <= 576
+    }
+  },
+  methods: {
+    updateViewport(){
+      this.viewport = this.$store.state.viewport
+    }
+  },
+  mounted(){
+    window.addEventListener('resize', this.updateViewport)
+  },
+  beforeDestroy(){
+    window.removeEventListener('resize', this.updateViewport)
   }
 }
 </script>

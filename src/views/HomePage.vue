@@ -28,12 +28,12 @@
 </template>
 
 <script>
-import pageInfoBar from './../components/pageInfoBar.vue'
+import PageInfoBar from './../components/PageInfoBar.vue'
 import PostItem from './../components/PostItem.vue'
 
 export default {
   name:'HomePage',
-	components: {pageInfoBar,PostItem},
+	components: {PageInfoBar,PostItem},
   data(){
     return {
       postContent:'',

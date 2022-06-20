@@ -51,6 +51,7 @@ export default {
   mounted(){
     window.addEventListener('resize',()=>{
       this.matchTablet = window.matchMedia("(max-width: 768px)").matches
+      this.$store.commit("CHANGEVIEWPORT", window.innerWidth)
     })
   }
 }

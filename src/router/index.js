@@ -4,11 +4,14 @@ import MainView from '../views/MainView.vue'
 import HomePage from '../views/HomePage.vue'
 import NotFound from '../views/NotFound.vue'
 import UserLoginPage from '../views/UserLoginPage.vue'
+import AdminLoginPage from '../views/AdminLoginPage.vue'
+import RegisterPage from '../views/RegisterPage.vue'
 import ProfilePage from '../views/ProfilePage.vue'
 import SettingPage from '../views/SettingPage.vue'
 import UserPostsPage from '../views/UserPostsPage.vue'
 import UserRepliesPage from '../views/UserRepliesPage.vue'
 import UserLikesPage from '../views/UserLikesPage.vue'
+import AdminMainView from '../views/admin/AdminMainView.vue'
 
 Vue.use(VueRouter)
 
@@ -53,9 +56,24 @@ const routes = [
     ]
   },
   {
+    path: '/admin',
+    name: 'admin',
+    component: AdminMainView
+  },
+  {
     path: '/login',
     name: 'login',
     component: UserLoginPage,
+  },
+  {
+    path: '/admin-login',
+    name: 'admin-login',
+    component: AdminLoginPage,
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: RegisterPage,
   },
   {
     path: '*',

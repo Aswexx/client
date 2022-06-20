@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import PageInfoBar from './../components/pageInfoBar.vue'
+import PageInfoBar from '../components/PageInfoBar.vue'
 
 
 export default {

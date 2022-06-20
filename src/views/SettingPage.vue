@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import PageInfoBar from '../components/pageInfoBar.vue'
+import PageInfoBar from '../components/PageInfoBar.vue'
 import InputItem from '../components/InputItem.vue'
 export default {
 	data(){

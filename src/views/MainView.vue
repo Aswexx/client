@@ -195,9 +195,17 @@ export default {
   },
   components: {NavBar,PopUserList},
   mounted(){
+    if (!this.$store.state.isAuthenticated) {
+      this.$router.push({ name: 'login'})
+    }
     this.$bus.$on('activatePost',this.showModal)
     this.$bus.$on('activateReply',this.showModal)
     this.$bus.$on('activateEditProfile',this.showModal)
+  },
+  beforeDetroy(){
+    this.$bus.$off('activatePost',this.showModal)
+    this.$bus.$off('activateReply',this.showModal)
+    this.$bus.$off('activateEditProfile',this.showModal)
   }
 }
 </script>
