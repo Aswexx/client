@@ -3,7 +3,9 @@
 
     <NavBar/>
     <router-view></router-view>
-    <PopUserList/>
+    <PopUserList
+      v-show="userRole === 'normal'"
+    />
 
     <!-- post modal -->
     <div class="post-modal"
@@ -145,6 +147,7 @@ export default {
       showingModal: '',
       editNameContent: '',
       editIntroContent: '',
+      userRole: this.$store.state.userRole
     }
   },
   watch: {
@@ -193,11 +196,8 @@ export default {
       alert('2222')
     }
   },
-  components: {NavBar,PopUserList},
+  components: { NavBar,PopUserList },
   mounted(){
-    if (!this.$store.state.isAuthenticated) {
-      this.$router.push({ name: 'login'})
-    }
     this.$bus.$on('activatePost',this.showModal)
     this.$bus.$on('activateReply',this.showModal)
     this.$bus.$on('activateEditProfile',this.showModal)

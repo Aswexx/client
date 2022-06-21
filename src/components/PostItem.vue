@@ -2,12 +2,12 @@
   <div class="post-item">
     <img src="./../assets/images/default-avatar2.jpg" alt="avatar">
     <div class="interact">
-      <span>Apple</span>
-      <span>@Mango ‧ 3小時</span>
+      <span><b>Apple</b>@Mango ‧ 3小時</span>
+      <slot></slot>
     </div>
     <span v-show="isReplyList">回覆 @apple</span>
     <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptates harum repellat tempora dignissimos sit, perferendis amet soluta consectetur aut sed!</p>
-    <div class="count" v-show="!isReplyList">
+    <div class="count" v-show="currentAppliedPath === 'likes' || currentAppliedPath === 'posts'">
       <button href="#"
         @click="reply"
       >
@@ -27,8 +27,7 @@
 export default {
   data(){
     return {
-      isReplyList: this.$route.name === 'replies',
-      isLikesList: this.$route.name === 'likes'
+      currentAppliedPath: this.$route.name
     }
   },
   methods:{
@@ -57,9 +56,10 @@ export default {
   }
 
   .interact {
-    span:first-child{
-      font-weight: bold;
-      padding-right: .5rem;
+    display: flex;
+    justify-content: space-between;
+    b {
+      padding-right: 1rem;
     }
   }
 

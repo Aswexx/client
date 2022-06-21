@@ -16,7 +16,7 @@ const mutations = {
 const state = {
 	viewport: window.innerWidth,
 	isAuthenticated: true,
-	userRole: 'normal'
+	userRole: 'admin'
 };
 
 export default new Vuex.Store({

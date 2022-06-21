@@ -3,31 +3,46 @@
     <svg class="brand-logo">
       <use xlink:href="./../assets/images/symbol-defs.svg#icon-brand-logo"></use>
     </svg>
-    <ul>
+
+    <ul :class="{'admin-nav': isAdmin}">
       <li>
-        <router-link to="/home" active-class="active">
-          <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-home"></use></svg><span>首頁</span>
+        <router-link
+          :to="isAdmin ? '/post-list' : '/home'"
+          active-class="active"
+        >
+          <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-home"></use></svg>
+          <span>{{ isAdmin ? '推文清單' : '首頁' }}</span>
+        </router-link>
+      </li>
+      <li>
+        <router-link
+          :to="isAdmin ? '/user-list' : '/profile'"
+          active-class="active"
+        >
+          <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-user"></use></svg>
+          <span>{{ isAdmin ? '使用者列表' : '個人資料' }}</span>
         </router-link>
       </li>
       <li>
         <router-link 
-          to="/profile" 
+          v-if="!isAdmin"
+          to="/setting" 
           active-class="active"
         >
-          <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-user"></use></svg><span>個人資料</span>
-        </router-link>
-      </li>
-      <li>
-        <router-link to="/setting" active-class="active">
           <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-setting"></use></svg><span>設定</span>
         </router-link>
       </li>
-    <button @click="post">
+    <button 
+      v-if="!isAdmin"
+      @click="post">
       <span>推文</span>
       <svg class="post-icon" v-if="matchTablet"><use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use></svg>
     </button>
     </ul>
-    <div class="logout">
+
+    <div class="logout"
+      @click='logout'
+    >
       <svg class="">
         <use xlink:href="./../assets/images/symbol-defs.svg#icon-logout"></use>
       </svg>
@@ -41,12 +56,21 @@ export default {
   data(){
     return {
       matchTablet: window.matchMedia("(max-width: 768px)").matches,
+      isAdmin: this.$store.state.userRole === 'admin'
     }
   },
   methods:{
     post(){
       this.$bus.$emit('activatePost','post')
     },
+    logout(){
+      if (this.isAdmin) {
+        // ! TODO:清空驗證
+        return this.$router.push({ name: 'admin-login'})
+      }
+      // ! TODO:清空驗證
+      this.$router.push({ name: 'login'})
+    }
   },
   mounted(){
     window.addEventListener('resize',()=>{
@@ -73,6 +97,11 @@ export default {
 
     .brand-logo {
       align-self: flex-start;
+    }
+
+    ul.admin-nav {
+      height: 15rem;
+      margin-top: 1rem;
     }
     
     @include respond($bp-tablet){
@@ -116,6 +145,7 @@ export default {
 
   .logout {
     margin-top: auto;
+    cursor: pointer;
   }
 
   li>a,.logout {

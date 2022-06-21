@@ -3,8 +3,14 @@
     <!-- 顯示當前頁面，若查看他人頁面則顯示姓名與推文數 -->
 
     <!-- <h4>首頁</h4> -->
+    <div class="setting"
+      v-if="isAdmin"
+    >
+      <h3>推文清單</h3>
+    </div>
+
     <div class="personal"
-      v-if="$route.name !== 'setting' && !matchMobile"
+      v-else-if="$route.name !== 'setting' && !matchMobile"
     >
       <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-arrow-left2"></use></svg>
       <h5>John Doe</h5>
@@ -15,7 +21,6 @@
       v-else-if="$route.name !== 'setting' && matchMobile"
     >
       <h3>test</h3>
-    
     </div>
 
     <div class="setting"
@@ -30,7 +35,8 @@
 export default {
   data(){
     return {
-      viewport: this.$store.state.viewport
+      viewport: this.$store.state.viewport,
+      isAdmin: this.$store.state.userRole === 'admin'
     }
   },
   computed: {

@@ -11,7 +11,8 @@ import SettingPage from '../views/SettingPage.vue'
 import UserPostsPage from '../views/UserPostsPage.vue'
 import UserRepliesPage from '../views/UserRepliesPage.vue'
 import UserLikesPage from '../views/UserLikesPage.vue'
-import AdminMainView from '../views/admin/AdminMainView.vue'
+import PostListPage from '../views/admin/PostListPage.vue'
+import UserListPage from '../views/admin/UserListPage.vue'
 
 Vue.use(VueRouter)
 
@@ -19,6 +20,7 @@ const routes = [
   {
     path: '/',
     name: 'primary',
+    redirect: '/login',
     component: MainView,
     children: [
       {
@@ -52,13 +54,18 @@ const routes = [
         path: 'setting',
         name: 'setting',
         component: SettingPage
+      },
+      {
+        path: 'post-list',
+        name: 'post-list',
+        component: PostListPage
+      },
+      {
+        path: 'user-list',
+        name: 'user-list',
+        component: UserListPage
       }
     ]
-  },
-  {
-    path: '/admin',
-    name: 'admin',
-    component: AdminMainView
   },
   {
     path: '/login',
