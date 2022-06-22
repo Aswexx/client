@@ -6,7 +6,7 @@
     <div class="setting"
       v-if="isAdmin"
     >
-      <h3>推文清單</h3>
+      <h3>{{ pageTitle }}</h3>
     </div>
 
     <div class="personal"
@@ -36,12 +36,19 @@ export default {
   data(){
     return {
       viewport: this.$store.state.viewport,
-      isAdmin: this.$store.state.userRole === 'admin'
+      isAdmin: this.$store.state.userRole === 'admin',
+      currentPage: this.$route.name
     }
   },
   computed: {
     matchMobile(){
       return this.viewport <= 576
+    },
+    pageTitle(){
+      if (this.currentPage === 'post-list'){
+        return '推文清單'
+      }
+      return '使用者列表'
     }
   },
   methods: {
