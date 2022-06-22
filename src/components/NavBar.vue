@@ -61,7 +61,7 @@ export default {
   },
   methods:{
     post(){
-      this.$bus.$emit('activatePost','post')
+      this.$bus.$emit('activateModal','post')
     },
     logout(){
       if (this.isAdmin) {

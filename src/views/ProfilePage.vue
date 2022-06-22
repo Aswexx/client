@@ -39,7 +39,7 @@ export default {
 	components: { PageInfoBar },
 	methods: {
 		showEditModal(){
-			this.$bus.$emit('activateEditProfile','editProfile')
+			this.$bus.$emit('activateModal','editProfile')
 		}
 	},
 	mounted(){

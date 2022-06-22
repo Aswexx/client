@@ -5,7 +5,7 @@
       <span><b>Apple</b>@Mango ‧ 3小時</span>
       <slot></slot>
     </div>
-    <span v-show="isReplyList">回覆 @apple</span>
+    <span>回覆 @apple</span>
     <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptates harum repellat tempora dignissimos sit, perferendis amet soluta consectetur aut sed!</p>
     <div class="count" v-show="currentAppliedPath === 'likes' || currentAppliedPath === 'posts'">
       <button href="#"
@@ -15,8 +15,16 @@
         <span>25</span>
       </button>
       <button>
-        <svg v-show="!isLikesList"><use xlink:href="./../assets/images/symbol-defs.svg#icon-heart-normal"></use></svg>
-        <svg v-show="isLikesList" class="heart-icon"><use xlink:href="./../assets/images/symbol-defs.svg#icon-heart-solid"></use></svg>
+        <svg 
+          v-if="currentAppliedPath === 'posts'"
+        >
+          <use xlink:href="./../assets/images/symbol-defs.svg#icon-heart-normal"></use>
+        </svg>
+        <svg class="heart-icon" 
+          v-else
+        >
+          <use xlink:href="./../assets/images/symbol-defs.svg#icon-heart-solid"></use>
+        </svg>
         <span>76</span>
       </button>
     </div>
@@ -32,7 +40,7 @@ export default {
   },
   methods:{
     reply(){
-      this.$bus.$emit('activateReply','reply')
+      this.$bus.$emit('activateModal','reply')
     }
   },
   mounted(){
@@ -67,6 +75,7 @@ export default {
     width: 12rem;
     display: flex;
     justify-content: space-between;
+    grid-column: 2/-1;
 
     span {
       padding-left: .5rem;
