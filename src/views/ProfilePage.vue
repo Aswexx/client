@@ -4,7 +4,25 @@
 		<img class="user-bg" src="../assets/images/default-profile-bg.jpg" alt="user-bg">
 		<div class="profile-card">
 			<img src="../assets/images/default-avatar3.jpg" alt="img">
-			<button @click="showEditModal">編輯個人資料</button>
+
+			<div class="interact">
+				<button 
+					v-show="!isSelf"
+					@click="email"
+				>
+				<svg class=""><use xlink:href="../assets/images/symbol-defs.svg#icon-email"></use></svg>
+				</button>
+				<button 
+					v-show="!isSelf"
+					:class="{followed: isfollowed}"
+					@click="toggleFollow"
+				>
+					<svg v-if="!isfollowed"><use xlink:href="../assets/images/symbol-defs.svg#icon-bell"></use></svg>
+					<svg v-else><use xlink:href="../assets/images/symbol-defs.svg#icon-followed"></use></svg>
+				</button>
+				<button :class="{end: isSelf}" @click="showEditModal">編輯個人資料</button>
+			</div>
+
 			<div class="profile-info">
 				<h5>John Doe</h5>
 				<span>@heyjohn</span>
@@ -34,12 +52,24 @@
 <script>
 import PageInfoBar from '../components/PageInfoBar.vue'
 
-
 export default {
+	data(){
+		return {
+			isSelf: false,
+			isfollowed: true
+		}
+	},
 	components: { PageInfoBar },
 	methods: {
 		showEditModal(){
 			this.$bus.$emit('activateModal','editProfile')
+		},
+		toggleFollow(){
+			// !TODO update user following
+			this.isfollowed = !this.isfollowed
+		},
+		email(){
+			window.location.href = "mailto:a284ru8ccc@gmail.com?subject=你好啊&body=yoyoyo%0Ahey~~&cc=anita888@gmail.com";
 		}
 	},
 	mounted(){
@@ -72,18 +102,54 @@ export default {
 			transform: translate(1.5rem , -8.6rem);
 			border: 5px solid $color-gray-100;
 		}
+	}
+
+	.interact {
+		width: 50%;
+		border: 1px solid blue;
+		position: absolute;
+		top: 0;
+		right: 1.2rem;
+		display: flex;
+		justify-content: space-between;
+
 		button {
-			position: absolute;
-			right: 1.2rem;
-			width: 13rem;
+			width: 4rem;
+			height: 4rem;
+			padding: 0;
 			background: $color-gray-100;
 			color: $color-brand;
 			border: 1px solid $color-brand;
 
+			&:last-child {
+				width: 13rem;
+			}
+
 			&:hover {
 				background-color: $color-brand;
 				color: $color-gray-100;
+
+				svg {
+					fill: $color-gray-100;
+				}
 			}
+
+			&.end {
+				margin-left: auto;
+			}
+			&.followed {
+				background-color: $color-brand;
+				svg {
+					fill: $color-gray-100;
+				}
+			}
+		}
+
+
+		svg {
+			width: 2.4rem;
+			height: 2.4rem;
+			fill: $color-brand;
 		}
 	}
 

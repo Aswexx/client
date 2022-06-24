@@ -8,9 +8,31 @@
 			:class="{reply: modalType === 'reply'}"
 			@click="focusInput()"
 		>
-			<p>
-				<svg @click="closeModal()"><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg>
-			</p>
+			<div class="post-input-title">
+				<svg 
+          v-if="$store.state.viewport < 576"
+          @click="closeModal()"
+        >
+          <use xlink:href="../assets/images/symbol-defs.svg#icon-arrow-left2"></use>
+        </svg>
+
+        <svg 
+          v-else
+          @click="closeModal()"
+        >
+          <use xlink:href="../assets/images/symbol-defs.svg#icon-cross"></use>
+        </svg>
+
+        <div class="button-group"
+          v-show="$store.state.viewport < 576"
+        >
+          <button 
+            @click="submitPost()"
+            :disabled="postContent.length === 0 || postContent.length > 140"
+          >推文</button>
+        </div>
+
+			</div>
 
 			<div class="source-post"
 				v-show="modalType === 'reply'"
@@ -24,12 +46,18 @@
 				<p>回覆給<span>@apple</span></p>
 			</div>
 
-			<img src="./../assets/images/default-avatar.jpg" alt="avatar" class="avatar">
-			<textarea placeholder="有什麼新鮮事?"
-				v-model="postContent"
-				ref="txtarea"
-			></textarea>
-			<div class="button-group">
+      <div class="textarea-group">
+        <img src="./../assets/images/default-avatar.jpg" alt="avatar" class="avatar">
+        <textarea placeholder="有什麼新鮮事?"
+          v-model="postContent"
+          ref="txtarea"
+        >
+        </textarea>
+      </div>
+
+			<div class="button-group"
+        v-show="$store.state.viewport >= 576"
+      >
 				<span>
 					{{validationErrMsg}}
 				</span>
@@ -38,6 +66,11 @@
 					:disabled="postContent.length === 0 || postContent.length > 140"
 				>推文</button>
 			</div>
+
+      <p class="validation-err-msg" v-show="$store.state.viewport < 576">
+        {{validationErrMsg}}
+      </p>
+
 		</div>
 
 		<div class="profile-card"
@@ -160,6 +193,10 @@ export default {
   width: 100%;
   height: 100vh;
   background-color: rgba($color: $color-gray-700, $alpha: .5);
+
+  @include respond($bp-mobile) {
+    background-color: $color-gray-100;
+  }
 }
 
 .post-input-group, .profile-card {
@@ -171,29 +208,68 @@ export default {
   border: 1px solid $color-gray-400;
   border-radius: 15px;
 
-  svg {
-    width: 1.2rem;
-    height: 1.2rem;
-    fill: $color-brand;
-    cursor: pointer;
-  }
-
-  p {
+  .post-input-title {
     border-bottom: 1px solid $color-gray-500;
     padding: 1rem;
+  }
+
+  svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: $color-brand;
+    cursor: pointer;
+
+    @include respond($bp-mobile) {
+      fill: $color-gray-900;
+    }
   }
 
   img {
     margin-top: 1.5rem;
     margin-left: 1rem;
   }
+
+  @include respond($bp-mobile) {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    .post-input-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .textarea-group {
+      display: flex;
+      margin-bottom: auto;
+      img {
+        align-self: flex-start;
+      }
+      textarea {
+        height: 30rem;
+        padding-top: 1rem;
+      }
+    }
+
+    .validation-err-msg {
+      text-align: end;
+      color: $color-error;
+      padding-bottom: 2rem;
+    }
+  }
 }
 
 .button-group {
   margin-top: 13rem;
   margin-right: 1.5rem;
-
   text-align: end;
+
   button {
     width: 7.5rem;
     padding: 1rem 1.25rem;
@@ -202,6 +278,12 @@ export default {
 
   span {
     color: $color-brand;
+  }
+
+  @include respond($bp-mobile) {
+    display: inline-block;
+    margin-top: 0;
+    margin-left: auto;
   }
 }
 
@@ -266,6 +348,10 @@ textarea {
 .reply {
   height: min-content;
 	padding-bottom: 1.5rem;
+
+  @include respond($bp-mobile) {
+    height: 100%;
+  }
 }
 
 // edit-profile
@@ -380,10 +466,6 @@ textarea {
   }
 }
 
-.validation-error {
-  color: $color-error;
-  padding-right: 1rem;
-}
 
 
 </style>

@@ -20,7 +20,8 @@
     <div class="personal-mobile-view"
       v-else-if="$route.name !== 'setting' && matchMobile"
     >
-      <h3>test</h3>
+      <img src="../assets/images/default-avatar.jpg" alt="img">
+      <h2>test</h2>
     </div>
 
     <div class="setting"
@@ -78,6 +79,7 @@ export default {
     height: 1.4rem;
   }
 
+
   .personal {
     display: grid;
     grid-template-columns: repeat(2,max-content);
@@ -86,6 +88,13 @@ export default {
     svg {
       grid-row: 1/3;
       align-self: center;
+    }
+  }
+
+  .personal-mobile-view {
+    display: flex;
+    img {
+      margin-right: 2rem;
     }
   }
 
