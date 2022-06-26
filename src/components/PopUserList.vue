@@ -1,4 +1,5 @@
 <template>
+
 	<div class="pop-user-list">
 		<h4>追隨誰</h4>
 		<div class="user-card-wraper">

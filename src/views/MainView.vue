@@ -1,11 +1,17 @@
 <template>
   <div class="main-view">
     <NavBar/>
-    <router-view></router-view>
+
+    <transition name="fade" mode="out-in">
+      <router-view></router-view>
+    </transition>
+
     <PopUserList
       v-show="userRole === 'normal'"
     />
+
     <ActionModal/>
+
   </div>
 </template>
 
@@ -47,5 +53,21 @@ export default {
     grid-template-columns: 100%;
   }
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .3s ease-in-out;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0
+}
+
+.fade-enter-to,
+.fade-leave {
+  opacity: 1;
+}
+
 
 </style>

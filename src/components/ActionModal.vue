@@ -1,8 +1,10 @@
 <template>
+<transition name="modal-fade">
+
 	<div class="modal"
 		v-show="isActivated"
 	>
-
+    <transition name="modal-inner-offset">
 		<div class="post-input-group"
 			v-show="modalType === 'post' || modalType === 'reply'"
 			:class="{reply: modalType === 'reply'}"
@@ -72,7 +74,10 @@
       </p>
 
 		</div>
+    </transition>
 
+
+    <transition name="modal-inner-offset">
 		<div class="profile-card"
 			v-show="modalType === 'editProfile'"
 		>
@@ -122,8 +127,11 @@
 			</div>
 
 		</div>
+    </transition>
 
-	</div>
+  </div>
+
+</transition>
 </template>
 
 <script>
@@ -169,6 +177,7 @@ export default {
 			this.modalType = type
 		},
 		closeModal(){
+      this.modalType = ''
 			this.isActivated = false
 		},
 		focusInput(){
@@ -464,6 +473,49 @@ textarea {
   span {
     align-self: flex-end;
   }
+}
+
+// transitions
+
+.modal-fade-enter-active {
+  transition: all .2s ease-in-out;
+}
+
+.modal-fade-leave-active {
+  transition: all .2s ease-in-out .3s;
+}
+
+.modal-fade-enter,
+.modal-fade-leave-to {
+  opacity: 0;
+  transform-origin: top left;
+  transform: scale(0);
+}
+
+.modal-fade-enter-to,
+.modal-fade-leave {
+  opacity: 1;
+  transform-origin: top left;
+  transform: scale(1);
+}
+
+
+.modal-inner-offset-enter-active {
+  transition: transform .2s ease-in-out .3s;
+}
+
+.modal-inner-offset-leave-active {
+  transition: transform .2s ease-in-out
+}
+
+.modal-inner-offset-enter,
+.modal-inner-offset-leave-to {
+  transform: translateY(-130%);
+}
+
+.modal-inner-offset-enter-to,
+.modal-inner-offset-leave {
+  transform: translateY(0);
 }
 
 

@@ -69,6 +69,7 @@ import InputItem from '../components/InputItem.vue'
 export default {
 	data(){
 		return {
+			isPasswordSame: true
 		}
 	},
 	components: { PageInfoBar, InputItem },

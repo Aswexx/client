@@ -32,12 +32,12 @@
           <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-setting"></use></svg><span>設定</span>
         </router-link>
       </li>
-    <button 
-      v-if="!isAdmin"
-      @click="post">
-      <span>推文</span>
-      <svg class="post-icon" v-if="matchTablet"><use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use></svg>
-    </button>
+      <button 
+        v-if="!isAdmin"
+        @click="post">
+        <span>推文</span>
+        <svg class="post-icon" v-if="matchTablet"><use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use></svg>
+      </button>
     </ul>
 
     <div class="logout"
@@ -87,6 +87,8 @@ export default {
   .active {
     color: $color-brand;
     fill: $color-brand;
+
+    transition: all .3s ease-in;
   }
 
   div.nav {

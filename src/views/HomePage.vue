@@ -1,4 +1,5 @@
 <template>
+
 	<div class="home">
 		<pageInfoBar/>
 		<div class="post-input-group">
@@ -25,6 +26,7 @@
 			<PostItem/>
 		</div>
 	</div>
+
 </template>
 
 <script>
@@ -108,5 +110,4 @@ textarea {
     color: $color-gray-900;
   }
 }
-
 </style>
