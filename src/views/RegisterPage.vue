@@ -8,15 +8,17 @@
 
 		<form action="">
 			<label for="account">帳號</label>
-			<input id="account" type="text" placeholder="請輸入帳號">
-			<label for="account">名稱</label>
-			<input id="account" type="text" placeholder="請輸入使用者名稱">
-			<label for="account">Email</label>
-			<input id="account" type="text" placeholder="請輸入Email">
+			<input id="account" type="text" placeholder="請輸入註冊帳號">
 			<label for="account">密碼</label>
 			<input id="account" type="password" placeholder="請設定密碼">
 			<label for="password">確認密碼</label>
 			<input id="password" type="password" placeholder="請再次密碼">
+			<label for="account">名稱</label>
+			<input id="account" type="text" placeholder="請設定顯示在平台上的名稱">
+			<label for="account">別名</label>
+			<input id="account" type="text" placeholder="請設定顯示在平台上的別名">
+			<label for="account">Email</label>
+			<input id="account" type="text" placeholder="請設定Email">
 		</form>
 		<button>註冊</button>
 		<router-link 

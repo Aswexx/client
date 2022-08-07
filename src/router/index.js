@@ -47,7 +47,7 @@ const routes = [
             path: 'likes',
             name: 'likes',
             component: UserLikesPage
-          },
+          }
         ]
       },
       {
@@ -70,23 +70,23 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: UserLoginPage,
+    component: UserLoginPage
   },
   {
     path: '/admin-login',
     name: 'admin-login',
-    component: AdminLoginPage,
+    component: AdminLoginPage
   },
   {
     path: '/register',
     name: 'register',
-    component: RegisterPage,
+    component: RegisterPage
   },
   {
     path: '*',
     name: 'not-found',
-    component: NotFound,
-  },
+    component: NotFound
+  }
   // {
   //   path: '/about',
   //   name: 'about',
@@ -98,6 +98,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
+  mode: 'hash',
   routes
 })
 
