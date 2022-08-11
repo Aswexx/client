@@ -18,8 +18,6 @@ export default {
         email,
         avatar: picture
       }
-
-      console.log(userInfo)
       this.$store.dispatch('postUser', userInfo)
     }
   },

@@ -150,7 +150,7 @@ export default {
 	},
 	watch: {
     postContent(newVal){
-      if (newVal.length === 0){
+      if (!newVal.length){
         this.validationErrMsg = '內容不可為空'
       } else if (newVal.length > 10) {
         this.validationErrMsg = '字數不可超過 140 字'
@@ -159,7 +159,7 @@ export default {
       }
     },
     replyContent(newVal){
-      if (newVal.length === 0){
+      if (!newVal.length){
         this.validationReplyErrMsg = '內容不可為空'
       } else if (newVal.length > 140) {
         this.validationReplyErrMsg = '字數不可超過 140 字'

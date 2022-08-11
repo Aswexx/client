@@ -70,6 +70,8 @@ export default {
       }
       // ! TODO:清空驗證
       this.$router.push({ name: 'login'})
+      // window.location.reload()
+      this.$store.commit("RESETSTATES")
     }
   },
   mounted(){

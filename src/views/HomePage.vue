@@ -1,55 +1,91 @@
 <template>
 
-	<div class="home">
-		<pageInfoBar/>
-		<div class="post-input-group">
-			<img src="./../assets/images/default-avatar.jpg" alt="avatar" class="avatar">
-			<textarea placeholder="有什麼新鮮事?"
-        v-model="postContent"
+  <div class="home">
+    <PageInfoBar/>
+    <div class="post-input-group">
+      <img class="avatar" alt="avatar"
+        :src="this.$store.state.userData.avatar.url"
+      >
+      <textarea placeholder="有什麼新鮮事?"
+        v-model="postContents"
       ></textarea>
       <div class="button-group">
         <span>
-          {{validationErrMsg}}
+          {{ validationErrMsg }}
         </span>
-        <button>推文</button>
+        <button @click="submitNewPost">推文</button>
       </div>
-		</div>
-		<!-- PostItem 之後有資料串時 v-for -->
-		<div class="postList">
-			<PostItem/>
-			<PostItem/>
-			<PostItem/>
-			<PostItem/>
-			<PostItem/>
-			<PostItem/>
-			<PostItem/>
-			<PostItem/>
-		</div>
-	</div>
+    </div>
+
+    <div class="postList" 
+      @scroll="loadMorePosts"
+    >
+      <PostItem
+        v-for="post in showingPosts"
+        :key="post.id"
+        :post="post"
+        >
+      </PostItem>
+
+      <LoadSpinner v-show="showLoader"></LoadSpinner>
+    </div>
+  </div>
 
 </template>
 
 <script>
 import PageInfoBar from './../components/PageInfoBar.vue'
 import PostItem from './../components/PostItem.vue'
+import LoadSpinner from './../components/LoadSpinner.vue'
+import axios from 'axios'
 
 export default {
   name:'HomePage',
-	components: {PageInfoBar,PostItem},
+  components: { PageInfoBar, PostItem, LoadSpinner },
   data(){
     return {
-      postContent:'',
-      validationErrMsg: '內容不可為空'
+      postContents:'',
+      validationErrMsg: '內容不可為空',
+      postCount: 0,
+      showLoader: false,
+      showingPosts: this.$store.state.showingPosts
     }
   },
   watch: {
-    postContent(newVal){
+    postContents(newVal){
       if (newVal.length === 0){
         this.validationErrMsg = '內容不可為空'
       } else if (newVal.length > 10) {
         this.validationErrMsg = '字數不可超過 140 字'
       } else {
         this.validationErrMsg = ''
+      }
+    },
+  },
+  methods: {
+    submitNewPost (){
+      this.$store.dispatch('submitNewPost', this.postContents)
+      this.postContents = ''
+    },
+    async loadMorePosts(event){
+      const { scrollTop, scrollHeight, clientHeight } = event.target
+
+      if (scrollTop + clientHeight >= scrollHeight) {
+         // exclude loadSpinner
+        if (this.postCount === event.target.children.length - 1) {
+          console.log('scroll event canceled')
+          return
+        }
+        this.postCount = event.target.children.length - 1
+        this.showLoader = true
+        // TODO check total posts amount and get 10 posts from bk API if there is more
+        const newPosts = 
+          await axios.get(`${this.$store.state.API_URL}/posts/${this.postCount}`)
+
+        setTimeout(()=> {
+          this.showLoader = false
+          this.$store.state.showingPosts.push(...newPosts.data)
+        }, 2000)
       }
     }
   },
@@ -70,7 +106,7 @@ export default {
 
 .postList {
   height: 71.5rem;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .post-input-group {

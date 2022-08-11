@@ -14,9 +14,11 @@
 
     <form action="">
       <label for="account">帳號</label>
-      <input id="account" type="text" placeholder="請輸入帳號">
+      <input id="account" name="account" type="text" placeholder="請輸入帳號" 
+        v-model="account">
       <label for="password">密碼</label>
-      <input id="password" type="password" placeholder="請輸入密碼">
+      <input id="password" name="password" type="password" placeholder="請輸入密碼"
+        v-model="password">
     </form>
     <button @click="login">登入</button>
     <div class="other">
@@ -44,16 +46,36 @@
 </template>
 
 <script>
+import axios from 'axios'
 import GoogleSignInButton from './GoogleSignInButton.vue'
 export default {
   data(){
     return {
       currentPage: this.$route.name,
+      account: '',
+      password: ''
     }
   },
   components: { GoogleSignInButton },
   methods: {
-    login(){
+    async login(){
+      const submitData = {
+        account: this.account,
+        password: this.password
+      }
+
+      const userData =  await axios.post(`${this.$store.state.API_URL}/users/normal`, submitData)
+      if (!userData.data) {
+        alert('登入資訊有誤')
+        return
+      }
+
+      const relativePosts = await axios.get(`${this.$store.state.API_URL}/posts/0`)
+      const popUsers = await axios.get(`${this.$store.state.API_URL}/users/popular`)
+
+      this.$store.state.userData = userData.data
+      this.$store.state.showingPosts = relativePosts.data
+      this.$store.state.showingPopUsers = popUsers.data
       this.$router.push({
         name: 'home'
       })

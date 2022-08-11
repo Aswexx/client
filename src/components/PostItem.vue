@@ -1,22 +1,23 @@
 <template>
   <div class="post-item">
-    <img src="./../assets/images/default-avatar2.jpg" alt="avatar">
+    <img alt="avatar"
+      :src="post.author.avatar.url"
+    >
     <div class="interact">
-      <span><b>Apple</b>@Mango ‧ 3小時</span>
-      <slot></slot>
+      <span><b>{{ post.author.name }}</b>@{{ post.author.alias }} ‧ {{ relativeTime }}</span>
+      <span @click="deletePost(post.id)"><svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg></span>
     </div>
-    <span>回覆 @apple</span>
-    <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptates harum repellat tempora dignissimos sit, perferendis amet soluta consectetur aut sed!</p>
-    <div class="count" v-show="currentAppliedPath === 'likes' || currentAppliedPath === 'posts'">
+    <p>{{ post.contents }}</p>
+    <div class="count">
       <button href="#"
         @click="reply"
       >
         <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"></use></svg>
-        <span>25</span>
+        <span>{{ post.comments.length }}</span>
       </button>
       <button>
         <svg 
-          v-if="currentAppliedPath === 'posts'"
+          v-if="!isLike"
         >
           <use xlink:href="./../assets/images/symbol-defs.svg#icon-heart-normal"></use>
         </svg>
@@ -25,22 +26,46 @@
         >
           <use xlink:href="./../assets/images/symbol-defs.svg#icon-heart-solid"></use>
         </svg>
-        <span>76</span>
+        <span>{{ post.liked.length }}</span>
       </button>
     </div>
   </div>
 </template>
 
 <script>
+import formatDistanceToNow from 'date-fns/formatDistanceToNow'
+import { parseISO } from 'date-fns/esm/fp'
+import { zhTW } from 'date-fns/locale'
 export default {
   data(){
     return {
-      currentAppliedPath: this.$route.name
+      isLike: false
+    }
+  },
+  props: {
+    post: {
+      type: Object,
+    }
+  },
+  computed: {
+    relativeTime(){
+      return formatDistanceToNow(
+        parseISO(this.post.createdAt),
+        {
+          addSuffix: true,
+          locale: zhTW
+        }
+      )
     }
   },
   methods:{
     reply(){
       this.$bus.$emit('activateModal','reply')
+    },
+    deletePost(postId){
+      // TODO:optimize notification
+      if (!confirm('確定刪除?')) return
+      this.$store.dispatch('deletePost', postId)
     }
   },
   mounted(){
@@ -53,14 +78,24 @@ export default {
 @import './../assets/scss/base.scss';
 
   .post-item {
-    height: 13.6rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    height: 12rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
     border-bottom: 1px solid $color-gray-400;
 
     display: grid;
     grid-template-columns: min-content auto;
     grid-column-gap: 1rem;
+    grid-row-gap: .5rem;
+  }
+
+  p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4; 
+    -webkit-box-orient: vertical;
   }
 
   .interact {
@@ -68,6 +103,16 @@ export default {
     justify-content: space-between;
     b {
       padding-right: 1rem;
+    }
+
+    span:nth-of-type(2){
+      margin-right: 1.5rem;
+    }
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
     }
   }
 

@@ -13,8 +13,8 @@
       v-else-if="$route.name !== 'setting' && !matchMobile"
     >
       <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-arrow-left2"></use></svg>
-      <h5>John Doe</h5>
-      <p>23則貼文</p>
+      <h5>{{ this.$store.state.userData.name }}</h5>
+      <p>@ {{ this.$store.state.userData.alias }}</p>
     </div>
 
     <div class="personal-mobile-view"
