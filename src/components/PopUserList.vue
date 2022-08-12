@@ -7,8 +7,10 @@
       <div class="user-card" v-for="user in users" :key="user.id">
         <img :src="user.avatar.url" alt="avatar">
         <h5>{{ user.name }}</h5>
-        <button :class="{'not-follow': !user.isFollowing}" @click="toggleStyle(user)">
-          {{ user.isFollowing ? '正在追隨' : '追隨' }}
+        <button 
+          :class="{'not-follow': !showFollowState(user)}"
+          @click="toggleFollow(user)">
+          {{ showFollowState(user) ? '正在追隨' : '追隨' }}
         </button>
         <span>@{{ user.alias }}</span>
       </div>
@@ -23,12 +25,27 @@ export default {
   name: 'PopUserList',
   data(){
     return {
-      users: this.$store.state.showingPopUsers
+      users: this.$store.state.popUsers,
     }
   },
   methods:{
-    toggleStyle(user){
-      user.isFollowing = !user.isFollowing
+    toggleFollow(user){
+      const isFollowing = this.showFollowState(user)
+      if (!isFollowing) {
+        this.$store.dispatch('addFollowShip', user.id)
+        return
+      }
+
+      const followShip = 
+        user.followed.find(r => r.followerId === this.$store.state.userData.id)
+      return this.$store.dispatch('removeFollowShip', followShip)
+    },
+    showFollowState(user) {
+      if (!user.followed.length) {
+        return false
+      }
+
+      return user.followed.find(followShip => followShip.followerId === this.$store.state.userData.id)
     }
   },
 }
@@ -54,7 +71,7 @@ export default {
 
 
   &:hover {
-    color: $color-gray-100;
+    color: $color-sup-orange;
   }
 }
 

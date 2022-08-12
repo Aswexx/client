@@ -10,12 +10,34 @@ const actions = {
     context.commit('SAVEUSERDATA', data)
   },
 
+  async addFollowShip(context, userId) {
+    const followShipInfo = {
+      followerId: context.state.userData.id,
+      followedId: userId
+    }
+    const { data } = await axios.put(
+      `${context.state.API_URL}/users/`,
+      followShipInfo
+    )
+
+    console.log('🧨', data)
+    context.commit('ADDFOLLOWSHIP', data)
+  },
+
+  async removeFollowShip(context, followShip) {
+    const followShipId = followShip.id
+    const { data } = await axios.delete(
+      `${context.state.API_URL}/users/${followShipId}`
+    )
+
+    context.commit('REMOVEFOLLOWSHIP', data)
+  },
+
   async getUserPosts(context) {
     if (context.state.userPosts.length) return
     const { data } = await axios.get(
       `${context.state.API_URL}/posts/${context.state.userData.id}/newestTen`
     )
-    console.log('pulled', data)
     context.commit('SAVEUSERPOSTS', data)
   },
 
@@ -54,6 +76,22 @@ const mutations = {
     state.userPosts.unshift(post)
     state.showingPosts.unshift(post)
   },
+  ADDFOLLOWSHIP(state, followShip) {
+    state.popUsers.forEach((popUser) => {
+      if (popUser.id === followShip.followedId) {
+        popUser.followed.unshift(followShip)
+        return
+      }
+    })
+  },
+  REMOVEFOLLOWSHIP(state, followShip) {
+    state.popUsers.forEach((popUser) => {
+      if (popUser.id === followShip.followedId) {
+        const followShipIndex = popUser.followed.indexOf(followShip)
+        popUser.followed.splice(followShipIndex, 1)
+      }
+    })
+  },
   REMOVEPOST(state, postId) {
     const postToRemove = state.showingPosts.find((post) => post.id === postId)
     let index = state.showingPosts.indexOf(postToRemove)
@@ -72,7 +110,7 @@ const mutations = {
       userData: {},
       userPosts: [],
       showingPosts: [],
-      showingPopUsers: []
+      popUsers: []
     }
 
     Object.assign(state, initialState)
@@ -87,7 +125,7 @@ const state = {
   userData: {},
   userPosts: [],
   showingPosts: [],
-  showingPopUsers: [],
+  popUsers: [],
   API_URL: 'http://localhost:4000'
 }
 

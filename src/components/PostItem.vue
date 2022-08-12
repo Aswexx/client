@@ -5,7 +5,9 @@
     >
     <div class="interact">
       <span><b>{{ post.author.name }}</b>@{{ post.author.alias }} ‧ {{ relativeTime }}</span>
-      <span @click="deletePost(post.id)"><svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg></span>
+      <span 
+        v-if="isUserOwn"
+        @click="deletePost(post.id)"><svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg></span>
     </div>
     <p>{{ post.contents }}</p>
     <div class="count">
@@ -39,7 +41,7 @@ import { zhTW } from 'date-fns/locale'
 export default {
   data(){
     return {
-      isLike: false
+      isLike: false,
     }
   },
   props: {
@@ -56,6 +58,9 @@ export default {
           locale: zhTW
         }
       )
+    },
+    isUserOwn() {
+      return this.post.author.id === this.$store.state.userData.id
     }
   },
   methods:{
