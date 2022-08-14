@@ -4,7 +4,7 @@
     <PageInfoBar/>
     <div class="post-input-group">
       <img class="avatar" alt="avatar"
-        :src="this.$store.state.userData.avatar.url"
+        :src="this.$store.state.loginedUserData.avatar.url"
       >
       <textarea placeholder="有什麼新鮮事?"
         v-model="postContents"

@@ -1,35 +1,48 @@
 <template>
   <div>
-    <PageInfoBar/>
-    <img class="user-bg" src="../assets/images/default-profile-bg.jpg" alt="user-bg">
+    <PageInfoBar>
+
+    </PageInfoBar>
+    <VueLoadImage>
+      <img class="user-bg" alt="user-bg" 
+        slot="image"
+        :src="showingUserData.bgImage.url"
+      >
+      <div slot="preloader" class="user-bg">
+        <LoadSpinner/>
+      </div>
+      <div slot="error">error!!</div>
+    </VueLoadImage>
     <div class="profile-card">
-      <img src="../assets/images/default-avatar3.jpg" alt="img">
+      <img alt="img"
+        :src="showingUserData.avatar.url"
+      >
 
       <div class="interact">
         <button 
-          v-show="!isSelf"
+          v-show="!isLoginUser"
           @click="email"
         >
         <svg class=""><use xlink:href="../assets/images/symbol-defs.svg#icon-email"></use></svg>
         </button>
         <button 
-          v-show="!isSelf"
+          v-show="!isLoginUser"
           :class="{followed: isfollowed}"
           @click="toggleFollow"
         >
           <svg v-if="!isfollowed"><use xlink:href="../assets/images/symbol-defs.svg#icon-bell"></use></svg>
           <svg v-else><use xlink:href="../assets/images/symbol-defs.svg#icon-followed"></use></svg>
         </button>
-        <button :class="{end: isSelf}" @click="showEditModal">編輯個人資料</button>
+        <button :class="{end: isLoginUser}" @click="showEditModal">編輯個人資料</button>
       </div>
 
       <div class="profile-info">
-        <h5>John Doe</h5>
-        <span>@heyjohn</span>
-        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Inventore atque illum eos!</p>
+        <h5>{{ showingUserData.name }}</h5>
+        <span>@{{ showingUserData.alias }}</span>
+        <p>{{ showingUserData.bio }}</p>
         <div class="follows">
-          <span>34 個跟隨中</span>
-          <span>59 位追隨者</span>
+          <span>{{ showingUserData.follow.length }} 個跟隨中</span>
+          <span>{{ showingUserData.followed.length }} 位追隨者</span>
         </div>
       </div>
     </div>
@@ -41,7 +54,6 @@
     </div>
 
     <router-view></router-view>
-    <!-- PostItem 之後有資料串時 v-for -->
     <div class="post-list">
       <PostItem
         v-for="post in userPosts"
@@ -56,16 +68,34 @@
 <script>
 import PageInfoBar from '../components/PageInfoBar.vue'
 import PostItem from '../components/PostItem.vue'
+import VueLoadImage  from 'vue-load-image'
+import LoadSpinner  from '../components/LoadSpinner.vue'
 
 export default {
   data(){
     return {
-      isSelf: false,
+      isLoginUser: false,
       isfollowed: true,
-      userPosts: this.$store.state.userPosts
+      userPosts: [],
     }
   },
-  components: { PageInfoBar, PostItem },
+  components: { PageInfoBar, PostItem, VueLoadImage, LoadSpinner },
+  computed:{
+    showingUserData(){
+    // alert(this.$route.params.userId)
+    // if (this.$route.params.userId) {
+    //     return this.$store.state.otherUserData
+    //   } else {
+    //     return this.$store.state.loginedUserData
+    //   }
+    // }
+      if (!this.$store.state.otherUserData.id){
+        return this.$store.state.loginedUserData
+      } else {
+        return this.$store.state.otherUserData
+      }
+    }
+  },
   methods: {
     showEditModal(){
       this.$bus.$emit('activateModal','editProfile')
@@ -75,13 +105,20 @@ export default {
     },
     email(){
       window.location.href = "mailto:a284ru8ccc@gmail.com?subject=你好啊&body=yoyoyo%0Ahey~~&cc=anita888@gmail.com";
+    },
+    async getPageContentsAndUpdateState(){
+      const userId = this.$route.params.userId || this.$store.state.loginedUserData.id
+      await this.$store.dispatch('getUser', userId)
+      await this.$store.dispatch('getUserPosts', userId)
+      this.userPosts = this.$store.state.userPosts
     }
   },
   mounted(){
-    this.$router.push({ name: 'posts'})
-
-    this.$store.dispatch('getUserPosts')
+    this.getPageContentsAndUpdateState()
   },
+  destroyed(){
+    this.$store.state.otherUserData = {}
+  }
 }
 </script>
 
@@ -101,6 +138,10 @@ export default {
 
     object-fit: cover;
     object-position: 0 80%;
+
+    div {
+      margin-top: 10%;
+    }
   }
 
   .profile-card {

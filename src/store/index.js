@@ -5,6 +5,14 @@ import axios from 'axios'
 Vue.use(Vuex)
 
 const actions = {
+  async getUser(context, userId) {
+    //* avoid logined user makeing infos request again.
+    if (userId === context.state.loginedUserData.id) return
+
+    const { data } = await axios.get(`${context.state.API_URL}/users/${userId}`)
+    context.commit('SAVEUSERDATA', data)
+  },
+
   async postUser(context, userInfo) {
     const { data } = await axios.post(context.state.API_URL, userInfo)
     context.commit('SAVEUSERDATA', data)
@@ -12,7 +20,7 @@ const actions = {
 
   async addFollowShip(context, userId) {
     const followShipInfo = {
-      followerId: context.state.userData.id,
+      followerId: context.state.loginedUserData.id,
       followedId: userId
     }
     const { data } = await axios.put(
@@ -20,7 +28,6 @@ const actions = {
       followShipInfo
     )
 
-    console.log('🧨', data)
     context.commit('ADDFOLLOWSHIP', data)
   },
 
@@ -33,17 +40,16 @@ const actions = {
     context.commit('REMOVEFOLLOWSHIP', data)
   },
 
-  async getUserPosts(context) {
-    if (context.state.userPosts.length) return
+  async getUserPosts(context, userId) {
     const { data } = await axios.get(
-      `${context.state.API_URL}/posts/${context.state.userData.id}/newestTen`
+      `${context.state.API_URL}/posts/${userId}/newestTen`
     )
     context.commit('SAVEUSERPOSTS', data)
   },
 
   async submitNewPost(context, postContents) {
     const postInfo = {
-      authorId: context.state.userData.id,
+      authorId: context.state.loginedUserData.id,
       contents: postContents
     }
     const { data } = await axios.post(
@@ -66,11 +72,15 @@ const mutations = {
     state.viewport = value
   },
   SAVEUSERDATA(state, userInfo) {
-    state.userData = userInfo
+    if (Object.hasOwn(state.loginedUserData, 'id')) {
+      state.otherUserData = userInfo
+      return
+    }
+    state.loginedUserData = userInfo
     state.userRole = userInfo.role
   },
   SAVEUSERPOSTS(state, posts) {
-    state.userPosts.push(...posts)
+    state.userPosts = [...posts]
   },
   SAVENEWPOST(state, post) {
     state.userPosts.unshift(post)
@@ -80,6 +90,7 @@ const mutations = {
     state.popUsers.forEach((popUser) => {
       if (popUser.id === followShip.followedId) {
         popUser.followed.unshift(followShip)
+        state.otherUserData.followed.unshift(followShip)
         return
       }
     })
@@ -89,6 +100,7 @@ const mutations = {
       if (popUser.id === followShip.followedId) {
         const followShipIndex = popUser.followed.indexOf(followShip)
         popUser.followed.splice(followShipIndex, 1)
+        state.otherUserData.followed.splice(followShipIndex, 1)
       }
     })
   },
@@ -107,13 +119,16 @@ const mutations = {
       viewport: window.innerWidth,
       isAuthenticated: true,
       userRole: 'normal',
-      userData: {},
+      loginedUserData: {},
       userPosts: [],
       showingPosts: [],
       popUsers: []
     }
 
     Object.assign(state, initialState)
+  },
+  TOGGLE(state, value) {
+    state.isSamePage = value
   }
 }
 
@@ -122,7 +137,8 @@ const state = {
   viewport: window.innerWidth,
   isAuthenticated: true,
   userRole: 'normal',
-  userData: {},
+  loginedUserData: {},
+  otherUserData: {},
   userPosts: [],
   showingPosts: [],
   popUsers: [],

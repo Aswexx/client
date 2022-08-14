@@ -1,8 +1,5 @@
 <template>
   <div class="page-info">
-    <!-- 顯示當前頁面，若查看他人頁面則顯示姓名與推文數 -->
-
-    <!-- <h4>首頁</h4> -->
     <div class="setting"
       v-if="isAdmin"
     >
@@ -13,8 +10,8 @@
       v-else-if="$route.name !== 'setting' && !matchMobile"
     >
       <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-arrow-left2"></use></svg>
-      <h5>{{ this.$store.state.userData.name }}</h5>
-      <p>@ {{ this.$store.state.userData.alias }}</p>
+      <h5>{{ showingUserInfo.name }}</h5>
+      <p>@ {{ showingUserInfo.alias }}</p>
     </div>
 
     <div class="personal-mobile-view"
@@ -42,6 +39,13 @@ export default {
     }
   },
   computed: {
+    showingUserInfo(){
+      if (!this.$store.state.otherUserData.id) {
+        return this.$store.state.loginedUserData
+      }
+
+      return this.$store.state.otherUserData
+    },
     matchMobile(){
       return this.viewport <= 576
     },

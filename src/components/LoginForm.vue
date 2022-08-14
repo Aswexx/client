@@ -64,17 +64,17 @@ export default {
         password: this.password
       }
 
-      const userData =  await axios.post(`${this.$store.state.API_URL}/users/normal`, submitData)
-      if (!userData.data) {
+      const loginedUserData =  await axios.post(`${this.$store.state.API_URL}/users/normal`, submitData)
+      if (!loginedUserData.data) {
         alert('登入資訊有誤')
         return
       }
-      this.$store.state.userData = userData.data
+      this.$store.state.loginedUserData = loginedUserData.data
 
       const relativePosts = await axios.get(`${this.$store.state.API_URL}/posts/0`)
       const popUsers = 
         await axios.get(
-          `${this.$store.state.API_URL}/users/popular/${this.$store.state.userData.id}`
+          `${this.$store.state.API_URL}/users/popular/${this.$store.state.loginedUserData.id}`
           )
 
       this.$store.state.showingPosts = relativePosts.data

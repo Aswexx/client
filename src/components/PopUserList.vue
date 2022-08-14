@@ -4,12 +4,14 @@
     <h4>活躍人物</h4>
     <div class="user-card-wraper">
 
-      <div class="user-card" v-for="user in users" :key="user.id">
+      <div class="user-card"
+        @click="toUserProfile(user.id)"
+        v-for="user in users" :key="user.id">
         <img :src="user.avatar.url" alt="avatar">
         <h5>{{ user.name }}</h5>
         <button 
           :class="{'not-follow': !showFollowState(user)}"
-          @click="toggleFollow(user)">
+          @click.stop="toggleFollow(user)">
           {{ showFollowState(user) ? '正在追隨' : '追隨' }}
         </button>
         <span>@{{ user.alias }}</span>
@@ -17,6 +19,7 @@
 
     </div>
   </div>
+
 </template>
 
 <script>
@@ -37,7 +40,7 @@ export default {
       }
 
       const followShip = 
-        user.followed.find(r => r.followerId === this.$store.state.userData.id)
+        user.followed.find(r => r.followerId === this.$store.state.loginedUserData.id)
       return this.$store.dispatch('removeFollowShip', followShip)
     },
     showFollowState(user) {
@@ -45,7 +48,27 @@ export default {
         return false
       }
 
-      return user.followed.find(followShip => followShip.followerId === this.$store.state.userData.id)
+      return user.followed.find(followShip => followShip.followerId === this.$store.state.loginedUserData.id)
+    },
+    async toUserProfile(userId){
+      //* implement state mutations directly
+      //* if current route is NOT 'profile/posts'、'profile/posts' or 'profile/posts'
+      switch (this.$route.name) {
+        case 'posts':
+          break
+        case 'replies':
+          break
+        case 'likes':
+          break
+        default:
+          return this.$router.push({
+            name: 'posts',
+            params: { userId }
+          })
+      }
+
+      await this.$store.dispatch('getUser', userId)
+      await this.$store.dispatch('getUserPosts', userId)
     }
   },
 }
@@ -55,12 +78,11 @@ export default {
 @import './../assets/scss/abstracts.scss';
 
 .pop-user-list {
+  grid-column: 3/4;
   @include respond($bp-mobile) {
     display: none;
   }
 }
-
-
 
 .not-follow {
   background-color: $color-gray-100;
@@ -77,11 +99,9 @@ export default {
 
 button {
   padding: 1.2rem;
-
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-
 }
 
 .user-card {
@@ -91,6 +111,14 @@ button {
   grid-column-gap: .5rem;
 
   align-items: center;
+  cursor: pointer;
+
+  box-shadow: inset 0 0 0 0 $color-brand;
+  transition: color .3s ease-in-out, box-shadow .3s ease-in-out;
+
+  &:hover {
+    box-shadow: inset 20px 0 0 0 $color-brand;
+  }
 }
 
 h5 {
@@ -114,5 +142,4 @@ span {
   grid-row: 2/3;
 }
 
-  
 </style>

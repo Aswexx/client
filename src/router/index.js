@@ -30,6 +30,7 @@ const routes = [
       },
       {
         path: 'profile',
+        redirect: '/profile/posts',
         name: 'profile',
         component: ProfilePage,
         children: [

@@ -16,7 +16,9 @@
       </li>
       <li>
         <router-link
-          :to="isAdmin ? '/user-list' : '/profile'"
+          :to="isAdmin ? 
+            '/user-list' : 
+            '/profile/posts'"
           active-class="active"
         >
           <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-user"></use></svg>

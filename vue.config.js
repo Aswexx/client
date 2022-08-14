@@ -3,4 +3,7 @@ module.exports = defineConfig({
   transpileDependencies: true,
   outputDir: './../server/public',
   publicPath: process.env.NODE_ENV === 'production' ? './' : '/'
+  // devServer: {
+  //   allowedHosts: 'auto'
+  // }
 })

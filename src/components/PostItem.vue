@@ -60,7 +60,7 @@ export default {
       )
     },
     isUserOwn() {
-      return this.post.author.id === this.$store.state.userData.id
+      return this.post.author.id === this.$store.state.loginedUserData.id
     }
   },
   methods:{
