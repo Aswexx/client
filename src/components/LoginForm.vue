@@ -71,7 +71,9 @@ export default {
       }
       this.$store.state.loginedUserData = loginedUserData.data
 
-      const relativePosts = await axios.get(`${this.$store.state.API_URL}/posts/0`)
+      const relativePosts = await axios.get(`${this.$store.state.API_URL}/posts/relative-posts`, {
+        params: { skipPostsCount: 0 }
+      })
       const popUsers = 
         await axios.get(
           `${this.$store.state.API_URL}/users/popular/${this.$store.state.loginedUserData.id}`

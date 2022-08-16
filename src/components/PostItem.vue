@@ -12,7 +12,7 @@
     <p>{{ post.contents }}</p>
     <div class="count">
       <button href="#"
-        @click="reply"
+        @click="reply(post)"
       >
         <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"></use></svg>
         <span>{{ post.comments.length }}</span>
@@ -64,8 +64,12 @@ export default {
     }
   },
   methods:{
-    reply(){
-      this.$bus.$emit('activateModal','reply')
+    reply(post){
+      post = {
+        ...post,
+        relativeTime: this.relativeTime
+      }
+      this.$bus.$emit('activateModal', 'reply', post)
     },
     deletePost(postId){
       // TODO:optimize notification

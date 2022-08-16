@@ -39,18 +39,24 @@
 			<div class="source-post"
 				v-show="modalType === 'reply'"
 			>
-				<img src="./../assets/images/default-avatar2.jpg" alt="avatar">
+				<img alt="avatar"
+          :src="sourcePostInfo.author.avatar.url"
+        >
 				<div class="interact">
-					<span>Apple</span>
-					<span>@Mango ‧ 3小時</span>
+					<span>{{ sourcePostInfo.author.name }}</span>
+					<span>@{{ sourcePostInfo.author.alias }} ‧ {{ sourcePostInfo.relativeTime }}</span>
 				</div>
-				<p class="text-content">Lorem, ipsem illusint laboriosam, quod atque neque odio quos ut optio eveniet nesciunt obcaecati modi consequuntur perferendis unde a cum at iusto voluptas. Dolore iste repudiandae quasi quisquam sit deleniti cum nam placeat aspernatur laudantium praesentium odio error quos officiis aut magni animi enim quis fugit, tenetur explicabo. Quia aliquid magnam quasi facilis odio, incidunt reprehenderit possimus repellat officia porro sapiente, dicta labore impedit, inventore ullam debitis commodi vel harum aspernatur enim id consequuntur blanditiis. Unde ipsa non eius, repellendus animi voluptatibus vero aut porro cum fugiat ea quas quia dolor quibusdam expedita sint, ex blanditiis magnam doloribus aliquam sit deleniti facere tempore provident! Soluta magnam adipisci iusto itaque ex distinctio molestias voluptates? Placeat cupiditate sequi corrupti!</p>
-				<p>回覆給<span>@apple</span></p>
+				<p class="text-content">
+          {{ sourcePostInfo.contents }}
+        </p>
+				<p>回覆給<span>@{{ sourcePostInfo.author.alias }}</span></p>
 			</div>
 
       <div class="textarea-group">
-        <img src="./../assets/images/default-avatar.jpg" alt="avatar" class="avatar">
-        <textarea placeholder="有什麼新鮮事?"
+        <img alt="avatar" class="avatar"
+          :src="$store.state.loginedUserData.avatar.url"
+        >
+        <textarea placeholder="推你的回覆"
           v-model="postContent"
           ref="txtarea"
         >
@@ -146,6 +152,7 @@ export default {
 			editNameContent:'',
 			editIntroContent: '',
 			isActivated: '',
+      sourcePostInfo: {}
 		}
 	},
 	watch: {
@@ -172,9 +179,10 @@ export default {
 		saveProfile(){
 			alert('hi')
 		},
-		setModalType(type){
+		setModalType(type, post){
 			this.isActivated = true
 			this.modalType = type
+      this.sourcePostInfo = post
 		},
 		closeModal(){
       this.modalType = ''

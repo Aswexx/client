@@ -79,8 +79,9 @@ export default {
         this.postCount = event.target.children.length - 1
         this.showLoader = true
         // TODO check total posts amount and get 10 posts from bk API if there is more
-        const newPosts = 
-          await axios.get(`${this.$store.state.API_URL}/posts/${this.postCount}`)
+        const newPosts =
+          await axios.get(`${this.$store.state.API_URL}/posts/relative-posts`, {
+            params: { skipPostsCount: this.postCount }})
 
         setTimeout(()=> {
           this.showLoader = false

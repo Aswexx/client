@@ -82,13 +82,6 @@ export default {
   components: { PageInfoBar, PostItem, VueLoadImage, LoadSpinner },
   computed:{
     showingUserData(){
-    // alert(this.$route.params.userId)
-    // if (this.$route.params.userId) {
-    //     return this.$store.state.otherUserData
-    //   } else {
-    //     return this.$store.state.loginedUserData
-    //   }
-    // }
       if (!this.$store.state.otherUserData.id){
         return this.$store.state.loginedUserData
       } else {

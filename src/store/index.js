@@ -42,7 +42,7 @@ const actions = {
 
   async getUserPosts(context, userId) {
     const { data } = await axios.get(
-      `${context.state.API_URL}/posts/${userId}/newestTen`
+      `${context.state.API_URL}/posts/recent/${userId}`
     )
     context.commit('SAVEUSERPOSTS', data)
   },
