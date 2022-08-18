@@ -1,7 +1,5 @@
 <template>
-	<div>
-		<PostItem/>
-	</div>
+	<PostItem/>
 </template>
 
 <script>

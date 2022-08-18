@@ -69,18 +69,18 @@ export default {
         alert('登入資訊有誤')
         return
       }
-      this.$store.state.loginedUserData = loginedUserData.data
+      this.$store.state.userAbout.loginedUserData = loginedUserData.data
 
       const relativePosts = await axios.get(`${this.$store.state.API_URL}/posts/relative-posts`, {
         params: { skipPostsCount: 0 }
       })
       const popUsers = 
         await axios.get(
-          `${this.$store.state.API_URL}/users/popular/${this.$store.state.loginedUserData.id}`
+          `${this.$store.state.API_URL}/users/popular/${this.$store.state.userAbout.loginedUserData.id}`
           )
 
-      this.$store.state.showingPosts = relativePosts.data
-      this.$store.state.popUsers = popUsers.data
+      this.$store.state.postAbout.showingPosts = relativePosts.data
+      this.$store.state.userAbout.popUsers = popUsers.data
       this.$router.push({
         name: 'home'
       })

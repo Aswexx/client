@@ -28,27 +28,27 @@ export default {
   name: 'PopUserList',
   data(){
     return {
-      users: this.$store.state.popUsers,
+      users: this.$store.state.userAbout.popUsers,
     }
   },
   methods:{
     toggleFollow(user){
       const isFollowing = this.showFollowState(user)
       if (!isFollowing) {
-        this.$store.dispatch('addFollowShip', user.id)
+        this.$store.dispatch('userAbout/addFollowship', user.id)
         return
       }
 
-      const followShip = 
-        user.followed.find(r => r.followerId === this.$store.state.loginedUserData.id)
-      return this.$store.dispatch('removeFollowShip', followShip)
+      const followship = 
+        user.followed.find(r => r.followerId === this.$store.state.userAbout.loginedUserData.id)
+      return this.$store.dispatch('userAbout/removeFollowship', followship)
     },
     showFollowState(user) {
       if (!user.followed.length) {
         return false
       }
 
-      return user.followed.find(followShip => followShip.followerId === this.$store.state.loginedUserData.id)
+      return user.followed.find(followship => followship.followerId === this.$store.state.userAbout.loginedUserData.id)
     },
     async toUserProfile(userId){
       //* implement state mutations directly
@@ -67,8 +67,8 @@ export default {
           })
       }
 
-      await this.$store.dispatch('getUser', userId)
-      await this.$store.dispatch('getUserPosts', userId)
+      await this.$store.dispatch('userAbout/getUser', userId)
+      await this.$store.dispatch('postAbout/getUserPosts', userId)
     }
   },
 }

@@ -4,7 +4,7 @@
     <PageInfoBar/>
     <div class="post-input-group">
       <img class="avatar" alt="avatar"
-        :src="this.$store.state.loginedUserData.avatar.url"
+        :src="this.$store.state.userAbout.loginedUserData.avatar.url"
       >
       <textarea placeholder="有什麼新鮮事?"
         v-model="postContents"
@@ -48,7 +48,7 @@ export default {
       validationErrMsg: '內容不可為空',
       postCount: 0,
       showLoader: false,
-      showingPosts: this.$store.state.showingPosts
+      showingPosts: this.$store.state.postAbout.showingPosts
     }
   },
   watch: {
@@ -64,7 +64,7 @@ export default {
   },
   methods: {
     submitNewPost (){
-      this.$store.dispatch('submitNewPost', this.postContents)
+      this.$store.dispatch('postAbout/submitNewPost', this.postContents)
       this.postContents = ''
     },
     async loadMorePosts(event){
@@ -85,7 +85,7 @@ export default {
 
         setTimeout(()=> {
           this.showLoader = false
-          this.$store.state.showingPosts.push(...newPosts.data)
+          this.$store.state.postAbout.showingPosts.push(...newPosts.data)
         }, 2000)
       }
     }

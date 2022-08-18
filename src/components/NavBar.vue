@@ -73,13 +73,13 @@ export default {
       // ! TODO:清空驗證
       this.$router.push({ name: 'login'})
       // window.location.reload()
-      this.$store.commit("RESETSTATES")
+      this.$store.commit("RESET_STATES")
     }
   },
   mounted(){
     window.addEventListener('resize',()=>{
       this.matchTablet = window.matchMedia("(max-width: 768px)").matches
-      this.$store.commit("CHANGEVIEWPORT", window.innerWidth)
+      this.$store.commit("CHANGE_VIEWPORT", window.innerWidth)
     })
   }
 }

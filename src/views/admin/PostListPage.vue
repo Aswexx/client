@@ -2,7 +2,7 @@
 	<div class="post-list">
 		<PageInfoBar/>
 		<PostItem>
-			<svg class="cross" @click="removePost"><use xlink:href="./../../assets/images/symbol-defs.svg#icon-cross"></use></svg>
+			<svg class="cross" @click="REMOVE_POST"><use xlink:href="./../../assets/images/symbol-defs.svg#icon-cross"></use></svg>
 		</PostItem>
 	</div>
 </template>
@@ -13,7 +13,7 @@ import PostItem from '../../components/PostItem.vue'
 export default {
 	components: { PageInfoBar, PostItem },
 	methods: {
-		removePost(){
+		REMOVE_POST(){
 			alert('22')
 		}
 	}

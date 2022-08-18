@@ -1,5 +1,8 @@
 <template>
-  <div class="post-item">
+  <div class="post-item" 
+    v-if="post.author"
+    @click="toPostDetail(post)"
+  >
     <img alt="avatar"
       :src="post.author.avatar.url"
     >
@@ -7,12 +10,15 @@
       <span><b>{{ post.author.name }}</b>@{{ post.author.alias }} ‧ {{ relativeTime }}</span>
       <span 
         v-if="isUserOwn"
-        @click="deletePost(post.id)"><svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg></span>
+        @click.stop="deletePost(post.id)"><svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg></span>
     </div>
     <p>{{ post.contents }}</p>
-    <div class="count">
+    
+    <div class="count"
+      v-if="$route.name !== 'post-detail'"
+    >
       <button href="#"
-        @click="reply(post)"
+        @click.stop="showReplyModal(post)"
       >
         <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"></use></svg>
         <span>{{ post.comments.length }}</span>
@@ -39,6 +45,7 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import { parseISO } from 'date-fns/esm/fp'
 import { zhTW } from 'date-fns/locale'
 export default {
+  name: 'PostItem',
   data(){
     return {
       isLike: false,
@@ -60,25 +67,30 @@ export default {
       )
     },
     isUserOwn() {
-      return this.post.author.id === this.$store.state.loginedUserData.id
+      return this.post.author.id === this.$store.state.userAbout.loginedUserData.id
     }
   },
   methods:{
-    reply(post){
+    showReplyModal(post){
       post = {
         ...post,
         relativeTime: this.relativeTime
       }
-      this.$bus.$emit('activateModal', 'reply', post)
+      // this.$bus.$emit('activateModal', 'reply', post)
+      this.$store.commit('TOGGLE_MODAL', post)
     },
     deletePost(postId){
       // TODO:optimize notification
       if (!confirm('確定刪除?')) return
-      this.$store.dispatch('deletePost', postId)
+      this.$store.dispatch('postAbout/deletePost', postId)
+    },
+    toPostDetail(post){
+      if (this.$route.name === 'post-detail') return
+      this.$router.push({
+        name: 'post-detail',
+        params: { post }
+      })
     }
-  },
-  mounted(){
-    
   }
 }
 </script>
@@ -90,12 +102,43 @@ export default {
     height: 12rem;
     padding-top: .5rem;
     padding-bottom: .5rem;
-    border-bottom: 1px solid $color-gray-400;
+    cursor: pointer;
 
     display: grid;
     grid-template-columns: min-content auto;
     grid-column-gap: 1rem;
     grid-row-gap: .5rem;
+
+    // hover effect set
+    border-bottom: 1px solid $color-gray-400;
+    background-color: rgba(white, 0.1);
+    box-shadow:
+      0px 
+      1rem
+      2rem
+      rgba(white, .1);
+    backdrop-filter: blur(2px);
+    transition: transform .5s ease-out;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      background: rgba(white, 0.4);
+      width: 60%;
+      height: 100%;
+      top: 0%;
+      left: -125%;
+
+      transform: skew(45deg);
+      position: absolute;
+      transition: left .5s ease-out;
+    }
+
+    &:hover {
+      &::before {
+        left: 150%;
+      }
+    }
   }
 
   p {
@@ -119,8 +162,8 @@ export default {
     }
 
     svg {
-      width: 1rem;
-      height: 1rem;
+      width: 1.2rem;
+      height: 1.2rem;
       cursor: pointer;
     }
   }

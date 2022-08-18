@@ -11,6 +11,7 @@ import SettingPage from '../views/SettingPage.vue'
 import UserPostsPage from '../views/UserPostsPage.vue'
 import UserRepliesPage from '../views/UserRepliesPage.vue'
 import UserLikesPage from '../views/UserLikesPage.vue'
+import PostDetailPage from '../views/PostDetailPage.vue'
 import PostListPage from '../views/admin/PostListPage.vue'
 import UserListPage from '../views/admin/UserListPage.vue'
 
@@ -56,6 +57,12 @@ const routes = [
         name: 'setting',
         component: SettingPage
       },
+      {
+        path: 'post-detail',
+        name: 'post-detail',
+        component: PostDetailPage
+      },
+      // admin pages
       {
         path: 'post-list',
         name: 'post-list',

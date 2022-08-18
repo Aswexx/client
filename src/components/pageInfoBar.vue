@@ -6,10 +6,17 @@
       <h3>{{ pageTitle }}</h3>
     </div>
 
+    <div class="post-detail"
+      v-else-if="$route.name === 'post-detail'"
+    >
+      <svg @click="goPreviousRoute"><use xlink:href="./../assets/images/symbol-defs.svg#icon-arrow-left2"></use></svg>
+      <h3>推文</h3>
+    </div>
+
     <div class="personal"
       v-else-if="$route.name !== 'setting' && !matchMobile"
     >
-      <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-arrow-left2"></use></svg>
+      <svg @click="goPreviousRoute"><use xlink:href="./../assets/images/symbol-defs.svg#icon-arrow-left2"></use></svg>
       <h5>{{ showingUserInfo.name }}</h5>
       <p>@ {{ showingUserInfo.alias }}</p>
     </div>
@@ -34,17 +41,17 @@ export default {
   data(){
     return {
       viewport: this.$store.state.viewport,
-      isAdmin: this.$store.state.userRole === 'admin',
+      isAdmin: this.$store.state.userAbout.userRole === 'admin',
       currentPage: this.$route.name
     }
   },
   computed: {
     showingUserInfo(){
-      if (!this.$store.state.otherUserData.id) {
-        return this.$store.state.loginedUserData
+      if (!this.$store.state.userAbout.otherUserData.id) {
+        return this.$store.state.userAbout.loginedUserData
       }
 
-      return this.$store.state.otherUserData
+      return this.$store.state.userAbout.otherUserData
     },
     matchMobile(){
       return this.viewport <= 576
@@ -59,6 +66,9 @@ export default {
   methods: {
     updateViewport(){
       this.viewport = this.$store.state.viewport
+    },
+    goPreviousRoute(){
+      this.$router.back()
     }
   },
   mounted(){
@@ -78,9 +88,24 @@ export default {
     padding: 1rem 1rem 1rem 0rem;
   }
 
+  .post-detail {
+    h3 {
+      display: inline-block;
+      padding: 0 1rem;
+    }
+  }
+
   svg {
     width: 1.7rem;
     height: 1.4rem;
+    transition: all .2s ease-in;
+    cursor: pointer;
+
+
+    &:hover {
+      fill: $color-brand;
+      transform: scale(1.3, 1.3);
+    }
   }
 
 

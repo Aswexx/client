@@ -24,10 +24,10 @@ export default {
   name: 'MainView',
   data(){
     return {
-      userRole: this.$store.state.userRole
+      userRole: this.$store.state.userAbout.userRole
     }
   },
-  components: { NavBar, PopUserList, ActionModal },
+  components: { NavBar, PopUserList, ActionModal }
 }
 </script>
 

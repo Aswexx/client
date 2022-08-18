@@ -1,24 +1,24 @@
 <template>
 <transition name="modal-fade">
 
-	<div class="modal"
-		v-show="isActivated"
-	>
+  <div class="modal"
+    v-show="isActivated"
+  >
     <transition name="modal-inner-offset">
-		<div class="post-input-group"
-			v-show="modalType === 'post' || modalType === 'reply'"
-			:class="{reply: modalType === 'reply'}"
-			@click="focusInput()"
-		>
-			<div class="post-input-title">
-				<svg 
+    <div class="post-input-group"
+      v-show="modalType === 'post' || modalType === 'reply'"
+      :class="{reply: modalType === 'reply'}"
+      @click="focusInput()"
+    >
+      <div class="post-input-title">
+        <svg 
           v-if="$store.state.viewport < 576"
           @click="closeModal()"
         >
           <use xlink:href="../assets/images/symbol-defs.svg#icon-arrow-left2"></use>
         </svg>
 
-        <svg 
+        <svg
           v-else
           @click="closeModal()"
         >
@@ -29,110 +29,114 @@
           v-show="$store.state.viewport < 576"
         >
           <button 
-            @click="submitPost()"
-            :disabled="postContent.length === 0 || postContent.length > 140"
+            @click="submitContents()"
+            :disabled="typingContents.length === 0 || typingContents.length > 140"
           >推文</button>
         </div>
 
-			</div>
+      </div>
 
-			<div class="source-post"
-				v-show="modalType === 'reply'"
-			>
-				<img alt="avatar"
-          :src="sourcePostInfo.author.avatar.url"
+      <div class="source-post"
+        v-show="modalType === 'reply'"
+      >
+        <template v-if="isDataLoaded">
+        <img alt="avatar"
+          :src="sourcePost.author.avatar.url"
         >
-				<div class="interact">
-					<span>{{ sourcePostInfo.author.name }}</span>
-					<span>@{{ sourcePostInfo.author.alias }} ‧ {{ sourcePostInfo.relativeTime }}</span>
-				</div>
-				<p class="text-content">
-          {{ sourcePostInfo.contents }}
+        <div class="interact">
+          <span>{{ sourcePost.author.name }}</span>
+          <span>@{{ sourcePost.author.alias }} ‧ {{ sourcePost.relativeTime }}</span>
+        </div>
+        <p class="text-content">
+          {{ sourcePost.contents }}
         </p>
-				<p>回覆給<span>@{{ sourcePostInfo.author.alias }}</span></p>
-			</div>
+        <p>回覆給<span>@{{ sourcePost.author.alias }}</span></p>
+        </template>
+      </div>
 
       <div class="textarea-group">
         <img alt="avatar" class="avatar"
-          :src="$store.state.loginedUserData.avatar.url"
+          :src="$store.state.userAbout.loginedUserData.avatar.url"
         >
         <textarea placeholder="推你的回覆"
-          v-model="postContent"
+          v-model="typingContents"
           ref="txtarea"
         >
         </textarea>
       </div>
 
-			<div class="button-group"
+      <div class="button-group"
         v-show="$store.state.viewport >= 576"
       >
-				<span>
-					{{validationErrMsg}}
-				</span>
-				<button 
-					@click="submitPost()"
-					:disabled="postContent.length === 0 || postContent.length > 140"
-				>推文</button>
-			</div>
+        <span>
+          {{validationErrMsg}}
+        </span>
+        <button 
+          @click="submitContents()"
+          :disabled="typingContents.length === 0 || typingContents.length > 140"
+        >
+          {{ modalType === 'reply' ? '回覆': '推文'}}
+        </button>
+      </div>
 
       <p class="validation-err-msg" v-show="$store.state.viewport < 576">
         {{validationErrMsg}}
       </p>
 
-		</div>
+    </div>
     </transition>
 
 
     <transition name="modal-inner-offset">
-		<div class="profile-card"
-			v-show="modalType === 'editProfile'"
-		>
-			<div class="title">
-				<span>
-					<svg @click="closeModal()"><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg>
-				</span>
-				<span class="title-text">編輯個人資料</span>
-				<span class="validation-error"
-					v-show="editNameContent.length > 20 || editIntroContent.length > 160"
-				>
-					編輯字數不符限制
-				</span>
-				<button 
-					:disabled="editNameContent.length > 20 || editIntroContent.length > 160"
-					@click="saveProfile"
-				>
-				儲存</button>
-			</div>
+    <div class="profile-card"
+      v-show="modalType === 'editProfile'"
+    >
+      <div class="title">
+        <span>
+          <svg @click="closeModal()"><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg>
+        </span>
+        <span class="title-text">編輯個人資料</span>
+        <span class="validation-error"
+          v-show="editNameContent.length > 20 || editIntroContent.length > 160"
+        >
+          編輯字數不符限制
+        </span>
+        <button 
+          :disabled="editNameContent.length > 20 || editIntroContent.length > 160"
+          @click="saveProfile"
+        >
+        儲存</button>
+      </div>
 
-			<div class="bg-wraper">
-				<svg>
-					<use xlink:href="./../assets/images/symbol-defs.svg#icon-camera"></use>
-				</svg>
-				<svg>
-					<use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use>
-				</svg>
-			</div>
+      <div class="bg-wraper">
+        <svg>
+          <use xlink:href="./../assets/images/symbol-defs.svg#icon-camera"></use>
+        </svg>
+        <svg>
+          <use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use>
+        </svg>
+      </div>
 
-			<div class="avatar-wraper">
-				<svg>
-					<use xlink:href="./../assets/images/symbol-defs.svg#icon-camera"></use>
-				</svg>
-			</div>
+      <div class="avatar-wraper">
+        <svg>
+          <use xlink:href="./../assets/images/symbol-defs.svg#icon-camera"></use>
+        </svg>
+      </div>
 
-			<div class="profile-input-group">
-				<label for="profile-name">名稱</label>
-				<input type="text" name="" id="profile-name"
-					v-model="editNameContent"
-				>
-				<span>{{ editNameContent.length }}/20</span>
-				<label for="profile-intro">自我介紹</label>
-				<textarea name="" id="profile-intro"
-					v-model="editIntroContent"
-				></textarea>
-				<span>{{ editIntroContent.length }}/160</span>
-			</div>
+      <div class="profile-input-group">
+        <label for="profile-name">名稱</label>
+        <input type="text" name="" id="profile-name"
+          v-model="editNameContent"
+        >
+        <span>{{ editNameContent.length }}/20</span>
+        <label for="profile-intro">自我介紹</label>
+        <textarea name="" id="profile-intro"
+          v-model="editIntroContent"
+        ></textarea>
+        <span>{{ editIntroContent.length }}/160</span>
+      </div>
 
-		</div>
+    </div>
     </transition>
 
   </div>
@@ -142,21 +146,33 @@
 
 <script>
 export default {
-	data(){
-		return {
-			modalType: '',
-			postContent: '',
-			validationErrMsg: '',
-			replyContent: '',
-			validationReplyErrMsg: '',
-			editNameContent:'',
-			editIntroContent: '',
-			isActivated: '',
-      sourcePostInfo: {}
-		}
-	},
-	watch: {
-    postContent(newVal){
+  data(){
+    return {
+      // modalType: this.$store.state.modalType,
+      typingContents: '',
+      validationErrMsg: '',
+      editNameContent:'',
+      editIntroContent: '',
+      // isActivated: this.$store.state.isModalOpened,
+      // sourcePost: this.$store.state.sourcePost
+    }
+  },
+  computed:{
+    isDataLoaded(){
+      return Object.hasOwn(this.sourcePost, 'author')
+    },
+    isActivated(){
+      return this.$store.state.isModalOpened
+    },
+    modalType(){
+      return this.$store.state.modalType
+    },
+    sourcePost(){
+      return this.$store.state.sourcePost
+    }
+  },
+  watch: {
+    typingContents(newVal){
       if (!newVal.length){
         this.validationErrMsg = '內容不可為空'
       } else if (newVal.length > 10) {
@@ -165,40 +181,29 @@ export default {
         this.validationErrMsg = ''
       }
     },
-    replyContent(newVal){
-      if (!newVal.length){
-        this.validationReplyErrMsg = '內容不可為空'
-      } else if (newVal.length > 140) {
-        this.validationReplyErrMsg = '字數不可超過 140 字'
-      } else {
-        this.validationReplyErrMsg = ''
-      }
-    }
   },
-	methods: {
-		saveProfile(){
-			alert('hi')
-		},
-		setModalType(type, post){
-			this.isActivated = true
-			this.modalType = type
-      this.sourcePostInfo = post
-		},
-		closeModal(){
-      this.modalType = ''
-			this.isActivated = false
-		},
-		focusInput(){
+  methods: {
+    saveProfile(){
+      alert('hi')
+    },
+    closeModal(){
+      this.$store.commit('TOGGLE_MODAL')
+    },
+    focusInput(){
       this.$refs.txtarea.focus()
     },
-	},
-	mounted(){
-		this.$bus.$on('activateModal', this.setModalType)
-	},
-	beforeDestroy(){
-		this.$bus.$off('activateModal', this.setModalType)
-	}
+    submitContents(){
+      const contentsInfo = {
+        authorId: this.$store.state.userAbout.loginedUserData.id,
+        postId: this.sourcePost.id,
+        contents: this.typingContents,
+      }
+      this.typingContents = ''
+      this.$store.dispatch('commentAbout/submitComment', contentsInfo)
+    }
+  }
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -343,9 +348,9 @@ textarea {
     margin-top: 0;
   }
 
-	.text-content {
-		grid-column: 2/-1;
-	}
+  .text-content {
+    grid-column: 2/-1;
+  }
 
   p {
     padding: 1rem 1rem 1rem 0;
@@ -364,7 +369,7 @@ textarea {
 
 .reply {
   height: min-content;
-	padding-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
 
   @include respond($bp-mobile) {
     height: 100%;

@@ -76,17 +76,19 @@ export default {
     return {
       isLoginUser: false,
       isfollowed: true,
-      userPosts: [],
     }
   },
   components: { PageInfoBar, PostItem, VueLoadImage, LoadSpinner },
   computed:{
     showingUserData(){
-      if (!this.$store.state.otherUserData.id){
-        return this.$store.state.loginedUserData
+      if (!this.$store.state.userAbout.otherUserData.id){
+        return this.$store.state.userAbout.loginedUserData
       } else {
-        return this.$store.state.otherUserData
+        return this.$store.state.userAbout.otherUserData
       }
+    },
+    userPosts(){
+      return this.$store.state.postAbout.userPosts
     }
   },
   methods: {
@@ -99,18 +101,20 @@ export default {
     email(){
       window.location.href = "mailto:a284ru8ccc@gmail.com?subject=你好啊&body=yoyoyo%0Ahey~~&cc=anita888@gmail.com";
     },
-    async getPageContentsAndUpdateState(){
-      const userId = this.$route.params.userId || this.$store.state.loginedUserData.id
-      await this.$store.dispatch('getUser', userId)
-      await this.$store.dispatch('getUserPosts', userId)
-      this.userPosts = this.$store.state.userPosts
-    }
+    // async getPageContentsAndUpdateState(){
+    //   const userId = this.$route.params.userId || this.$store.state.userAbout.loginedUserData.id
+    //   await this.$store.dispatch('userAbout/getUser', userId)
+    //   await this.$store.dispatch('postAbout/getUserPosts', userId)
+    // }
   },
-  mounted(){
-    this.getPageContentsAndUpdateState()
+  async created(){
+    // this.getPageContentsAndUpdateState()
+    const userId = this.$route.params.userId || this.$store.state.userAbout.loginedUserData.id
+    await this.$store.dispatch('userAbout/getUser', userId)
+    await this.$store.dispatch('postAbout/getUserPosts', userId)
   },
   destroyed(){
-    this.$store.state.otherUserData = {}
+    this.$store.state.userAbout.otherUserData = {}
   }
 }
 </script>
