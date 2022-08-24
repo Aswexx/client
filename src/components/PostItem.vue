@@ -10,14 +10,21 @@
       <span><b>{{ post.author.name }}</b>@{{ post.author.alias }} ‧ {{ relativeTime }}</span>
       <span 
         v-if="isUserOwn"
-        @click.stop="deletePost(post.id)"><svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg></span>
+        @click.stop="deletePost(post.id)"
+      >
+        <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg>
+      </span>
     </div>
-    <p>{{ post.contents }}</p>
+    <p 
+      :class="{'home-page': $route.name === 'home'}"
+    >
+      {{ post.contents }}
+    </p>
     
     <div class="count"
       v-if="$route.name !== 'post-detail'"
     >
-      <button href="#"
+      <button
         @click.stop="showReplyModal(post)"
       >
         <svg><use xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"></use></svg>
@@ -76,7 +83,6 @@ export default {
         ...post,
         relativeTime: this.relativeTime
       }
-      // this.$bus.$emit('activateModal', 'reply', post)
       this.$store.commit('TOGGLE_MODAL', post)
     },
     deletePost(postId){
@@ -99,7 +105,7 @@ export default {
 @import './../assets/scss/base.scss';
 
   .post-item {
-    height: 12rem;
+    min-height: 12rem;
     padding-top: .5rem;
     padding-bottom: .5rem;
     cursor: pointer;
@@ -141,7 +147,7 @@ export default {
     }
   }
 
-  p {
+  p.home-page {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
