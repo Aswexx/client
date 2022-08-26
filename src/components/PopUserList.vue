@@ -78,6 +78,9 @@ export default {
 @import './../assets/scss/abstracts.scss';
 
 .pop-user-list {
+  position: sticky;
+  top: 0;
+  height: 98vh;
   grid-column: 3/4;
   @include respond($bp-mobile) {
     display: none;

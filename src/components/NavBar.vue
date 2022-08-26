@@ -63,7 +63,7 @@ export default {
   },
   methods:{
     post(){
-      this.$bus.$emit('activateModal','post')
+      this.$store.commit('TOGGLE_MODAL')
     },
     logout(){
       if (this.isAdmin) {
@@ -96,7 +96,10 @@ export default {
   }
 
   div.nav {
+    position: sticky;
+    top: 0;
     height: 98vh;
+
     display: flex;
     flex-direction: column;
     align-items: center;

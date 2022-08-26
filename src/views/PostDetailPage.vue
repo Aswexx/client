@@ -29,7 +29,7 @@
       </a>
     </div>
 
-    <div class="reply">
+    <!-- <div class="reply">
       <img
         alt="avatar"
         class="avatar"
@@ -56,7 +56,8 @@
         </svg>
         <button @click="reply">回覆</button>
       </div>
-    </div>
+    </div> -->
+    <ContentPoster :postId="post.id" />
 
     <div class="comment-list">
       <CommentItem
@@ -73,7 +74,7 @@
 import PageInfoBar from './../components/PageInfoBar'
 import PostItem from './../components/PostItem'
 import CommentItem from './../components/CommentItem'
-import EmojiInput from './../components/EmojiInput'
+import ContentPoster from './../components/ContentPoster'
 export default {
   name: 'PostDetailPage',
   data() {
@@ -87,34 +88,11 @@ export default {
       return this.post.comments
     }
   },
-  components: { PageInfoBar, PostItem, CommentItem, EmojiInput },
+  components: { PageInfoBar, PostItem, CommentItem, ContentPoster },
   methods: {
-    reply() {
-      const emojiInput = this.$refs.emojiInput
-      const contentsToSubmit = new FormData()
-
-      contentsToSubmit.append(
-        'authorId',
-        this.$store.state.userAbout.loginedUserData.id
-      )
-      contentsToSubmit.append('postId', this.post.id)
-      contentsToSubmit.append('contents', emojiInput.input)
-      contentsToSubmit.append('file', emojiInput.fileToUpload)
-
-      emojiInput.input = ''
-      emojiInput.fileToUpload = ''
-      emojiInput.cancelUpload()
-      this.$store.dispatch('commentAbout/submitComment', contentsToSubmit)
-    },
     showModal(post) {
       this.$refs.post.showReplyModal(post)
     },
-    showFilePicker(fileType) {
-      this.$refs.emojiInput.showFilePicker(fileType)
-    },
-    emitEmojiPicker() {
-      console.log(this.$refs.emojiInput.$refs.emojiPicker.$el)
-    }
   },
   mounted() {
     this.post = this.$route.params.post
@@ -146,26 +124,5 @@ svg {
   width: 50%;
   display: flex;
   justify-content: space-around;
-}
-
-.reply {
-  border-top: 1px solid $color-gray-400;
-  border-bottom: 1px solid $color-gray-400;
-  display: grid;
-  grid-template-columns: 10% 90%;
-}
-
-.upload-wrapper {
-  grid-column: 2/-1;
-  display: flex;
-  align-items: center;
-  svg {
-    margin-right: 2rem;
-    fill: $color-brand;
-  }
-  button {
-    width: 8rem;
-    margin-left: auto;
-  }
 }
 </style>

@@ -13,8 +13,6 @@ export const commentOptions = {
   namespaced: true,
   actions: {
     async submitComment(context, comment) {
-      console.log(comment)
-
       const result = await axios.post(
         `${context.rootState.API_URL}/comments`,
         comment

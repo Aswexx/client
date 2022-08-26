@@ -10,14 +10,14 @@ export const postOptions = {
       context.commit('SAVE_USER_POSTS', data)
     },
 
-    async submitNewPost(context, postContents) {
-      const postInfo = {
-        authorId: context.rootState.userAbout.loginedUserData.id,
-        contents: postContents
-      }
+    async submitNewPost(context, post) {
+      // const postInfo = {
+      //   authorId: context.rootState.userAbout.loginedUserData.id,
+      //   contents: postContents
+      // }
       const { data } = await axios.post(
         `${context.rootState.API_URL}/posts/`,
-        postInfo
+        post
       )
 
       context.commit('SAVE_NEW_POST', data)

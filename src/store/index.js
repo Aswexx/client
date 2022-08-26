@@ -13,7 +13,11 @@ const mutations = {
   },
   TOGGLE_MODAL(state, contents) {
     state.isModalOpened = !state.isModalOpened
-    if (!contents) return // null represents try to close modal
+    if (!contents) {
+      state.modalType = ''
+      state.sourcePost = {}
+      return // contents null represents try to close modal or trigger post modal
+    }
     state.sourcePost = contents
     state.modalType = 'reply'
   },

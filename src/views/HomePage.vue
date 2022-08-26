@@ -1,8 +1,7 @@
 <template>
-
   <div class="home">
-    <PageInfoBar/>
-    <div class="post-input-group">
+    <PageInfoBar />
+    <!-- <div class="post-input-group">
       <img class="avatar" alt="avatar"
         :src="this.$store.state.userAbout.loginedUserData.avatar.url"
       >
@@ -15,36 +14,31 @@
         </span>
         <button @click="submitNewPost">推文</button>
       </div>
-    </div>
+    </div> -->
+    <ContentPoster/>
 
-    <div class="postList" 
-      @scroll="loadMorePosts"
-    >
-      <PostItem
-        v-for="post in showingPosts"
-        :key="post.id"
-        :post="post"
-        >
+    <div class="postList" @scroll="loadMorePosts">
+      <PostItem v-for="post in showingPosts" :key="post.id" :post="post">
       </PostItem>
 
       <LoadSpinner v-show="showLoader"></LoadSpinner>
     </div>
   </div>
-
 </template>
 
 <script>
 import PageInfoBar from './../components/PageInfoBar.vue'
 import PostItem from './../components/PostItem.vue'
 import LoadSpinner from './../components/LoadSpinner.vue'
+import ContentPoster from './../components/ContentPoster.vue'
 import axios from 'axios'
 
 export default {
-  name:'HomePage',
-  components: { PageInfoBar, PostItem, LoadSpinner },
-  data(){
+  name: 'HomePage',
+  components: { PageInfoBar, PostItem, LoadSpinner, ContentPoster },
+  data() {
     return {
-      postContents:'',
+      postContents: '',
       validationErrMsg: '內容不可為空',
       postCount: 0,
       showLoader: false,
@@ -52,26 +46,26 @@ export default {
     }
   },
   watch: {
-    postContents(newVal){
-      if (newVal.length === 0){
+    postContents(newVal) {
+      if (newVal.length === 0) {
         this.validationErrMsg = '內容不可為空'
       } else if (newVal.length > 10) {
         this.validationErrMsg = '字數不可超過 140 字'
       } else {
         this.validationErrMsg = ''
       }
-    },
+    }
   },
   methods: {
-    submitNewPost (){
+    submitNewPost() {
       this.$store.dispatch('postAbout/submitNewPost', this.postContents)
       this.postContents = ''
     },
-    async loadMorePosts(event){
+    async loadMorePosts(event) {
       const { scrollTop, scrollHeight, clientHeight } = event.target
 
       if (scrollTop + clientHeight >= scrollHeight) {
-         // exclude loadSpinner
+        // exclude loadSpinner
         if (this.postCount === event.target.children.length - 1) {
           console.log('scroll event canceled')
           return
@@ -79,20 +73,22 @@ export default {
         this.postCount = event.target.children.length - 1
         this.showLoader = true
         // TODO check total posts amount and get 10 posts from bk API if there is more
-        const newPosts =
-          await axios.get(`${this.$store.state.API_URL}/posts/relative-posts`, {
-            params: { skipPostsCount: this.postCount }})
+        const newPosts = await axios.get(
+          `${this.$store.state.API_URL}/posts/relative-posts`,
+          {
+            params: { skipPostsCount: this.postCount }
+          }
+        )
 
-        setTimeout(()=> {
+        setTimeout(() => {
           this.showLoader = false
           this.$store.state.postAbout.showingPosts.push(...newPosts.data)
         }, 2000)
       }
     }
-  },
+  }
 }
 </script>
-
 
 <style lang="scss" scoped>
 @import './../assets/scss/base.scss';
@@ -106,7 +102,7 @@ export default {
 }
 
 .postList {
-  height: 71.5rem;
+  height: 70rem;
   overflow-y: auto;
 }
 
@@ -115,7 +111,6 @@ export default {
   border-bottom: 5px solid $color-gray-400;
   padding-top: 1.5rem;
 }
-
 
 .button-group {
   display: flex;

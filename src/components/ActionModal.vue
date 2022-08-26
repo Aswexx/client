@@ -5,9 +5,9 @@
     v-show="isActivated"
   >
     <transition name="modal-inner-offset">
-    <div class="post-input-group"
-      v-show="modalType === 'post' || modalType === 'reply'"
-      :class="{reply: modalType === 'reply'}"
+      <!-- v-show="modalType === 'post' || modalType === 'reply'" -->
+    <!-- <div class="post-input-group"
+      :class="{reply: $store.state.modalType === 'reply'}"
       @click="focusInput()"
     >
       <div class="post-input-title">
@@ -58,7 +58,7 @@
         <img alt="avatar" class="avatar"
           :src="$store.state.userAbout.loginedUserData.avatar.url"
         >
-        <textarea placeholder="推你的回覆"
+        <textarea placeholder="有什麼新鮮事?"
           v-model="typingContents"
           ref="txtarea"
         >
@@ -83,7 +83,25 @@
         {{validationErrMsg}}
       </p>
 
-    </div>
+    </div> -->
+    <div class="post-input-group">
+      <div class="post-input-title">
+        <svg 
+          v-if="$store.state.viewport < 576"
+          @click="closeModal()"
+        >
+          <use xlink:href="../assets/images/symbol-defs.svg#icon-arrow-left2"></use>
+        </svg>
+
+        <svg
+          v-else
+          @click="closeModal()"
+        >
+          <use xlink:href="../assets/images/symbol-defs.svg#icon-cross"></use>
+        </svg>
+      </div>
+      <ContentPoster class="content-poster"/>
+    </div> 
     </transition>
 
 
@@ -145,16 +163,15 @@
 </template>
 
 <script>
+import ContentPoster from './ContentPoster.vue'
 export default {
+  components: { ContentPoster },
   data(){
     return {
-      // modalType: this.$store.state.modalType,
       typingContents: '',
       validationErrMsg: '',
       editNameContent:'',
       editIntroContent: '',
-      // isActivated: this.$store.state.isModalOpened,
-      // sourcePost: this.$store.state.sourcePost
     }
   },
   computed:{
@@ -209,6 +226,11 @@ export default {
 <style lang="scss" scoped>
 @import './../assets/scss/base.scss';
 
+.content-poster {
+  border-bottom: none;
+  grid-row-gap: 5rem;
+}
+
 .modal {
   position: absolute;
   left: 0;
@@ -223,7 +245,7 @@ export default {
 
 .post-input-group, .profile-card {
   width: 50%;
-  height: 30rem;
+  min-height: 25rem;
   margin: 5rem auto auto auto;
 
   background-color: $color-gray-100;
