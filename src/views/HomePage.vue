@@ -85,8 +85,8 @@ export default {
           this.$store.state.postAbout.showingPosts.push(...newPosts.data)
         }, 2000)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 

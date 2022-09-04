@@ -21,15 +21,14 @@ const mutations = {
     state.sourcePost = contents
     state.modalType = 'reply'
   },
-  RESET_STATES(state) {
-    const initialState = {
-      ...state,
-      viewport: window.innerWidth,
-      isAuthenticated: true,
-      isModalOpened: false,
-      sourcePost: {}
-    }
-    Object.assign(state, initialState)
+  TRIGGER_TOAST(state, toast) {
+    state.toastType = toast.type
+    state.toastDetail = toast.detail
+    state.isToastShow = true
+
+    window.timer = setTimeout(() => {
+      state.isToastShow = false
+    }, 5300)
   }
 }
 
@@ -37,6 +36,9 @@ const state = {
   viewport: window.innerWidth,
   isModalOpened: '',
   modalType: '',
+  isToastShow: false,
+  toastType: '',
+  toastDetail: '',
   sourcePost: {},
   API_URL: 'http://localhost:4000'
 }

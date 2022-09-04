@@ -3,18 +3,27 @@ import axios from 'axios'
 export const postOptions = {
   namespaced: true,
   actions: {
-    async getUserPosts(context, userId) {
+    async getHomePagePosts(context) {
       const { data } = await axios.get(
-        `${context.rootState.API_URL}/posts/recent/${userId}`
+        `${context.rootState.API_URL}/posts/relative-posts`,
+        { params: { skipPostsCount: 0 } }
       )
-      context.commit('SAVE_USER_POSTS', data)
+
+      context.state.showingPosts = data
+    },
+    async getUserPosts(context, userId) {
+      try {
+        const { data } = await axios.get(
+          `${context.rootState.API_URL}/posts/recent/${userId}`
+        )
+        context.commit('SAVE_USER_POSTS', data)
+      } catch (err) {
+        console.error(err)
+        alert('請重登')
+      }
     },
 
     async submitNewPost(context, post) {
-      // const postInfo = {
-      //   authorId: context.rootState.userAbout.loginedUserData.id,
-      //   contents: postContents
-      // }
       const { data } = await axios.post(
         `${context.rootState.API_URL}/posts/`,
         post

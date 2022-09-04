@@ -3,8 +3,9 @@
     <img
       alt="avatar"
       class="avatar"
-      :src="$store.state.userAbout.loginedUserData.avatar.url"
+      src="../assets/images/default_avatar1.png"
     />
+      <!-- :src="$store.state.userAbout.loginedUserData.avatar.url" -->
     <EmojiInput ref="emojiInput" />
     <div class="upload-wrapper">
       <svg class="upload-img" @click="showFilePicker('image/png, image/jpeg')">

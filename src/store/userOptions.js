@@ -3,6 +3,36 @@ import axios from 'axios'
 export const userOptions = {
   namespaced: true,
   actions: {
+    async googleOauth(context, token) {
+      console.log(token)
+      const { data } = await axios.post(
+        `${context.rootState.API_URL}/users/google`,
+        { token }
+      )
+
+      context.commit('SAVE_USER_DATA', data)
+      context.state.isAuthenticated = true
+    },
+    async auth(context, loginInfo) {
+      const loginedUserData = await axios.post(
+        `${context.rootState.API_URL}/users/normal`,
+        loginInfo
+      )
+      if (!loginedUserData.data) {
+        throw new Error('登入資訊有誤')
+        // alert('登入資訊有誤')
+        // return
+      }
+      context.commit('SAVE_USER_DATA', loginedUserData.data)
+      context.state.isAuthenticated = true
+    },
+    async getPopUsers(context) {
+      const popUsers = await axios.get(
+        `${context.rootState.API_URL}/users/popular/${context.state.loginedUserData.id}`
+      )
+
+      context.state.popUsers = popUsers.data
+    },
     async getUser(context, userId) {
       //* avoid logined user makeing infos request again.
       if (userId === context.state.loginedUserData.id) return
@@ -70,7 +100,7 @@ export const userOptions = {
     }
   },
   state: {
-    isAuthenticated: true,
+    isAuthenticated: false,
     userRole: 'normal',
     loginedUserData: {},
     otherUserData: {},
