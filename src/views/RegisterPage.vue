@@ -7,7 +7,6 @@
     </svg>
     <h3>建立你的帳號</h3>
 
-    <!-- TODO Add valiadtion msg -->
     <form
       id="register"
       :action="`${$store.state.API_URL}/users`"
@@ -127,6 +126,7 @@ export default {
       }
 
       this.$refs.register.submit()
+      // TODO: make sure get home page data before direct to home
     }
   }
 }

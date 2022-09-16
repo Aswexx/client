@@ -1,226 +1,160 @@
 <template>
-<transition name="modal-fade">
+  <transition name="modal-fade">
+    <div class="modal" v-show="isActivated">
+      <transition name="modal-inner-offset">
+        <div class="post-input-group">
+          <div class="post-input-title">
+            <svg v-if="$store.state.viewport < 576" @click="closeModal()">
+              <use
+                xlink:href="../assets/images/symbol-defs.svg#icon-arrow-left2"
+              ></use>
+            </svg>
 
-  <div class="modal"
-    v-show="isActivated"
-  >
-    <transition name="modal-inner-offset">
-      <!-- v-show="modalType === 'post' || modalType === 'reply'" -->
-    <!-- <div class="post-input-group"
-      :class="{reply: $store.state.modalType === 'reply'}"
-      @click="focusInput()"
-    >
-      <div class="post-input-title">
-        <svg 
-          v-if="$store.state.viewport < 576"
-          @click="closeModal()"
-        >
-          <use xlink:href="../assets/images/symbol-defs.svg#icon-arrow-left2"></use>
-        </svg>
-
-        <svg
-          v-else
-          @click="closeModal()"
-        >
-          <use xlink:href="../assets/images/symbol-defs.svg#icon-cross"></use>
-        </svg>
-
-        <div class="button-group"
-          v-show="$store.state.viewport < 576"
-        >
-          <button 
-            @click="submitContents()"
-            :disabled="typingContents.length === 0 || typingContents.length > 140"
-          >推文</button>
+            <svg v-else @click="closeModal()">
+              <use
+                xlink:href="../assets/images/symbol-defs.svg#icon-cross"
+              ></use>
+            </svg>
+          </div>
+          <ContentPoster class="content-poster" :source="source" />
         </div>
+      </transition>
 
-      </div>
+      <transition name="modal-inner-offset">
+        <div class="profile-card" v-show="modalType === 'editProfile'">
+          <div class="title">
+            <span>
+              <svg @click="closeModal()">
+                <use
+                  xlink:href="./../assets/images/symbol-defs.svg#icon-cross"
+                ></use>
+              </svg>
+            </span>
+            <span class="title-text">編輯個人資料</span>
+            <span
+              class="validation-error"
+              v-show="
+                editNameContent.length > 20 || editIntroContent.length > 160
+              "
+            >
+              編輯字數不符限制
+            </span>
+            <button
+              :disabled="
+                editNameContent.length > 20 || editIntroContent.length > 160
+              "
+              @click="saveProfile"
+            >
+              儲存
+            </button>
+          </div>
 
-      <div class="source-post"
-        v-show="modalType === 'reply'"
-      >
-        <template v-if="isDataLoaded">
-        <img alt="avatar"
-          :src="sourcePost.author.avatar.url"
-        >
-        <div class="interact">
-          <span>{{ sourcePost.author.name }}</span>
-          <span>@{{ sourcePost.author.alias }} ‧ {{ sourcePost.relativeTime }}</span>
+          <div class="bg-wraper">
+            <svg>
+              <use
+                xlink:href="./../assets/images/symbol-defs.svg#icon-camera"
+              ></use>
+            </svg>
+            <svg>
+              <use
+                xlink:href="./../assets/images/symbol-defs.svg#icon-cross"
+              ></use>
+            </svg>
+          </div>
+
+          <div class="avatar-wraper">
+            <svg>
+              <use
+                xlink:href="./../assets/images/symbol-defs.svg#icon-camera"
+              ></use>
+            </svg>
+          </div>
+
+          <div class="profile-input-group">
+            <label for="profile-name">名稱</label>
+            <input
+              type="text"
+              name=""
+              id="profile-name"
+              v-model="editNameContent"
+            />
+            <span>{{ editNameContent.length }}/20</span>
+            <label for="profile-intro">自我介紹</label>
+            <textarea
+              name=""
+              id="profile-intro"
+              v-model="editIntroContent"
+            ></textarea>
+            <span>{{ editIntroContent.length }}/160</span>
+          </div>
         </div>
-        <p class="text-content">
-          {{ sourcePost.contents }}
-        </p>
-        <p>回覆給<span>@{{ sourcePost.author.alias }}</span></p>
-        </template>
-      </div>
-
-      <div class="textarea-group">
-        <img alt="avatar" class="avatar"
-          :src="$store.state.userAbout.loginedUserData.avatar.url"
-        >
-        <textarea placeholder="有什麼新鮮事?"
-          v-model="typingContents"
-          ref="txtarea"
-        >
-        </textarea>
-      </div>
-
-      <div class="button-group"
-        v-show="$store.state.viewport >= 576"
-      >
-        <span>
-          {{validationErrMsg}}
-        </span>
-        <button 
-          @click="submitContents()"
-          :disabled="typingContents.length === 0 || typingContents.length > 140"
-        >
-          {{ modalType === 'reply' ? '回覆': '推文'}}
-        </button>
-      </div>
-
-      <p class="validation-err-msg" v-show="$store.state.viewport < 576">
-        {{validationErrMsg}}
-      </p>
-
-    </div> -->
-    <div class="post-input-group">
-      <div class="post-input-title">
-        <svg 
-          v-if="$store.state.viewport < 576"
-          @click="closeModal()"
-        >
-          <use xlink:href="../assets/images/symbol-defs.svg#icon-arrow-left2"></use>
-        </svg>
-
-        <svg
-          v-else
-          @click="closeModal()"
-        >
-          <use xlink:href="../assets/images/symbol-defs.svg#icon-cross"></use>
-        </svg>
-      </div>
-      <ContentPoster class="content-poster"/>
-    </div> 
-    </transition>
-
-
-    <transition name="modal-inner-offset">
-    <div class="profile-card"
-      v-show="modalType === 'editProfile'"
-    >
-      <div class="title">
-        <span>
-          <svg @click="closeModal()"><use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use></svg>
-        </span>
-        <span class="title-text">編輯個人資料</span>
-        <span class="validation-error"
-          v-show="editNameContent.length > 20 || editIntroContent.length > 160"
-        >
-          編輯字數不符限制
-        </span>
-        <button 
-          :disabled="editNameContent.length > 20 || editIntroContent.length > 160"
-          @click="saveProfile"
-        >
-        儲存</button>
-      </div>
-
-      <div class="bg-wraper">
-        <svg>
-          <use xlink:href="./../assets/images/symbol-defs.svg#icon-camera"></use>
-        </svg>
-        <svg>
-          <use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use>
-        </svg>
-      </div>
-
-      <div class="avatar-wraper">
-        <svg>
-          <use xlink:href="./../assets/images/symbol-defs.svg#icon-camera"></use>
-        </svg>
-      </div>
-
-      <div class="profile-input-group">
-        <label for="profile-name">名稱</label>
-        <input type="text" name="" id="profile-name"
-          v-model="editNameContent"
-        >
-        <span>{{ editNameContent.length }}/20</span>
-        <label for="profile-intro">自我介紹</label>
-        <textarea name="" id="profile-intro"
-          v-model="editIntroContent"
-        ></textarea>
-        <span>{{ editIntroContent.length }}/160</span>
-      </div>
-
+      </transition>
     </div>
-    </transition>
-
-  </div>
-
-</transition>
+  </transition>
 </template>
 
 <script>
 import ContentPoster from './ContentPoster.vue'
 export default {
   components: { ContentPoster },
-  data(){
+  data() {
     return {
       typingContents: '',
       validationErrMsg: '',
-      editNameContent:'',
-      editIntroContent: '',
+      editNameContent: '',
+      editIntroContent: ''
     }
   },
-  computed:{
-    isDataLoaded(){
-      return Object.hasOwn(this.sourcePost, 'author')
+  computed: {
+    isDataLoaded() {
+      return Object.hasOwn(this.sourcePostOrComment, 'author')
     },
-    isActivated(){
+    isActivated() {
       return this.$store.state.isModalOpened
     },
-    modalType(){
+    modalType() {
       return this.$store.state.modalType
     },
-    sourcePost(){
-      return this.$store.state.sourcePost
+    source() {
+      return {
+        id: this.$store.state.sourcePostOrComment.id,
+        modalType: this.$store.state.sourcePostOrComment.modalType
+      }
     }
   },
   watch: {
-    typingContents(newVal){
-      if (!newVal.length){
+    typingContents(newVal) {
+      if (!newVal.length) {
         this.validationErrMsg = '內容不可為空'
       } else if (newVal.length > 10) {
         this.validationErrMsg = '字數不可超過 140 字'
       } else {
         this.validationErrMsg = ''
       }
-    },
+    }
   },
   methods: {
-    saveProfile(){
+    saveProfile() {
       alert('hi')
     },
-    closeModal(){
+    closeModal() {
       this.$store.commit('TOGGLE_MODAL')
     },
-    focusInput(){
+    focusInput() {
       this.$refs.txtarea.focus()
     },
-    submitContents(){
-      const contentsInfo = {
-        authorId: this.$store.state.userAbout.loginedUserData.id,
-        postId: this.sourcePost.id,
-        contents: this.typingContents,
-      }
-      this.typingContents = ''
-      this.$store.dispatch('commentAbout/submitComment', contentsInfo)
-    }
+    // submitContents() {
+    //   const contentsInfo = {
+    //     authorId: this.$store.getters.loginedUserId,
+    //     postId: '2222ttses',
+    //     commentId: this.sourcePostOrComment.id,
+    //     contents: this.typingContents
+    //   }
+    //   this.typingContents = ''
+    //   this.$store.dispatch('commentAbout/submitComment', contentsInfo)
+    // }
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
@@ -236,14 +170,15 @@ export default {
   left: 0;
   width: 100%;
   height: 100vh;
-  background-color: rgba($color: $color-gray-700, $alpha: .5);
+  background-color: rgba($color: $color-gray-700, $alpha: 0.5);
 
   @include respond($bp-mobile) {
     background-color: $color-gray-100;
   }
 }
 
-.post-input-group, .profile-card {
+.post-input-group,
+.profile-card {
   width: 50%;
   min-height: 25rem;
   margin: 5rem auto auto auto;
@@ -357,8 +292,8 @@ textarea {
   position: relative;
 
   &::after {
-    content: "";
-    width: .15rem;
+    content: '';
+    width: 0.15rem;
     height: calc(100% - 5.5rem);
     background-color: $color-gray-300;
     position: absolute;
@@ -377,7 +312,7 @@ textarea {
   p {
     padding: 1rem 1rem 1rem 0;
     border-bottom: none;
-    &:last-child{
+    &:last-child {
       font-weight: bold;
       color: $color-gray-700;
       grid-column: 2/-1;
@@ -423,7 +358,7 @@ textarea {
 }
 
 .bg-wraper {
-  margin-top: .5rem;
+  margin-top: 0.5rem;
   background-image: url('./../assets/images/default-profile-bg.jpg');
   background-position: 50% 75%;
   background-size: cover;
@@ -438,7 +373,7 @@ textarea {
     margin: 0 1rem;
     width: 2.4rem;
     height: 2.4rem;
-    transition: fill .2s ease-in;
+    transition: fill 0.2s ease-in;
 
     &:hover {
       fill: $color-gray-300;
@@ -456,7 +391,7 @@ textarea {
   border: 5px solid $color-gray-100;
   position: relative;
 
-  transform: translate(1rem ,-50%);
+  transform: translate(1rem, -50%);
 
   svg {
     position: absolute;
@@ -466,7 +401,7 @@ textarea {
     margin: 0 1rem;
     width: 2.4rem;
     height: 2.4rem;
-    transition: fill .2s ease-in;
+    transition: fill 0.2s ease-in;
 
     &:hover {
       fill: $color-gray-300;
@@ -479,13 +414,15 @@ textarea {
   display: flex;
   flex-direction: column;
 
-  label,input,textarea {
+  label,
+  input,
+  textarea {
     background-color: $color-gray-200;
   }
 
   label {
     color: $color-gray-800;
-    padding-bottom: .5rem;
+    padding-bottom: 0.5rem;
   }
 
   input {
@@ -495,7 +432,8 @@ textarea {
     }
   }
 
-  input,textarea {
+  input,
+  textarea {
     border-bottom: 2px solid $color-gray-900;
   }
 
@@ -513,11 +451,11 @@ textarea {
 // transitions
 
 .modal-fade-enter-active {
-  transition: all .2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .modal-fade-leave-active {
-  transition: all .2s ease-in-out .3s;
+  transition: all 0.2s ease-in-out 0.3s;
 }
 
 .modal-fade-enter,
@@ -534,13 +472,12 @@ textarea {
   transform: scale(1);
 }
 
-
 .modal-inner-offset-enter-active {
-  transition: transform .2s ease-in-out .3s;
+  transition: transform 0.2s ease-in-out 0.3s;
 }
 
 .modal-inner-offset-leave-active {
-  transition: transform .2s ease-in-out
+  transition: transform 0.2s ease-in-out;
 }
 
 .modal-inner-offset-enter,
@@ -552,7 +489,4 @@ textarea {
 .modal-inner-offset-leave {
   transform: translateY(0);
 }
-
-
-
 </style>

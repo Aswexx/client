@@ -3,10 +3,33 @@ import Vuex from 'vuex'
 import { userOptions } from './userOptions'
 import { postOptions } from './postOptions'
 import { commentOptions } from './commentOptions'
+import axios from 'axios'
 
 Vue.use(Vuex)
 
-const actions = {}
+const getters = {
+  showingPosts(state) {
+    return state.postAbout.showingPosts
+  },
+  tempPost(state) {
+    return state.postAbout.tempPost
+  },
+  loginedUserId(state) {
+    return state.userAbout.loginedUserData.id
+  }
+}
+
+const actions = {
+  async sendChatNotification(context, receiverId) {
+    const notifData = {
+      informerId: context.state.userAbout.loginedUserData.id,
+      receiverId,
+      notifType: 'inviteChat'
+    }
+    await axios.post(`${context.state.API_URL}/notifications`, notifData)
+    // context.commit('TOGGLE_CHAT', notifData.informerId)
+  }
+}
 const mutations = {
   CHANGE_VIEWPORT(state, value) {
     state.viewport = value
@@ -15,11 +38,11 @@ const mutations = {
     state.isModalOpened = !state.isModalOpened
     if (!contents) {
       state.modalType = ''
-      state.sourcePost = {}
+      state.sourcePostOrComment = {}
       return // contents null represents try to close modal or trigger post modal
     }
-    state.sourcePost = contents
-    state.modalType = 'reply'
+    state.sourcePostOrComment = contents
+    state.modalType = contents.modalType
   },
   TRIGGER_TOAST(state, toast) {
     state.toastType = toast.type
@@ -29,21 +52,36 @@ const mutations = {
     window.timer = setTimeout(() => {
       state.isToastShow = false
     }, 5300)
+  },
+  TOGGLE_CHAT(state, roomId) {
+    state.isChatRoomOn = !state.isChatRoomOn
+    state.chatRoomId = roomId
+  },
+  ADD_NOTIFICATION(state, notification) {
+    state.notifications.unshift(notification)
   }
 }
 
 const state = {
   viewport: window.innerWidth,
+
   isModalOpened: '',
   modalType: '',
+
   isToastShow: false,
   toastType: '',
   toastDetail: '',
-  sourcePost: {},
+
+  isChatRoomOn: false,
+  chatRoomId: '',
+
+  sourcePostOrComment: {},
+  notifications: [],
   API_URL: 'http://localhost:4000'
 }
 
 export default new Vuex.Store({
+  getters,
   actions,
   mutations,
   state,

@@ -5,7 +5,7 @@
       class="avatar"
       src="../assets/images/default_avatar1.png"
     />
-      <!-- :src="$store.state.userAbout.loginedUserData.avatar.url" -->
+    <!-- :src="$store.state.userAbout.loginedUserData.avatar.url" -->
     <EmojiInput ref="emojiInput" />
     <div class="upload-wrapper">
       <svg class="upload-img" @click="showFilePicker('image/png, image/jpeg')">
@@ -15,7 +15,12 @@
         <use xlink:href="./../assets/images/symbol-defs.svg#icon-film"></use>
       </svg>
       <button @click="submitContents">
-        {{ $store.state.modalType === 'reply' ? '回覆' : '推文' }}
+        {{
+          $store.state.modalType === 'replyPost' ||
+          $route.name === 'post-detail'
+            ? '回覆'
+            : '推文'
+        }}
       </button>
     </div>
   </div>
@@ -28,6 +33,12 @@ export default {
   props: {
     postId: {
       type: String
+    },
+    commentId: {
+      type: String
+    },
+    source: {
+      type: Object
     }
   },
   methods: {
@@ -37,7 +48,7 @@ export default {
 
       contentsToSubmit.append(
         'authorId',
-        this.$store.state.userAbout.loginedUserData.id
+        this.$store.getters.loginedUserId
       )
       contentsToSubmit.append('contents', emojiInput.input)
       contentsToSubmit.append('file', emojiInput.fileToUpload)
@@ -46,12 +57,45 @@ export default {
       emojiInput.fileToUpload = ''
       emojiInput.cancelUpload()
 
-      if (!this.postId) {
+      // * reply comment in comment detail page
+      if (this.$route.name === 'comment-detail') {
+        const commentId = this.commentId || this.source.id
+        contentsToSubmit.append('commentId', commentId)
+        return this.$store.dispatch(
+          'commentAbout/submitComment',
+          contentsToSubmit
+        )
+      }
+
+      // * submit post
+      if (!this.source || !this.source.id) {
+        if (this.postId) {
+          contentsToSubmit.append('postId', this.postId)
+          return this.$store.dispatch(
+            'commentAbout/submitComment',
+            contentsToSubmit
+          )
+        }
         return this.$store.dispatch('postAbout/submitNewPost', contentsToSubmit)
       }
 
-      contentsToSubmit.append('postId', this.postId)
-      this.$store.dispatch('commentAbout/submitComment', contentsToSubmit)
+      // * home page reply post
+      if (this.source.modalType === 'replyPost') {
+        contentsToSubmit.append('postId', this.source.id)
+        return this.$store.dispatch(
+          'commentAbout/submitComment',
+          contentsToSubmit
+        )
+      }
+
+      // * reply comment via action modal
+      if (this.source.modalType === 'replyComment') {
+        contentsToSubmit.append('commentId', this.source.id)
+        return this.$store.dispatch(
+          'commentAbout/submitComment',
+          contentsToSubmit
+        )
+      }
     },
     showFilePicker(fileType) {
       this.$refs.emojiInput.showFilePicker(fileType)

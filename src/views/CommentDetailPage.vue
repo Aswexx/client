@@ -1,21 +1,21 @@
 <template>
   <div>
     <PageInfoBar />
-    <PostItem class="post" :post="post" ref="post" />
+    <CommentItem class="comment" :comment="comment" />
     <div class="info">
       <span>發表於 {{ formattedTime }}</span>
-      <span v-if="post.liked">{{ post.liked.length }} 個人喜歡</span>
+      <span v-if="comment.liked">{{ comment.liked.length }} 個人喜歡</span>
     </div>
 
     <div class="interact">
-      <a @click="showModal(post)">
+      <a @click="showModal(comment)">
         <svg>
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"
           ></use>
         </svg>
       </a>
-      <a @click="likePost(post)">
+      <a @click="likePost(comment)">
         <svg v-if="!isLike">
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-heart-normal"
@@ -29,74 +29,76 @@
       </a>
     </div>
 
-    <ContentPoster :postId="post.id" />
+    <ContentPoster :commentId="comment.id" />
 
     <div class="comment-list">
       <CommentItem
-        v-for="comment in comments"
+        v-for="comment in attatchComments"
         :key="comment.id"
         :comment="comment"
-        :postInfo="{ author: post.author, postId: post.id }"
+        @setMain="setMain"
       />
+      <!-- :postInfo="{ author: post.author, postId: post.id }" -->
     </div>
   </div>
 </template>
 
 <script>
 import PageInfoBar from './../components/PageInfoBar'
-import PostItem from './../components/PostItem'
 import CommentItem from './../components/CommentItem'
 import ContentPoster from './../components/ContentPoster'
 export default {
-  name: 'PostDetailPage',
+  name: 'CommentDetailPage',
   data() {
     return {
-      post: {},
+      comment: {},
+      attatchComments: [],
       isLike: ''
     }
   },
   computed: {
-    showingPosts() {
-      return this.$store.state.postAbout.showingPosts
-    },
-    comments() {
-      const index = this.showingPosts.indexOf(this.post)
-      if (index === -1) return []
-      return this.showingPosts[index].comments
-    },
+    // attatchComments() {
+    //   return this.$store.state.commentAbout.attatchComments
+    // },
+    // showingPosts() {
+    //   return this.$store.state.postAbout.showingPosts
+    // },
+    // comments() {
+    //   const index = this.showingPosts.indexOf(this.post)
+    //   return this.showingPosts[index].comments
+    // },
     formattedTime() {
       return this.$format(
-        new Date(this.post.createdAt),
+        new Date(this.comment.createdAt),
         'yyyy-MM-dd HH:mm:ss',
         { locale: this.$zhTW }
       )
     }
   },
-  components: { PageInfoBar, PostItem, CommentItem, ContentPoster },
+  components: { PageInfoBar, CommentItem, ContentPoster },
   methods: {
-    showModal(post) {
-      this.$refs.post.showReplyModal(post)
+    showModal(comment) {
+      this.$refs.comment.showReplyModal(comment)
     },
-    likePost(post) {
+    likeComment(comment) {
       const isLike = !this.isLike
       this.isLike = isLike
       this.$store.dispatch('postAbout/togglePostLike', {
-        postId: post.id,
+        commentId: comment.id,
         isLike
       })
-    }
+    },
+    setMain(comment, attatchComments) {
+      this.comment = comment
+      this.attatchComments = attatchComments
+    },
   },
   beforeMount() {
-    this.post = this.$route.params.post
-    if (!this.post) {
-      this.post = this.$store.getters.tempPost
-    }
-    this.isLike = this.post.liked.some(
+    this.comment = this.$route.params.comment
+    this.attatchComments = this.$route.params.attatchComments
+    this.isLike = this.comment.liked.some(
       (like) => like.userId === this.$store.getters.loginedUserId
     )
-  },
-  beforeDestroy() {
-    this.$store.commit('postAbout/SAVE_TEMP_POST', this.post)
   }
 }
 </script>

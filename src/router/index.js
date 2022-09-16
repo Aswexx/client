@@ -12,6 +12,9 @@ import UserPostsPage from '../views/UserPostsPage.vue'
 import UserRepliesPage from '../views/UserRepliesPage.vue'
 import UserLikesPage from '../views/UserLikesPage.vue'
 import PostDetailPage from '../views/PostDetailPage.vue'
+import CommentDetailPage from '../views/CommentDetailPage.vue'
+import NotificationPage from '../views/NotificationPage.vue'
+
 import PostListPage from '../views/admin/PostListPage.vue'
 import UserListPage from '../views/admin/UserListPage.vue'
 
@@ -53,6 +56,11 @@ const routes = [
         ]
       },
       {
+        path: 'notifications',
+        name: 'notifications',
+        component: NotificationPage
+      },
+      {
         path: 'setting',
         name: 'setting',
         component: SettingPage
@@ -61,6 +69,11 @@ const routes = [
         path: 'post-detail',
         name: 'post-detail',
         component: PostDetailPage
+      },
+      {
+        path: 'comment-detail',
+        name: 'comment-detail',
+        component: CommentDetailPage
       },
       // admin pages
       {
@@ -109,5 +122,15 @@ const router = new VueRouter({
   mode: 'hash',
   routes
 })
+
+// router.beforeEach((to, from, next) => {
+//   console.log(to, from)
+//   if (from.name === 'home') {
+//     to.meta.keepAlive = true
+//   } else {
+//     to.meta.keepAlive = false
+//   }
+//   next()
+// })
 
 export default router

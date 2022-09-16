@@ -5,7 +5,7 @@
       <template v-if="post.author">
         <span
           ><b>{{ post.author.name }}</b
-          >@{{ post.author.alias }} ‧ {{ relativeTime }}</span
+          >@{{ post.author.alias }} ‧ {{ timeRelativeToNow }}</span
         >
       </template>
       <span v-if="isUserOwn" @click.stop="deletePost">
@@ -27,7 +27,7 @@
         </svg>
         <span>{{ post.comments.length }}</span>
       </button>
-      <button>
+      <button @click.stop="togglePostLike(post)">
         <svg v-if="!isLike">
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-heart-normal"
@@ -45,9 +45,6 @@
 </template>
 
 <script>
-import formatDistanceToNow from 'date-fns/formatDistanceToNow'
-import { parseISO } from 'date-fns/esm/fp'
-import { zhTW } from 'date-fns/locale'
 export default {
   name: 'PostItem',
   data() {
@@ -61,29 +58,37 @@ export default {
     }
   },
   computed: {
-    relativeTime() {
-      return formatDistanceToNow(parseISO(this.post.createdAt), {
+    timeRelativeToNow() {
+      return this.$toNow(this.$parseISO(this.post.createdAt), {
         addSuffix: true,
-        locale: zhTW
+        locale: this.$zhTW
       })
     },
     isUserOwn() {
       if (this.post.author) {
         return (
-          this.post.author.id === this.$store.state.userAbout.loginedUserData.id
+          this.post.author.id === this.$store.getters.loginedUserId
         )
       }
-
       return ''
-    }
+    },
   },
   methods: {
     showReplyModal(post) {
       post = {
         ...post,
-        relativeTime: this.relativeTime
+        timeRelativeToNow: this.timeRelativeToNow,
+        modalType: 'replyPost'
       }
       this.$store.commit('TOGGLE_MODAL', post)
+    },
+    togglePostLike(post) {
+      const isLike = !this.isLike
+      this.isLike = !this.isLike
+      this.$store.dispatch('postAbout/togglePostLike', {
+        postId: post.id,
+        isLike
+      })
     },
     deletePost() {
       // TODO:optimize notification
@@ -96,6 +101,13 @@ export default {
         name: 'post-detail',
         params: { post }
       })
+    }
+  },
+  mounted() {
+    if (this.post) {
+      this.isLike = this.post.liked.some(
+        (like) => like.userId === this.$store.getters.loginedUserId
+      )
     }
   }
 }
@@ -117,29 +129,35 @@ export default {
 
   // hover effect set
   border-bottom: 1px solid $color-gray-400;
-  background-color: rgba(white, 0.1);
-  box-shadow: 0px 1rem 2rem rgba(white, 0.1);
-  backdrop-filter: blur(2px);
-  transition: transform 0.5s ease-out;
-  overflow: hidden;
+  // background-color: rgba(skyblue, 0.1);
+  // box-shadow: 0px 1rem 2rem rgba(skyblue, 0.1);
+  // backdrop-filter: blur(2px);
+  // transition: transform 0.5s ease-out;
+  // overflow: hidden;
 
-  &::before {
-    content: '';
-    background: rgba(white, 0.4);
-    width: 60%;
-    height: 100%;
-    top: 0%;
-    left: -125%;
+  // &::before {
+  //   content: '';
+  //   background: rgba(skyblue, 0.4);
+  //   width: 60%;
+  //   height: 100%;
+  //   top: 0%;
+  //   left: -125%;
 
-    transform: skew(45deg);
-    position: absolute;
-    transition: left 0.5s ease-out;
-  }
+  //   // TODO: fix hover effects
+  //   // transform: skew(45deg);
+  //   position: absolute;
+  //   transition: left 0.5s ease-out;
+  // }
 
+  // &:hover {
+  //   &::before {
+  //     left: 150%;
+  //   }
+  // }
+  background-color: $color-gray-100;
+  transition: all 0.2s ease-in;
   &:hover {
-    &::before {
-      left: 150%;
-    }
+    background-color: rgba($color-brand, 0.4);
   }
 }
 

@@ -1,17 +1,15 @@
 <template>
   <div class="main-view">
-    <NavBar/>
+    <NavBar />
 
     <transition name="fade" mode="out-in">
       <router-view></router-view>
     </transition>
 
-    <PopUserList
-      v-show="userRole === 'normal'"
-    />
+    <PopUserList v-show="userRole === 'normal'" />
 
-    <ActionModal/>
-
+    <ActionModal />
+    <ChatRoom v-if="isChatRoomOn" />
   </div>
 </template>
 
@@ -19,15 +17,21 @@
 import NavBar from '../components/NavBar.vue'
 import ActionModal from '../components/ActionModal.vue'
 import PopUserList from '../components/PopUserList.vue'
+import ChatRoom from '../components/ChatRoom.vue'
 
 export default {
   name: 'MainView',
-  data(){
+  data() {
     return {
-      userRole: this.$store.state.userAbout.userRole
+      userRole: this.$store.state.userAbout.userRole,
     }
   },
-  components: { NavBar, PopUserList, ActionModal }
+  components: { NavBar, PopUserList, ActionModal, ChatRoom },
+  computed: {
+    isChatRoomOn() {
+      return this.$store.state.isChatRoomOn
+    }
+  }
 }
 </script>
 
@@ -42,7 +46,7 @@ export default {
   grid-template-columns: 16% 60% 24%;
 
   div {
-    padding: 0 .8rem;
+    padding: 0 0.8rem;
   }
 
   @include respond($bp-tablet) {
@@ -56,18 +60,16 @@ export default {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity .3s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .fade-enter,
 .fade-leave-to {
-  opacity: 0
+  opacity: 0;
 }
 
 .fade-enter-to,
 .fade-leave {
   opacity: 1;
 }
-
-
 </style>

@@ -1,17 +1,18 @@
 <template>
-  <div class="comment">
+  <div class="comment" @click="toCommentDetail(comment, attatchComments)">
     <img class="comment__avatar" :src="comment.author.avatar.url" />
 
     <div class="comment__contents">
       <span class="comment__title">
         <b>{{ comment.author.name }}</b>
-        {{ comment.author.alias }}
-      </span>
+        {{ comment.author.alias }}．{{ timeRelativeToNow }}</span
+      >
       <p>
         回覆
-        <router-link :to="{ name: 'posts', params: { userId: postAuthor.id } }"
-          >@{{ postAuthor.alias }}</router-link
-        >
+        <button @click.stop="toProfilePage()">
+          <!-- @{{ postInfo.author.alias }} -->
+          @someOne
+        </button>
       </p>
       <div>{{ comment.contents }}</div>
       <template v-if="comment.media">
@@ -23,26 +24,21 @@
           v-else
           autoplay
           :src="comment.media.url"
-          @click="togglePlay" 
+          @click="togglePlay"
         ></video>
       </template>
-      <!-- <video controls autoplay loop
-        v-if="comment.image.url"
-        :src="comment.image.url"
-      >
-      </video> -->
     </div>
-
+    <!-- v-if="$route.name !== 'comment-detail'" -->
     <div class="comment__interact">
-      <a @click.stop="post;">
+      <a @click.stop="triggerModal(comment)">
         <svg>
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"
           ></use>
         </svg>
-        <span>1</span>
+        <span>{{ attatchComments.length }}</span>
       </a>
-      <a>
+      <a @click.stop="toggleCommentLike(comment)">
         <svg v-if="!isLike">
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-heart-normal"
@@ -53,7 +49,7 @@
             xlink:href="./../assets/images/symbol-defs.svg#icon-heart-solid"
           ></use>
         </svg>
-        <span>1</span>
+        <span>{{ comment.liked.length }}</span>
       </a>
     </div>
   </div>
@@ -64,15 +60,24 @@ export default {
   name: 'CommentItem',
   data() {
     return {
-      isLike: false
+      isLike: false,
+      attatchComments: []
     }
   },
   props: {
     comment: {
       type: Object
     },
-    postAuthor: {
+    postInfo: {
       type: Object
+    }
+  },
+  computed: {
+    timeRelativeToNow() {
+      return this.$toNow(this.$parseISO(this.comment.createdAt), {
+        addSuffix: true,
+        locale: this.$zhTW
+      })
     }
   },
   methods: {
@@ -84,7 +89,51 @@ export default {
       } else {
         video.pause()
       }
-    }
+    },
+    toggleCommentLike(comment) {
+      const isLike = !this.isLike
+      this.isLike = !this.isLike
+      this.$store.dispatch('commentAbout/toggleCommentLike', {
+        postId: this.postInfo.postId,
+        commentId: comment.id,
+        isLike
+      })
+    },
+    triggerModal(comment) {
+      comment = { ...comment, modalType: 'replyComment' }
+      this.$store.commit('TOGGLE_MODAL', comment)
+    },
+    toCommentDetail(comment, attatchComments) {
+      this.$router
+        .push({
+          name: 'comment-detail',
+          params: { comment, attatchComments }
+        })
+        .catch(() => {
+          this.$emit('setMain', comment, attatchComments)
+        })
+    },
+    toProfilePage() {
+      this.$router.push({
+        name: 'posts',
+        params: { userId: this.postInfo.author.id }
+      })
+    },
+    async getAttatchComments(commentId) {
+      this.attatchComments = await this.$store.dispatch(
+        'commentAbout/getAttatchComments',
+        commentId
+      )
+    },
+  },
+  async mounted() {
+    await this.getAttatchComments(this.comment.id)
+    
+
+    // TODO:fix
+    this.isLike = this.comment.liked.some(
+      (like) => like.userId === this.$store.getters.loginedUserId
+    )
   }
 }
 </script>
@@ -98,6 +147,7 @@ export default {
   grid-template-columns: min-content 1fr;
   grid-column-gap: 1.5rem;
   grid-row-gap: 1rem;
+  cursor: pointer;
 
   &__title {
     display: inline-block;
@@ -110,6 +160,9 @@ export default {
   width: 30%;
   display: flex;
   justify-content: space-between;
+  a {
+    cursor: pointer;
+  }
   svg {
     width: 1.6rem;
     height: 1.6rem;

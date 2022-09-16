@@ -1,21 +1,7 @@
 <template>
   <div class="home">
     <PageInfoBar />
-    <!-- <div class="post-input-group">
-      <img class="avatar" alt="avatar"
-        :src="this.$store.state.userAbout.loginedUserData.avatar.url"
-      >
-      <textarea placeholder="有什麼新鮮事?"
-        v-model="postContents"
-      ></textarea>
-      <div class="button-group">
-        <span>
-          {{ validationErrMsg }}
-        </span>
-        <button @click="submitNewPost">推文</button>
-      </div>
-    </div> -->
-    <ContentPoster/>
+    <ContentPoster />
 
     <div class="postList" @scroll="loadMorePosts">
       <PostItem v-for="post in showingPosts" :key="post.id" :post="post">
@@ -33,6 +19,9 @@ import LoadSpinner from './../components/LoadSpinner.vue'
 import ContentPoster from './../components/ContentPoster.vue'
 import axios from 'axios'
 
+// eslint-disable-next-line no-unused-vars
+let notificationSocket
+
 export default {
   name: 'HomePage',
   components: { PageInfoBar, PostItem, LoadSpinner, ContentPoster },
@@ -41,8 +30,7 @@ export default {
       postContents: '',
       validationErrMsg: '內容不可為空',
       postCount: 0,
-      showLoader: false,
-      showingPosts: this.$store.state.postAbout.showingPosts
+      showLoader: false
     }
   },
   watch: {
@@ -54,6 +42,11 @@ export default {
       } else {
         this.validationErrMsg = ''
       }
+    }
+  },
+  computed: {
+    showingPosts(){
+      return this.$store.state.postAbout.showingPosts
     }
   },
   methods: {
@@ -85,8 +78,24 @@ export default {
           this.$store.state.postAbout.showingPosts.push(...newPosts.data)
         }, 2000)
       }
-    },
+    }
   },
+  beforeCreate() {
+    this.$store.dispatch('postAbout/getHomePagePosts')
+  },
+  mounted() {
+    notificationSocket = this.$io(`${this.$store.state.API_URL}/notification`)
+
+    notificationSocket.on('ready', (msg) => {
+      console.log(msg)
+    })
+
+    notificationSocket.on('notification', (notification) => {
+      this.$store.commit('ADD_NOTIFICATION', notification)
+    })
+
+    notificationSocket.emit('setChannel', this.$store.getters.loginedUserId)
+  }
 }
 </script>
 

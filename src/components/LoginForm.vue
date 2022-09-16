@@ -28,7 +28,6 @@
       />
     </form>
     <button @click="login">登入</button>
-    <a href="http://localhost:4000/auth/google">Google 登入</a>
     <div class="other">
       <GoogleSignInButton></GoogleSignInButton>
       <router-link v-show="currentPage === 'login'" to="/register"
@@ -65,9 +64,9 @@ export default {
       try {
         await this.$store.dispatch('userAbout/auth', loginInfo)
         await this.$store.dispatch('userAbout/getPopUsers')
-        await this.$store.dispatch('postAbout/getHomePagePosts')
         this.$router.push({ name: 'home' })
       } catch (err) {
+        // TODO: optimize notifications
         alert(err)
       }
     }
@@ -140,5 +139,9 @@ input {
 
 button {
   margin-top: -1rem;
+}
+
+button:active {
+  color: blue;
 }
 </style>

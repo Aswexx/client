@@ -40,7 +40,7 @@ export default {
       }
 
       const followship = 
-        user.followed.find(r => r.followerId === this.$store.state.userAbout.loginedUserData.id)
+        user.followed.find(r => r.followerId === this.$store.getters.loginedUserId)
       return this.$store.dispatch('userAbout/removeFollowship', followship)
     },
     showFollowState(user) {
@@ -48,11 +48,11 @@ export default {
         return false
       }
 
-      return user.followed.find(followship => followship.followerId === this.$store.state.userAbout.loginedUserData.id)
+      return user.followed.find(followship => followship.followerId === this.$store.getters.loginedUserId)
     },
     async toUserProfile(userId){
       //* implement state mutations directly
-      //* if current route is NOT 'profile/posts'、'profile/posts' or 'profile/posts'
+      //* if current route is NOT 'profile/posts'、'profile/replies' or 'profile/likes'
       switch (this.$route.name) {
         case 'posts':
           break
