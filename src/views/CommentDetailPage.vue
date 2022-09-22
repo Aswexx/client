@@ -33,10 +33,10 @@
 
     <div class="comment-list">
       <CommentItem
-        v-for="comment in attatchComments"
-        :key="comment.id"
-        :comment="comment"
-        @setMain="setMain"
+        v-for="attachComment in attachComments"
+        :key="attachComment.id"
+        :comment="attachComment"
+        @setAsTopicComment="setAsTopicComment"
       />
       <!-- :postInfo="{ author: post.author, postId: post.id }" -->
     </div>
@@ -52,20 +52,13 @@ export default {
   data() {
     return {
       comment: {},
-      attatchComments: [],
+      attachComments: this.$store.getters.attachComments[this.$store.getters.topicComment.id],
       isLike: ''
     }
   },
   computed: {
-    // attatchComments() {
-    //   return this.$store.state.commentAbout.attatchComments
-    // },
-    // showingPosts() {
-    //   return this.$store.state.postAbout.showingPosts
-    // },
-    // comments() {
-    //   const index = this.showingPosts.indexOf(this.post)
-    //   return this.showingPosts[index].comments
+    // attachComments() {
+    //   return this.$store.getters.attachComments[this.comment.id]
     // },
     formattedTime() {
       return this.$format(
@@ -88,23 +81,46 @@ export default {
         isLike
       })
     },
-    setMain(comment, attatchComments) {
+    setAsTopicComment(comment, attachComments) {
+      this.$store.commit('commentAbout/SET_TOPIC_COMMENT', comment)
       this.comment = comment
-      this.attatchComments = attatchComments
-    },
+      // * set as falsy so that title comment of deep comment page wont show icons of interaction
+      this.comment.onCommentId = ''
+      this.attachComments = attachComments
+    }
+  },
+  beforeCreate() {
+    this.$store.commit('commentAbout/RESET_ATTACH_COMMENTS')
   },
   beforeMount() {
-    this.comment = this.$route.params.comment
-    this.attatchComments = this.$route.params.attatchComments
-    this.isLike = this.comment.liked.some(
+    const topicComment =
+      this.$route.params.comment ||
+      JSON.parse(sessionStorage.getItem('storeData')).commentAbout.topicComment
+
+    const attachComments =
+      this.$route.params.attachComments ||
+      JSON.parse(sessionStorage.getItem('storeData')).commentAbout
+        .attachComments[topicComment.id]
+
+    this.$store.commit('commentAbout/SET_TOPIC_COMMENT', topicComment)
+    this.$store.commit('commentAbout/SET_ATTACH_COMMENTS', {
+      commentId: topicComment.id,
+      attachComments: attachComments
+    })
+
+    this.comment = topicComment
+    this.attachComments = this.$store.getters.attachComments[topicComment.id]
+    this.isLike = topicComment.liked.some(
       (like) => like.userId === this.$store.getters.loginedUserId
     )
+  },
+  beforeDestroy() {
+    this.$store.commit('commentAbout/RESET_TOPIC_COMMENT')
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 div {
   padding: 1rem;
 }

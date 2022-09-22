@@ -28,7 +28,6 @@
 </template>
 
 <style lang="scss" scoped>
-@import '../assets/scss/abstracts.scss';
 
 .user-card {
 	width: 22rem;

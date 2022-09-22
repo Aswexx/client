@@ -1,14 +1,22 @@
 <template>
-  <div @click="direct(notif)">
+  <div class="notif" :class="{ read: notif.isRead }" @click="direct(notif)">
     <img src="../assets/images/default_avatar1.png" alt="avatar" />
-    <span>{{ description }}</span>
+    <span class="notif__description">{{ description }}</span>
+    <span>{{ formattedTime }}</span>
   </div>
 </template>
 
 <script>
 export default {
+  props: {
+    notif: {
+      type: Object,
+      required: true
+    }
+  },
   methods: {
     async direct(notif) {
+      this.read(notif)
       switch (notif.notifType) {
         case 'follow':
           this.$router.push({
@@ -20,8 +28,7 @@ export default {
           this.$store.commit('TOGGLE_CHAT', notif.informerId)
           break
         case 'replyPost':
-        case 'likePost':
-          // eslint-disable-next-line no-case-declarations
+        case 'likePost': {
           const { data } = await this.$store.dispatch(
             'postAbout/getPost',
             notif.targetPostId
@@ -31,10 +38,30 @@ export default {
             params: { post: data }
           })
           break
-        case 'likeComment':
-          alert('go to comment detail')
+        }
+        case 'replyComment':
+        case 'likeComment': {
+          const comment = await this.$store.dispatch(
+            'commentAbout/getComment',
+            notif.targetCommentId
+          )
+
+          const attachComments = await this.$store.dispatch(
+            'commentAbout/getAttachComments',
+            notif.targetCommentId
+          )
+          console.log(attachComments, comment)
+
+          this.$router.push({
+            name: 'comment-detail',
+            params: { comment, attachComments }
+          })
           break
+        }
       }
+    },
+    read(notif) {
+      this.$store.commit('TURN_NOTIF_READ', notif.id)
     }
   },
   computed: {
@@ -47,6 +74,8 @@ export default {
           return `${notif.informer.name} 邀請你進入聊天`
         case 'replyPost':
           return `${notif.informer.name} 評論了你的貼文`
+        case 'replyComment':
+          return `${notif.informer.name} 評論了你的評論`
         case 'likePost':
           return `${notif.informer.name} 喜歡你的貼文`
         case 'likeComment':
@@ -54,19 +83,35 @@ export default {
         default:
           return ''
       }
-    }
-  },
-  props: {
-    notif: {
-      type: Object,
-      required: true
+    },
+    formattedTime() {
+      return this.$format(
+        new Date(this.notif.createdAt),
+        'yyyy-MM-dd HH:mm:ss',
+        { locale: this.$zhTW }
+      )
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-div {
+
+.notif {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  width: 100%;
   cursor: pointer;
+
+  &__description {
+    flex: 1;
+  }
+}
+
+.read {
+  color: $color-gray-300;
 }
 </style>

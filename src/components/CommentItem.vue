@@ -1,5 +1,5 @@
 <template>
-  <div class="comment" @click="toCommentDetail(comment, attatchComments)">
+  <div class="comment" @click="toCommentDetail(comment, attachComments)">
     <img class="comment__avatar" :src="comment.author.avatar.url" />
 
     <div class="comment__contents">
@@ -28,15 +28,17 @@
         ></video>
       </template>
     </div>
-    <!-- v-if="$route.name !== 'comment-detail'" -->
-    <div class="comment__interact">
+    <div
+      class="comment__interact"
+      v-if="comment.onCommentId || this.$route.name === 'post-detail'"
+    >
       <a @click.stop="triggerModal(comment)">
         <svg>
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"
           ></use>
         </svg>
-        <span>{{ attatchComments.length }}</span>
+        <span>{{ attachComments.length }}</span>
       </a>
       <a @click.stop="toggleCommentLike(comment)">
         <svg v-if="!isLike">
@@ -49,7 +51,7 @@
             xlink:href="./../assets/images/symbol-defs.svg#icon-heart-solid"
           ></use>
         </svg>
-        <span>{{ comment.liked.length }}</span>
+        <span>{{ likesNum }}</span>
       </a>
     </div>
   </div>
@@ -61,7 +63,9 @@ export default {
   data() {
     return {
       isLike: false,
-      attatchComments: []
+      likesNum: this.comment.liked.length,
+      attachComments: [],
+      isTitleComment: false
     }
   },
   props: {
@@ -70,6 +74,9 @@ export default {
     },
     postInfo: {
       type: Object
+    },
+    commentTitleId: {
+      type: String
     }
   },
   computed: {
@@ -92,25 +99,37 @@ export default {
     },
     toggleCommentLike(comment) {
       const isLike = !this.isLike
-      this.isLike = !this.isLike
-      this.$store.dispatch('commentAbout/toggleCommentLike', {
-        postId: this.postInfo.postId,
+      const commentInfo = {
         commentId: comment.id,
         isLike
-      })
+      }
+
+      if (this.postInfo) {
+        commentInfo.postId = this.postInfo.postId
+      }
+
+      // * seperately controls the display about numbers of likes
+      // * in order to make display properly when user trigger refresh
+      this.isLike = !this.isLike
+      if (this.isLike) {
+        this.likesNum++
+      } else {
+        this.likesNum--
+      }
+      this.$store.dispatch('commentAbout/toggleCommentLike', commentInfo)
     },
     triggerModal(comment) {
       comment = { ...comment, modalType: 'replyComment' }
       this.$store.commit('TOGGLE_MODAL', comment)
     },
-    toCommentDetail(comment, attatchComments) {
+    toCommentDetail(comment, attachComments) {
       this.$router
         .push({
           name: 'comment-detail',
-          params: { comment, attatchComments }
+          params: { comment, attachComments }
         })
         .catch(() => {
-          this.$emit('setMain', comment, attatchComments)
+          this.$emit('setAsTopicComment', comment, attachComments)
         })
     },
     toProfilePage() {
@@ -118,28 +137,32 @@ export default {
         name: 'posts',
         params: { userId: this.postInfo.author.id }
       })
-    },
-    async getAttatchComments(commentId) {
-      this.attatchComments = await this.$store.dispatch(
-        'commentAbout/getAttatchComments',
-        commentId
-      )
-    },
+    }
   },
-  async mounted() {
-    await this.getAttatchComments(this.comment.id)
-    
-
-    // TODO:fix
+  async created() {
+    if (
+      this.comment.id &&
+      this.comment.id !== this.$store.getters.topicComment.id
+    ) {
+      await this.$store.dispatch(
+        'commentAbout/getAttachComments',
+        this.comment.id
+      )
+      this.attachComments = this.$store.getters.attachComments[this.comment.id]
+    }
+  },
+  mounted() {
     this.isLike = this.comment.liked.some(
-      (like) => like.userId === this.$store.getters.loginedUserId
+      (like) => {
+        const userId = like.userId || like.user.id
+        return userId === this.$store.getters.loginedUserId
+      }
     )
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 
 .comment {
   border-bottom: 1px solid $color-gray-400;

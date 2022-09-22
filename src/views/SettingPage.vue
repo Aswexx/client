@@ -1,109 +1,167 @@
 <template>
-	<div class="setting-page">
-		<PageInfoBar/>
+  <div class="setting-page">
+    <PageInfoBar />
 
-		<form action="#" class="input-groups" id="setting" 
-			@submit.prevent="saveSetting"
-			ref="settingForm"
-		>
-			<InputItem :inputInfo="{
-				inputTagId:'account',
-				inputTagName:'account',
-				type:'text',
-				labelName:'帳號',
-				originData: 'holahola',
-				editable: false,
-				placeholder: ''
-			}"/>
+    <img
+      class="user-bg"
+      src="../assets/images/default-profile-bg.jpg"
+      @click="showFilePicker('image/png, image/jpeg')"
+    />
+    <img class="user-avatar" src="../assets/images/default-avatar.jpg" />
 
-			<InputItem :inputInfo="{
-				inputTagId:'title',
-				inputTagName:'title',
-				type:'text',
-				labelName:'名稱',
-				originData: 'John Don',
-				editable: true,
-				placeholder: ''
-			}"/>
+    <form
+      method="post"
+      action="`${$store.state.API_URL}/users/${$store.state.getters.loginedUserId}`"
+      enctype="multipart/form-data"
+      id="setting"
+      class="input-groups"
+      @submit.prevent="saveSetting"
+      ref="settingForm"
+    >
+      <input type="file" accept="image/png, image/jpeg" name="backgroundImage" ref="backgroundInput" />
+      <input type="file" accept="image/png, image/jpeg" name="avatarImage"/>
 
-			<InputItem :inputInfo="{
-				inputTagId:'email',
-				inputTagName:'email',
-				type:'email',
-				labelName:'Email',
-				originData: 'qwdafheggr@gmail.com',
-				editable: false,
-				placeholder: ''
-			}"/>
+      <!-- <InputItem :inputInfo="{
+        inputTagId:'account',
+        inputTagName:'account',
+        type:'text',
+        labelName:'帳號',
+        originData: 'holahola',
+        editable: false,
+        placeholder: ''
+      }"/> -->
 
-			<InputItem 
-				:inputInfo="{
-				inputTagId:'password',
-				inputTagName:'password',
-				type: 'password',
-				labelName:'密碼',
-				originData: '',
-				editable: true,
-				placeholder: '請設定密碼'
-			}"/>
+      <InputItem
+        :inputInfo="{
+          inputTagId: 'alias',
+          inputTagName: 'alias',
+          type: 'text',
+          labelName: '別名',
+          originData: 'John',
+          editable: true,
+          placeholder: ''
+        }"
+      />
 
-			<InputItem :inputInfo="{
-				inputTagId:'checkPassword',
-				inputTagName:'checkPassword',
-				type: 'password',
-				labelName:'密碼再確認',
-				originData: '',
-				editable: true,
-				placeholder: '請再次設定密碼'
-			}"/>
+      <!-- <InputItem :inputInfo="{
+        inputTagId:'email',
+        inputTagName:'email',
+        type:'email',
+        labelName:'Email',
+        originData: 'qwdafheggr@gmail.com',
+        editable: false,
+        placeholder: ''
+      }"/>
+ -->
+      <InputItem
+        :inputInfo="{
+          inputTagId: 'password',
+          inputTagName: 'password',
+          type: 'password',
+          labelName: '密碼',
+          originData: '',
+          editable: true,
+          placeholder: '請設定密碼'
+        }"
+      />
 
-			<button type="submit" form="setting" :disabled="isPasswordSame">儲存</button>
+      <InputItem
+        :inputInfo="{
+          inputTagId: 'checkPassword',
+          inputTagName: 'checkPassword',
+          type: 'password',
+          labelName: '密碼再確認',
+          originData: '',
+          editable: true,
+          placeholder: '請再次設定密碼'
+        }"
+      />
 
-		</form>
-	</div>
+      <button
+        @click.prevent="validateThenSubmit"
+        form="setting"
+        :disabled="!isPasswordSame"
+      >
+        儲存
+      </button>
+    </form>
+  </div>
 </template>
 
 <script>
 import PageInfoBar from '../components/PageInfoBar.vue'
 import InputItem from '../components/InputItem.vue'
 export default {
-	data(){
-		return {
-			isPasswordSame: true
-		}
-	},
-	components: { PageInfoBar, InputItem },
-	methods: {
-		saveSetting(event){
-			// ! 先確認密碼一致
-			// ! 補提交密碼變更
-			console.log(event.target)
-			const form = event.target
-			const formData = new FormData(form)
-			for (let [key,value] of formData.entries()){
-				console.log(`${key}:${value}`)
-			}
-			if (formData.get('password') !== formData.get('checkPassword')){
-				console.log(formData.get('password'))
-				return alert('請再次確認密碼!')
-			}
-			form.submit()
-		},
-	},
+  data() {
+    return {
+      isPasswordSame: true,
+      allowedExtensions: /(\.jpeg|\.png)$/i
+    }
+  },
+  components: { PageInfoBar, InputItem },
+  methods: {
+    saveSetting(event) {
+      // ! 先確認密碼一致
+      // ! 補提交密碼變更
+      console.log(event.target)
+      const form = event.target
+      const formData = new FormData(form)
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:${value}`)
+      }
+      if (formData.get('password') !== formData.get('checkPassword')) {
+        console.log(formData.get('password'))
+        return alert('請再次確認密碼!')
+      }
+
+      form.submit()
+    },
+    showFilePicker() {
+      alert('hi')
+      this.$refs.backgroundInput.click()
+    },
+    validateThenSubmit() {
+      alert('start validation')
+      const form = this.$refs.settingForm
+      const formData = new FormData(form)
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:${value}`)
+      }
+
+      this.$store.dispatch('userAbout/updateProfile', formData)
+
+      // this.$refs.settingForm.submit()
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+.input-groups {
+  margin-top: 1.5rem;
+}
 
-	
+.user-bg {
+  display: block;
+  border-radius: 0;
+  width: 100%;
+  height: 20rem;
 
-	.input-groups {
-		margin-top: 1.5rem;
-	}
+  object-fit: cover;
+  object-position: 0 80%;
+}
 
-	button {
-		width: 9rem;
-		margin-left: auto;
-		display: block;
-	}
+.user-avatar {
+  display: block;
+  width: 14rem;
+  height: 14rem;
+  transform: translate(1.5rem, -8.6rem);
+  border: 5px solid $color-gray-100;
+}
+
+button {
+  width: 9rem;
+  margin-left: auto;
+  display: block;
+}
 </style>

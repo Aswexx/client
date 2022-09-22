@@ -35,7 +35,7 @@
       </li>
       <li>
         <router-link to="/notifications" active-class="active" class="unread">
-          <span class="unread-dot">5</span>
+          <span class="unread-dot">{{ unreadCounts }}</span>
           <svg>
             <use
               xlink:href="./../assets/images/symbol-defs.svg#icon-notifications"
@@ -78,6 +78,11 @@ export default {
       isAdmin: this.$store.state.userRole === 'admin'
     }
   },
+  computed: {
+    unreadCounts() {
+      return this.$store.getters.unreadNotifs
+    }
+  },
   methods: {
     post() {
       this.$store.commit('TOGGLE_MODAL')
@@ -103,7 +108,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 
 .active {
   color: $color-brand;

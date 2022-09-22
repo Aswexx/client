@@ -75,7 +75,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 
 .pop-user-list {
   position: sticky;

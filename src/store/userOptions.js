@@ -20,8 +20,6 @@ export const userOptions = {
       )
       if (!loginedUserData.data) {
         throw new Error('登入資訊有誤')
-        // alert('登入資訊有誤')
-        // return
       }
       context.commit('SAVE_USER_DATA', loginedUserData.data)
       context.state.isAuthenticated = true
@@ -46,6 +44,20 @@ export const userOptions = {
     async postUser(context, userInfo) {
       const { data } = await axios.post(context.rootState.API_URL, userInfo)
       context.commit('SAVE_USER_DATA', data)
+    },
+
+    async updateProfile(context, newInfo) {
+      try {
+        const result = await axios.patch(
+          `${context.rootState.API_URL}/users/${context.rootGetters.loginedUserId}`,
+          newInfo
+        )
+        if (!result.data) {
+          throw new Error('欄位不符')
+        }
+      } catch (err) {
+        console.log(err.message)
+      }
     },
 
     async addFollowship(context, userId) {
@@ -98,6 +110,9 @@ export const userOptions = {
         }
       })
     }
+    // UPDATE_PROFILE(state, info) {
+
+    // }
   },
   state: {
     isAuthenticated: false,

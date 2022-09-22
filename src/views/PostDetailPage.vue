@@ -33,7 +33,7 @@
 
     <div class="comment-list">
       <CommentItem
-        v-for="comment in comments"
+        v-for="comment in post.comments"
         :key="comment.id"
         :comment="comment"
         :postInfo="{ author: post.author, postId: post.id }"
@@ -56,20 +56,31 @@ export default {
     }
   },
   computed: {
-    showingPosts() {
-      return this.$store.state.postAbout.showingPosts
-    },
-    comments() {
-      const index = this.showingPosts.indexOf(this.post)
-      if (index === -1) return []
-      return this.showingPosts[index].comments
-    },
+    // showingPosts() {
+    //   return this.$store.state.postAbout.showingPosts
+    // },
+    // comments: {
+    //   get() {
+    //     const index = this.showingPosts.indexOf(this.post)
+    //     if (index === -1) return []
+    //     return this.showingPosts[index].comments
+    //   }
+    // },
+    // isLike() {
+    //   // * reload make this.post undefined,
+    //   const showingPosts = this.$store.getters.showingPosts
+    //   const targetPostIndex = showingPosts.indexOf(this.$store.getters.tempPost)
+    //   const post = this.$route.params.post || showingPosts[targetPostIndex]
+    //   console.log(post)
+    //   return post.liked.some(
+    //     (like) => like.userId === this.$store.getters.loginedUserId
+    //   )
+    // },
     formattedTime() {
-      return this.$format(
-        new Date(this.post.createdAt),
-        'yyyy-MM-dd HH:mm:ss',
-        { locale: this.$zhTW }
-      )
+      const post = this.post || this.$store.getters.tempPost
+      return this.$format(new Date(post.createdAt), 'yyyy-MM-dd HH:mm:ss', {
+        locale: this.$zhTW
+      })
     }
   },
   components: { PageInfoBar, PostItem, CommentItem, ContentPoster },
@@ -86,23 +97,26 @@ export default {
       })
     }
   },
+  beforeCreate() {
+    this.$store.commit('commentAbout/RESET_ATTACH_COMMENTS')
+  },
   beforeMount() {
-    this.post = this.$route.params.post
-    if (!this.post) {
-      this.post = this.$store.getters.tempPost
-    }
+    const showingPosts = this.$store.getters.showingPosts
+    this.post =
+      this.$route.params.post ||
+      showingPosts.find((post) => post.id === this.$store.getters.tempPost.id)
+
     this.isLike = this.post.liked.some(
       (like) => like.userId === this.$store.getters.loginedUserId
     )
   },
-  beforeDestroy() {
+  mounted() {
     this.$store.commit('postAbout/SAVE_TEMP_POST', this.post)
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 div {
   padding: 1rem;
 }

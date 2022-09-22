@@ -45,7 +45,7 @@ export default {
     }
   },
   computed: {
-    showingPosts(){
+    showingPosts() {
       return this.$store.state.postAbout.showingPosts
     }
   },
@@ -58,7 +58,7 @@ export default {
       const { scrollTop, scrollHeight, clientHeight } = event.target
 
       if (scrollTop + clientHeight >= scrollHeight) {
-        // exclude loadSpinner
+        //* exclude loadSpinner
         if (this.postCount === event.target.children.length - 1) {
           console.log('scroll event canceled')
           return
@@ -82,6 +82,8 @@ export default {
   },
   beforeCreate() {
     this.$store.dispatch('postAbout/getHomePagePosts')
+    if (this.$store.getters.unreadNotifs) return
+    this.$store.dispatch('getNotifications')
   },
   mounted() {
     notificationSocket = this.$io(`${this.$store.state.API_URL}/notification`)

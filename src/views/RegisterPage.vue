@@ -110,7 +110,7 @@ export default {
       }
 
       for (const value of form.values()) {
-        if (hasSpace.test(value)) {
+        if (hasSpace.test(value) || !value.length) {
           return this.$store.commit('TRIGGER_TOAST', {
             type: 'info',
             detail: '不能有空白'
@@ -133,7 +133,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 
 .register {
   margin: 6rem auto auto auto;

@@ -40,13 +40,13 @@
 export default {
   methods: {
     close() {
+      console.log(window.timer)
       clearTimeout(window.timer)
       this.$refs.toast.classList.remove('active')
     }
   },
   computed: {
     isTriggered() {
-      // return this.$store.commit('TOGGLE_TOAST', {type: 'success', detail: 'good'})
       return this.$store.state.isToastShow
     },
     toastType() {
@@ -74,7 +74,7 @@ export default {
       this.$refs.progress.classList.add('active')
       setTimeout(() => {
         this.$refs.progress.classList.remove('active')
-      }, 6000)
+      }, 5500)
     }
   }
 }

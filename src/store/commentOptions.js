@@ -2,6 +2,11 @@ import axios from 'axios'
 
 export const commentOptions = {
   namespaced: true,
+  getters: {
+    loginedUserId(state, getters, rootState, rootGetters) {
+      return rootGetters.loginedUserId
+    }
+  },
   actions: {
     async submitComment(context, comment) {
       const result = await axios.post(
@@ -9,26 +14,30 @@ export const commentOptions = {
         comment
       )
       context.rootState.isModalOpened = false
-      context.commit('postAbout/ADD_COMMENT_ON_POST', result.data, {
-        root: true
-      })
+      if (result.data.postId) {
+        context.commit('postAbout/ADD_COMMENT_ON_POST', result.data, {
+          root: true
+        })
+        return
+      }
+
+      alert('commentOnComment!')
+      context.commit('ADD_COMMENT_ON_ATTACH_COMMENT', result.data)
     },
-    // async addCommentOfComment(context, comment) {
-    //   const result = await axios.post(
-    //     `${context.rootState.API_URL}/comments`,
-    //     comment
-    //   )
-    //   context.rootState.isModalOpened = false
-    //   context.commit('postAbout/ADD_COMMENT_ON_COMMENT', result.data, {
-    //     root: true
-    //   })
-    // },
-    async getAttatchComments(context, commentId) {
+    async getComment(context, commentId) {
       const { data } = await axios.get(
         `${context.rootState.API_URL}/comments/${commentId}`
       )
+      context.commit('SET_TOPIC_COMMENT', data)
       return data
-      // context.commit('ADD_ATTATCH_COMMENT', data)
+    },
+
+    async getAttachComments(context, commentId) {
+      const { data } = await axios.get(
+        `${context.rootState.API_URL}/comments/${commentId}/attachComments`
+      )
+      context.commit('SET_ATTACH_COMMENTS', { commentId, attachComments: data })
+      return data
     },
     async toggleCommentLike(context, commentInfo) {
       const commentInfoToUpdate = {
@@ -41,11 +50,18 @@ export const commentOptions = {
         commentInfoToUpdate
       )
       console.log(data)
-      context.commit(
-        'postAbout/UPDATE_COMMENT_LIKE_OF_POST',
-        { ...commentInfoToUpdate, postId: commentInfo.postId },
-        { root: true }
-      )
+      if (commentInfo.postId) {
+        context.commit(
+          'postAbout/UPDATE_COMMENT_LIKE_OF_POST',
+          { ...commentInfoToUpdate, postId: commentInfo.postId },
+          { root: true }
+        )
+      } else {
+        context.commit('UPDATE_COMMENT_LIKE_OF_COMMENT', {
+          ...data,
+          commentId: commentInfo.commentId
+        })
+      }
     }
   },
   mutations: {
@@ -57,12 +73,60 @@ export const commentOptions = {
         }
       }
     },
-    ADD_ATTATCH_COMMENT(state, attatchComments) {
-      state.attatchComments = attatchComments
+    SET_ATTACH_COMMENTS(state, attachComments) {
+      state.attachComments[attachComments.commentId] =
+        attachComments.attachComments
+    },
+    ADD_COMMENT_ON_ATTACH_COMMENT(state, newComment) {
+      const key = newComment.onCommentId
+      if (!state.attachComments[key]) {
+        state.attachComments[key] = []
+      } else {
+        state.attachComments[key].unshift(newComment)
+      }
+    },
+    RESET_ATTACH_COMMENTS(state) {
+      state.attachComments = {}
+    },
+    SET_TOPIC_COMMENT(state, comment) {
+      state.topicComment = comment
+    },
+    RESET_TOPIC_COMMENT(state) {
+      state.topicComment = {}
+    },
+    SAVE_TEMP_COMMENT(state, comment) {
+      state.tempComment = comment
+    },
+    UPDATE_COMMENT_LIKE_OF_COMMENT(state, updatedComment) {
+      const topicCommentId = state.topicComment.id
+      const targetAttachComments = state.attachComments[topicCommentId]
+      let targetComment
+
+      // * if user cancel like will get response data with count prop
+      if (updatedComment.count) {
+        targetComment = targetAttachComments.find(
+          (comment) => comment.id === updatedComment.commentId
+        )
+        targetComment.liked = targetComment.liked.filter(
+          (e) => e.user.id !== this.getters.loginedUserId
+        )
+        return
+      }
+
+      targetComment = targetAttachComments.find(
+        (comment) => comment.id === updatedComment.commentId
+      )
+
+      targetComment.liked.push({
+        user: {
+          id: updatedComment.userId
+        }
+      })
     }
   },
   state: {
-    postComments: [],
-    attatchComments: []
+    topicComment: {},
+    attachComments: {},
+    tempComment: {}
   }
 }

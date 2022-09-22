@@ -58,7 +58,7 @@ export default {
       emojiInput.cancelUpload()
 
       // * reply comment in comment detail page
-      if (this.$route.name === 'comment-detail') {
+      if (this.$route.name === 'comment-detail' && !this.source) {
         const commentId = this.commentId || this.source.id
         contentsToSubmit.append('commentId', commentId)
         return this.$store.dispatch(
@@ -105,7 +105,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 
 div {
   padding: 1rem;

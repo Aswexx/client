@@ -75,7 +75,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/abstracts.scss';
 
 .user-login {
   margin: 6rem auto auto auto;

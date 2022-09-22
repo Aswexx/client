@@ -8,5 +8,14 @@ module.exports = defineConfig({
     workboxOptions: {
       swSrc: './src/service-worker.js'
     }
+  },
+  css: {
+    loaderOptions: {
+      sass: {
+        additionalData: `
+          @import "@/assets/scss/_abstracts.scss";
+        `
+      }
+    }
   }
 })
