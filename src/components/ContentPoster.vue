@@ -3,7 +3,7 @@
     <img
       alt="avatar"
       class="avatar"
-      src="../assets/images/default_avatar1.png"
+      :src="$store.getters.loginedUser.avatarUrl"
     />
     <!-- :src="$store.state.userAbout.loginedUserData.avatar.url" -->
     <EmojiInput ref="emojiInput" />

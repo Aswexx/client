@@ -4,22 +4,28 @@
 
     <img
       class="user-bg"
-      src="../assets/images/default-profile-bg.jpg"
+      :src="$store.getters.loginedUser.bgImageUrl"
       @click="showFilePicker('image/png, image/jpeg')"
     />
-    <img class="user-avatar" src="../assets/images/default-avatar.jpg" />
+    <img class="user-avatar" :src="$store.getters.loginedUser.avatarUrl" />
+    <p>{{ bio }}</p>
 
+    <!-- action="`${$store.state.API_URL}/users/${$store.state.getters.loginedUserId}`" -->
     <form
       method="post"
-      action="`${$store.state.API_URL}/users/${$store.state.getters.loginedUserId}`"
       enctype="multipart/form-data"
       id="setting"
       class="input-groups"
       @submit.prevent="saveSetting"
       ref="settingForm"
     >
-      <input type="file" accept="image/png, image/jpeg" name="backgroundImage" ref="backgroundInput" />
-      <input type="file" accept="image/png, image/jpeg" name="avatarImage"/>
+      <input
+        type="file"
+        accept="image/png, image/jpeg"
+        name="backgroundImage"
+        ref="backgroundInput"
+      />
+      <input type="file" accept="image/png, image/jpeg" name="avatarImage" />
 
       <!-- <InputItem :inputInfo="{
         inputTagId:'account',
@@ -37,22 +43,24 @@
           inputTagName: 'alias',
           type: 'text',
           labelName: '別名',
-          originData: 'John',
+          originData: alias,
           editable: true,
           placeholder: ''
         }"
       />
 
-      <!-- <InputItem :inputInfo="{
-        inputTagId:'email',
-        inputTagName:'email',
-        type:'email',
-        labelName:'Email',
-        originData: 'qwdafheggr@gmail.com',
-        editable: false,
-        placeholder: ''
-      }"/>
- -->
+      <InputItem
+        :inputInfo="{
+          inputTagId: 'bio',
+          inputTagName: 'bio',
+          type: 'text',
+          labelName: '個人簡介',
+          originData: bio,
+          editable: true,
+          placeholder: ''
+        }"
+      />
+
       <InputItem
         :inputInfo="{
           inputTagId: 'password',
@@ -95,7 +103,9 @@ export default {
   data() {
     return {
       isPasswordSame: true,
-      allowedExtensions: /(\.jpeg|\.png)$/i
+      allowedExtensions: /(\.jpeg|\.png)$/i,
+      alias: this.$store.getters.loginedUser.alias,
+      bio: this.$store.getters.loginedUser.bio
     }
   },
   components: { PageInfoBar, InputItem },

@@ -7,7 +7,7 @@
       <div class="user-card"
         @click="toUserProfile(user.id)"
         v-for="user in users" :key="user.id">
-        <img :src="user.avatar.url" alt="avatar">
+        <img :src="user.avatarUrl" alt="avatar">
         <h5>{{ user.name }}</h5>
         <button 
           :class="{'not-follow': !showFollowState(user)}"

@@ -66,7 +66,7 @@ export default {
       fileURL: '',
       fileToUpload: '',
       fileType: '',
-      allowedExtensions: /(\.mp4|\.jpeg|\.png|\.gif)$/i
+      allowedExtensions: /(\.mp4|\.jpeg|\.jpg|\.png|\.gif)$/i
     }
   },
   components: { EmojiPicker },
@@ -233,7 +233,7 @@ export default {
 
 img {
   width: 100%;
-  height: 50%;
+  height: unset;
   aspect-ratio: 16/9;
   object-fit: cover;
   border-radius: 10px;

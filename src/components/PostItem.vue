@@ -1,6 +1,11 @@
 <template>
   <div class="post-item" v-if="post" @click="toPostDetail(post)">
-    <img alt="avatar" v-if="post.author" :src="post.author.avatar.url" />
+    <img
+      class="avatar"
+      alt="avatar"
+      v-if="post.author"
+      :src="post.author.avatarUrl"
+    />
     <div class="interact">
       <template v-if="post.author">
         <span
@@ -9,14 +14,37 @@
         >
       </template>
       <span v-if="isUserOwn" @click.stop="deletePost">
-        <svg>
+        <svg v-if="$route.name === 'home'">
           <use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use>
         </svg>
       </span>
     </div>
-    <p :class="{ 'home-page': $route.name === 'home' }">
+    <p class="post-contents">
       {{ post.contents }}
     </p>
+
+    <template v-if="post.media">
+      <img
+        class="post-img"
+        v-if="/image\//.exec(post.media.type)"
+        :src="post.media.url"
+        alt="post-img"
+      />
+      <div v-else class="video-wrapper">
+        <video
+          :src="post.media.url"
+          alt="post-video"
+          ref="video"
+          @click.stop="togglePlay"
+        ></video>
+        <div class="controls">
+          <div class="progress-track">
+            <div class="progerss-bar" ref="progressBar"></div>
+          </div>
+          <div class="play-button"></div>
+        </div>
+      </div>
+    </template>
 
     <div class="count" v-if="$route.name !== 'post-detail'">
       <button @click.stop="showReplyModal(post)">
@@ -66,12 +94,10 @@ export default {
     },
     isUserOwn() {
       if (this.post.author) {
-        return (
-          this.post.author.id === this.$store.getters.loginedUserId
-        )
+        return this.post.author.id === this.$store.getters.loginedUserId
       }
       return ''
-    },
+    }
   },
   methods: {
     showReplyModal(post) {
@@ -101,6 +127,17 @@ export default {
         name: 'post-detail',
         params: { post }
       })
+    },
+    togglePlay() {
+      const video = this.$refs.video
+      const progressBar = this.$refs.progressBar
+      if (!video.paused) return this.$refs.video.pause()
+      video.play()
+      let progress
+      video.addEventListener('timeupdate', () => {
+        progress = video.currentTime / video.duration
+        progressBar.style.width = progress * 100 + '%'
+      })
     }
   },
   mounted() {
@@ -127,37 +164,55 @@ export default {
   grid-column-gap: 1rem;
   grid-row-gap: 0.5rem;
 
-  // hover effect set
   border-bottom: 1px solid $color-gray-400;
-  // background-color: rgba(skyblue, 0.1);
-  // box-shadow: 0px 1rem 2rem rgba(skyblue, 0.1);
-  // backdrop-filter: blur(2px);
-  // transition: transform 0.5s ease-out;
-  // overflow: hidden;
+  .avatar {
+    grid-row: 1/4;
+  }
 
-  // &::before {
-  //   content: '';
-  //   background: rgba(skyblue, 0.4);
-  //   width: 60%;
-  //   height: 100%;
-  //   top: 0%;
-  //   left: -125%;
+  .post-img {
+    width: 90%;
+    height: unset;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 10px;
+  }
 
-  //   // TODO: fix hover effects
-  //   // transform: skew(45deg);
-  //   position: absolute;
-  //   transition: left 0.5s ease-out;
-  // }
-
-  // &:hover {
-  //   &::before {
-  //     left: 150%;
-  //   }
-  // }
   background-color: $color-gray-100;
   transition: all 0.2s ease-in;
+
   &:hover {
     background-color: rgba($color-brand, 0.4);
+    .controls {
+      transform: translateY(0%);
+    }
+  }
+}
+
+.video-wrapper {
+  width: 90%;
+  position: relative;
+  overflow: hidden;
+
+  .controls {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    background-color: $color-gray-600;
+    height: 2rem;
+    transform: translateY(100%);
+    transition: all 0.2s ease-in;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: .5rem;
+    background-color: $color-gray-400;
+  }
+
+  .progerss-bar {
+    width: 0%;
+    height: .5rem;
+    background-color: red;
   }
 }
 
@@ -173,6 +228,7 @@ p.home-page {
 .interact {
   display: flex;
   justify-content: space-between;
+
   b {
     padding-right: 1rem;
   }
@@ -203,10 +259,6 @@ p.home-page {
     display: flex;
     align-items: center;
   }
-}
-
-img {
-  grid-row: 1/4;
 }
 
 svg {

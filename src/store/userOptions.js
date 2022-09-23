@@ -44,6 +44,7 @@ export const userOptions = {
     async postUser(context, userInfo) {
       const { data } = await axios.post(context.rootState.API_URL, userInfo)
       context.commit('SAVE_USER_DATA', data)
+      // TODO: direct user to home page or setting page
     },
 
     async updateProfile(context, newInfo) {

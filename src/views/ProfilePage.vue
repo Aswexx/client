@@ -6,7 +6,7 @@
         class="user-bg"
         alt="user-bg"
         slot="image"
-        :src="showingUserData.bgImage.url"
+        :src="showingUserData.bgImageUrl"
       />
       <div slot="preloader" class="user-bg">
         <LoadSpinner />
@@ -14,7 +14,7 @@
       <div slot="error">error!!</div>
     </VueLoadImage>
     <div class="profile-card">
-      <img alt="img" :src="showingUserData.avatar.url" />
+      <img alt="img" :src="showingUserData.avatarUrl" />
 
       <div class="interact">
         <button @click="triggerChat(showingUserData.id)">
@@ -122,8 +122,8 @@ export default {
     // * no route params means user try to see own profile
     const userId =
       this.$route.params.userId || 
-      // * if unload on profile page
-      JSON.parse(sessionStorage.get('storeData')).postAbout.userPosts[0].author.id ||
+      // * load session data if unload on profile page
+      JSON.parse(sessionStorage.getItem('storeData')).postAbout.userPosts[0].author.id ||
       this.$store.getters.loginedUserId
     await this.$store.dispatch('userAbout/getUser', userId)
     await this.$store.dispatch('postAbout/getUserPosts', userId)
