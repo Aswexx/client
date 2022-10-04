@@ -11,11 +11,17 @@ const getters = {
   showingPosts(state) {
     return state.postAbout.showingPosts
   },
+  postCount(state) {
+    return state.postAbout.postCount
+  },
   tempPost(state) {
     return state.postAbout.tempPost
   },
   tempComment(state) {
     return state.postAbout.tempComment
+  },
+  users(state) {
+    return state.userAbout.users
   },
   loginedUser(state) {
     return state.userAbout.loginedUserData

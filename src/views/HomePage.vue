@@ -3,7 +3,7 @@
     <PageInfoBar />
     <ContentPoster />
 
-    <div class="postList" @scroll="loadMorePosts">
+    <div class="post-list" @scroll="loadMorePosts">
       <PostItem v-for="post in showingPosts" :key="post.id" :post="post">
       </PostItem>
 
@@ -65,9 +65,10 @@ export default {
         }
         this.postCount = event.target.children.length - 1
         this.showLoader = true
-        // TODO check total posts amount and get 10 posts from bk API if there is more
+
+        // * get more posts base on current posts
         const newPosts = await axios.get(
-          `${this.$store.state.API_URL}/posts/relative-posts`,
+          `${this.$store.state.API_URL}/posts/home-page`,
           {
             params: { skipPostsCount: this.postCount }
           }
@@ -112,7 +113,7 @@ export default {
   }
 }
 
-.postList {
+.post-list {
   height: 70rem;
   overflow-y: auto;
 }

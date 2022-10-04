@@ -26,9 +26,10 @@
     <template v-if="post.media">
       <img
         class="post-img"
+        alt="post-img"
         v-if="/image\//.exec(post.media.type)"
         :src="post.media.url"
-        alt="post-img"
+        :hidden="!isShowMedia && $store.getters.loginedUser.role === 'admin'"
       />
       <div v-else class="video-wrapper">
         <video
@@ -36,12 +37,15 @@
           alt="post-video"
           ref="video"
           @click.stop="togglePlay"
+          :hidden="!isShowMedia && $store.getters.loginedUser.role === 'admin'"
         ></video>
+        <svg class="toggle-play" v-show="isVideoPaused">
+          <use xlink:href="./../assets/images/symbol-defs.svg#icon-play"></use>
+        </svg>
         <div class="controls">
           <div class="progress-track">
             <div class="progerss-bar" ref="progressBar"></div>
           </div>
-          <div class="play-button"></div>
         </div>
       </div>
     </template>
@@ -77,12 +81,16 @@ export default {
   name: 'PostItem',
   data() {
     return {
-      isLike: false
+      isLike: false,
+      isVideoPaused: true
     }
   },
   props: {
     post: {
       type: Object
+    },
+    isShowMedia: {
+      type: Boolean
     }
   },
   computed: {
@@ -131,13 +139,28 @@ export default {
     togglePlay() {
       const video = this.$refs.video
       const progressBar = this.$refs.progressBar
-      if (!video.paused) return this.$refs.video.pause()
+      if (!video.paused) {
+        this.$refs.video.pause()
+        this.isVideoPaused = true
+        return
+      }
       video.play()
+      this.isVideoPaused = false
       let progress
-      video.addEventListener('timeupdate', () => {
+
+      const handleTimeUpdate = () => {
         progress = video.currentTime / video.duration
         progressBar.style.width = progress * 100 + '%'
-      })
+      }
+
+      const handleEnded = () => {
+        this.isVideoPaused = true
+        video.removeEventListener('ended', handleEnded)
+        video.removeEventListener('timeupdate', handleTimeUpdate)
+      }
+
+      video.addEventListener('timeupdate', handleTimeUpdate)
+      video.addEventListener('ended', handleEnded)
     }
   },
   mounted() {
@@ -193,6 +216,10 @@ export default {
   position: relative;
   overflow: hidden;
 
+  video {
+    padding-bottom: 1.5rem;
+  }
+
   .controls {
     width: 100%;
     position: absolute;
@@ -203,15 +230,23 @@ export default {
     transition: all 0.2s ease-in;
   }
 
+  .toggle-play {
+    position: absolute;
+    fill: $color-gray-100;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
   .progress-track {
     width: 100%;
-    height: .5rem;
+    height: 0.5rem;
     background-color: $color-gray-400;
   }
 
   .progerss-bar {
     width: 0%;
-    height: .5rem;
+    height: 0.5rem;
     background-color: red;
   }
 }

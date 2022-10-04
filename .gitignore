@@ -2,6 +2,10 @@
 node_modules
 /dist
 /.vscode
+.gitignore
+babel.config.js
+jsconfig.json
+vue.config.js
 
 
 # local env files

@@ -14,9 +14,10 @@ import UserLikesPage from '../views/UserLikesPage.vue'
 import PostDetailPage from '../views/PostDetailPage.vue'
 import CommentDetailPage from '../views/CommentDetailPage.vue'
 import NotificationPage from '../views/NotificationPage.vue'
-
+// * admin pages
 import PostListPage from '../views/admin/PostListPage.vue'
 import UserListPage from '../views/admin/UserListPage.vue'
+import StatsPage from '../views/admin/StatsPage.vue'
 
 Vue.use(VueRouter)
 
@@ -75,7 +76,7 @@ const routes = [
         name: 'comment-detail',
         component: CommentDetailPage
       },
-      // admin pages
+      // * admin pages
       {
         path: 'post-list',
         name: 'post-list',
@@ -85,6 +86,11 @@ const routes = [
         path: 'user-list',
         name: 'user-list',
         component: UserListPage
+      },
+      {
+        path: 'stats',
+        name: 'stats',
+        component: StatsPage
       }
     ]
   },

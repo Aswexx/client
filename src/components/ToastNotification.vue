@@ -5,7 +5,8 @@
       :class="{
         active: isTriggered,
         success: toastType === 'success',
-        info: toastType === 'info'
+        info: toastType === 'info',
+        error: toastType === 'error'
       }"
       ref="toast"
     >
@@ -16,7 +17,7 @@
             href="./../assets/images/symbol-defs.svg#icon-check"
           ></use>
           <use
-            v-else
+            v-else-if="toastType === 'error'"
             href="./../assets/images/symbol-defs.svg#icon-cross"
           ></use>
         </svg>
@@ -58,13 +59,13 @@ export default {
     toastTitle() {
       switch (this.toastType) {
         case 'success':
-          return 'Success'
+          return '操作成功!'
         case 'info':
-          return 'Info'
+          return '通知'
         case 'error':
-          return 'Error'
+          return 'OOPS!'
         case 'warning':
-          return 'Warning'
+          return '提醒'
       }
       return ''
     }
@@ -146,6 +147,18 @@ svg {
   .toast__progress {
     &:before {
       background-color: $color-sup-blue;
+    }
+  }
+}
+
+.toast.error {
+  border-left: 0.5rem solid $color-error;
+  svg.toast__icon--main {
+    background-color: $color-error;
+  }
+  .toast__progress {
+    &:before {
+      background-color: $color-error;
     }
   }
 }

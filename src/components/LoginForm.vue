@@ -29,12 +29,12 @@
     </form>
     <button @click="login">登入</button>
     <div class="other">
-      <GoogleSignInButton></GoogleSignInButton>
+      <GoogleSignInButton v-if="currentPage === 'login'"></GoogleSignInButton>
       <router-link v-show="currentPage === 'login'" to="/register"
         >註冊</router-link
       >
 
-      <span>·</span>
+      <span v-if="currentPage === 'login'">·</span>
       <router-link v-if="currentPage === 'login'" to="/admin-login"
         >後台登入</router-link
       >
@@ -62,12 +62,27 @@ export default {
         password: this.password
       }
       try {
-        await this.$store.dispatch('userAbout/auth', loginInfo)
-        await this.$store.dispatch('userAbout/getPopUsers')
-        this.$router.push({ name: 'home' })
+        if (!loginInfo.account || 
+            !loginInfo.password ||
+            !/@/.exec(loginInfo.account)) {
+          throw new Error
+        }
+
+        if (this.currentPage === 'login') {
+          await this.$store.dispatch('userAbout/auth', loginInfo)
+          await this.$store.dispatch('userAbout/getPopUsers')
+          this.$router.push({ name: 'home' })
+          return
+        }
+
+        await this.$store.dispatch('userAbout/authAdmin', loginInfo)
+        await this.$store.dispatch('postAbout/getAdminPagePosts')
+        this.$router.push({ name: 'post-list' })
       } catch (err) {
-        // TODO: optimize notifications
-        alert(err)
+        this.$store.commit('TRIGGER_TOAST', {
+          type: 'error',
+          detail: '輸入格式不正確或資料有誤'
+        })
       }
     }
   }
@@ -75,7 +90,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .user-login {
   margin: 6rem auto auto auto;
   width: 36rem;

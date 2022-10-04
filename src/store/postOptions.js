@@ -5,8 +5,8 @@ export const postOptions = {
   actions: {
     async getHomePagePosts(context) {
       const { data } = await axios.get(
-        `${context.rootState.API_URL}/posts/relative-posts`,
-        { params: { skipPostsCount: 0 } }
+        `${context.rootState.API_URL}/posts/home-page`,
+        { params: { skipPostsCount: 0, take: 10, order: 'newest' } }
       )
 
       context.state.showingPosts = data
@@ -50,6 +50,26 @@ export const postOptions = {
       }
       await axios.put(`${context.rootState.API_URL}/posts`, postInfo)
       context.commit('UPDATE_POST_LIKE_STATE', postInfo)
+    },
+
+    // * Admin Page features
+    async getAdminPagePosts(
+      context,
+      conditions = { skipPostsCount: 0, take: 10, order: 'newest' } //* DEFAULT CONDITIONS
+    ) {
+      console.log({ conditions })
+      const { data } = await axios.get(`${context.rootState.API_URL}/posts`, {
+        params: {
+          skipPostsCount: conditions.skipPostsCount,
+          take: conditions.take,
+          order: conditions.order
+        }
+      })
+
+      context.state.postCount = data.postCount
+      delete data.postCount
+
+      context.state.showingPosts = data
     }
   },
   mutations: {
@@ -126,5 +146,5 @@ export const postOptions = {
       }
     }
   },
-  state: { userPosts: [], showingPosts: [], tempPost: {} }
+  state: { userPosts: [], showingPosts: [], tempPost: {}, postCount: 0 }
 }

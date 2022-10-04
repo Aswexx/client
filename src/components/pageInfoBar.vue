@@ -1,7 +1,7 @@
 <template>
   <div class="page-info">
     <div class="setting" v-if="isAdmin">
-      <h3>{{ pageTitle }}</h3>
+      <h3>{{ adminPageTitle }}</h3>
     </div>
 
     <div class="post-detail" v-else-if="$route.name === 'post-detail'">
@@ -70,11 +70,16 @@ export default {
     matchMobile() {
       return this.viewport <= 576
     },
-    pageTitle() {
-      if (this.currentPage === 'post-list') {
-        return '推文清單'
-      }
-      return '使用者列表'
+    adminPageTitle() {
+      // if (this.currentPage === 'post-list') {
+      //   return '推文清單'
+      // }
+      // return '使用者列表'
+      return this.currentPage === 'post-list'
+        ? '推文清單'
+        : this.currentPage === 'user-list'
+        ? '使用者列表'
+        : '統計圖表'
     }
   },
   methods: {

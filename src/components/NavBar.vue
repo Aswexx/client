@@ -6,7 +6,7 @@
       ></use>
     </svg>
 
-    <ul :class="{ 'admin-nav': isAdmin }">
+    <ul>
       <li>
         <router-link
           :to="isAdmin ? '/post-list' : '/home'"
@@ -20,6 +20,7 @@
           <span>{{ isAdmin ? '推文清單' : '首頁' }}</span>
         </router-link>
       </li>
+      
       <li>
         <router-link
           :to="isAdmin ? '/user-list' : '/profile/posts'"
@@ -33,8 +34,19 @@
           <span>{{ isAdmin ? '使用者列表' : '個人資料' }}</span>
         </router-link>
       </li>
+
       <li>
-        <router-link to="/notifications" active-class="active" class="unread">
+        <router-link v-if="isAdmin" to="/stats" active-class="active">
+          <svg>
+            <use
+              xlink:href="./../assets/images/symbol-defs.svg#icon-stats"
+            ></use></svg
+          ><span>統計</span>
+        </router-link>
+      </li>
+
+      <li>
+        <router-link v-if="!isAdmin" to="/notifications" active-class="active" class="unread">
           <span class="unread-dot">{{ unreadCounts }}</span>
           <svg>
             <use
@@ -44,6 +56,7 @@
           <span>通知</span>
         </router-link>
       </li>
+      
       <li>
         <router-link v-if="!isAdmin" to="/setting" active-class="active">
           <svg>
@@ -75,7 +88,7 @@ export default {
   data() {
     return {
       matchTablet: window.matchMedia('(max-width: 768px)').matches,
-      isAdmin: this.$store.state.userRole === 'admin'
+      isAdmin: this.$store.state.userAbout.userRole === 'admin'
     }
   },
   computed: {
@@ -89,13 +102,12 @@ export default {
     },
     logout() {
       if (this.isAdmin) {
-        // TODO 清空驗證
-        return this.$router.push({ name: 'admin-login' })
-      }
-      // this.$io(`${this.$store.state.API_URL}/notification`).disconnect()
-      // TODO:清空驗證
-      this.$router.push({ name: 'login' })
+        this.$router.push({ name: 'admin-login'})
+      } else {
+        this.$router.push({ name: 'login' })
+      } 
       window.location.reload()
+      sessionStorage.clear()
     }
   },
   mounted() {
@@ -127,11 +139,6 @@ div.nav {
 
   .brand-logo {
     align-self: flex-start;
-  }
-
-  ul.admin-nav {
-    height: 15rem;
-    margin-top: 1rem;
   }
 
   @include respond($bp-tablet) {
