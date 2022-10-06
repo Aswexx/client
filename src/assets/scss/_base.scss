@@ -85,3 +85,28 @@ video {
     left: 0;
   }
 }
+
+// * custom vue-multselect styles
+.multi-selector {
+
+  .multiselect__option--selected {
+    background-color: $color-brand;
+  }
+
+  .multiselect__option--highlight {
+    background: $color-brand;
+    color: white;
+  }
+
+  .multiselect__option--highlight:after {
+    // content: attr(data-select);
+    // background: $color-brand;
+    // color: white;
+    content: '';
+  }
+}
+
+// * data-picker
+.mx-datepicker {
+  width: 21rem !important;
+}

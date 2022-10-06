@@ -125,7 +125,6 @@ export const userOptions = {
       })
     },
     ARRANGE_USERS(state, orderRule) {
-      alert('ch state')
       switch (orderRule) {
         case 'createdAt':
           state.users.sort((a, b) => {

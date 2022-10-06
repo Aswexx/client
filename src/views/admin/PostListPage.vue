@@ -12,18 +12,24 @@
         </select>
       </div>
       <div class="toggle-show-media">
-        <label for="withMedia">只顯示推文內容</label>
-        <input type="checkbox" name="withMedia" id="withMedia"
-          @click="toggleShowMedia"
-          :checked="!isShowMedia"
-        >
+        <label>顯示圖片與短片</label>
+        <button :class="{active: isShowMedia}" @click="toggleShowMedia">顯示</button>
+        <button :class="{active: !isShowMedia}" @click="toggleShowMedia">不顯示</button>
       </div>
-      <div class="toggle-buttons">
+      <div class="toggle-posts-per-page">
         <label>每頁顯示筆數</label>
         <button :class="{active: postCountPerPage === 10}" @click="togglePostCountPerPage">10</button>
         <button :class="{active: postCountPerPage === 30}" @click="togglePostCountPerPage">30</button>
         <button :class="{active: postCountPerPage === 50}" @click="togglePostCountPerPage">50</button>
       </div>
+
+      <div>
+        <input type="checkbox" id="search" checked="checked">
+        <label for="search">以內文查詢</label>
+        <input type="text" placeholder="xxx">
+        <button v-if="!isOnSearch">查詢</button>
+      </div>
+
     </div>
     <div class="post-list">
       <PostItem 
@@ -56,7 +62,8 @@ export default {
       isShowMedia: true,
       order: 'newest',
       postCountPerPage: 10,
-      currentPageNum: 1 
+      currentPageNum: 1,
+      isOnSearch: false
     }
   },
   components: { PageInfoBar, PostItem },
@@ -107,9 +114,15 @@ export default {
 <style lang="scss" scoped>
 
   .controls {
+    grid-column: 3 / 4;
+    height: 30rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
     border-bottom: 1px solid $color-gray-600;
-    padding-bottom: 2rem;
-    background-color: $color-sup-blue;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 
     div {
       width: 60%;
@@ -122,7 +135,8 @@ export default {
     }
   }
 
-  .toggle-buttons {
+  .toggle-show-media,
+  .toggle-posts-per-page {
     button {
       background-color: $color-gray-400;
     }
@@ -136,7 +150,8 @@ export default {
   }
 
   .post-list {
-    height: 70rem;
+    border-bottom: 1px solid $color-gray-900;
+    height: 67rem;
     overflow-y: auto;
   }
 
@@ -144,7 +159,6 @@ export default {
     width: 60%;
     display: flex;
     justify-content: space-around;
-    background-color: $color-gray-400;
     span {
       width: 2.5rem;
       text-align: center;
@@ -154,7 +168,9 @@ export default {
       background-color: $color-brand;
     }
     span:hover {
-      background-color: $color-gray-600;
+      background-color: $color-brand;
     }
   }
+
+
 </style>

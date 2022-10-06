@@ -70,6 +70,27 @@ export const postOptions = {
       delete data.postCount
 
       context.state.showingPosts = data
+    },
+
+    async getAllPostsCreatedTime(context, dateRange) {
+      const { data } = await axios.get(
+        `${context.rootState.API_URL}/posts/createdTime`
+      )
+      const mappedData = data.map((e) => {
+        return new Date(e.createdAt)
+      })
+      const result = mappedData.filter(
+        (date) => date >= dateRange[0] && date <= dateRange[1]
+      )
+
+      // * index of chartData represents hours
+      const chartData = Array.from({ length: 24 }, () => 0)
+      result.forEach((date) => {
+        chartData[date.getHours()]++
+      })
+
+      console.log(chartData)
+      context.state.allPostsCreatedAt = chartData
     }
   },
   mutations: {
@@ -146,5 +167,11 @@ export const postOptions = {
       }
     }
   },
-  state: { userPosts: [], showingPosts: [], tempPost: {}, postCount: 0 }
+  state: {
+    userPosts: [],
+    showingPosts: [],
+    tempPost: {},
+    postCount: 0,
+    allPostsCreatedAt: []
+  }
 }
