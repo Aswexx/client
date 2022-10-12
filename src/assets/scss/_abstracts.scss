@@ -1,4 +1,5 @@
-$color-brand: #ff6600;
+// $color-brand: #ff6600;
+$color-brand: #2278a0;
 $color-sup-orange: #ff974A;
 $color-sup-blue: #50B5FF;
 $color-sup-green: #82C43C;
@@ -28,12 +29,13 @@ $color-gray-100: hsl(240, 23%, 100%);
 $bp-mobile: 576px;
 $bp-tablet: 768px;
 
-// datepicker
-$default-color: $color-gray-700;
-$primary-color: $color-brand;
-
 @mixin respond($breakpoint) {
   @media screen and (max-width: $breakpoint) {
     @content
   }
 };
+
+// datepicker
+$default-color: $color-gray-700;
+$primary-color: $color-brand;
+

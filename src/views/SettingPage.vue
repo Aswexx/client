@@ -5,12 +5,21 @@
     <img
       class="user-bg"
       :src="$store.getters.loginedUser.bgImageUrl"
-      @click="showFilePicker('image/png, image/jpeg')"
+      ref="backgroundImage"
+      @click="showImagePicker"
+      @error="setAltImg"
     />
-    <img class="user-avatar" :src="$store.getters.loginedUser.avatarUrl" />
-    <p>{{ bio }}</p>
+    <img
+      class="user-avatar"
+      :src="$store.getters.loginedUser.avatarUrl"
+      @click="showImagePicker"
+      @error="setAltImg"
+      ref="avatar"
+    />
+    <h5>{{ profile.name }}</h5>
+    <span>@{{ profile.alias }}</span>
+    <p>{{ profile.bio }}</p>
 
-    <!-- action="`${$store.state.API_URL}/users/${$store.state.getters.loginedUserId}`" -->
     <form
       method="post"
       enctype="multipart/form-data"
@@ -24,18 +33,17 @@
         accept="image/png, image/jpeg"
         name="backgroundImage"
         ref="backgroundInput"
+        hidden
+        @change="showSelectedFile"
       />
-      <input type="file" accept="image/png, image/jpeg" name="avatarImage" />
-
-      <!-- <InputItem :inputInfo="{
-        inputTagId:'account',
-        inputTagName:'account',
-        type:'text',
-        labelName:'帳號',
-        originData: 'holahola',
-        editable: false,
-        placeholder: ''
-      }"/> -->
+      <input
+        type="file"
+        accept="image/png, image/jpeg"
+        name="avatarImage"
+        ref="avatarInput"
+        hidden
+        @change="showSelectedFile"
+      />
 
       <InputItem
         :inputInfo="{
@@ -43,7 +51,7 @@
           inputTagName: 'alias',
           type: 'text',
           labelName: '別名',
-          originData: alias,
+          originData: profile.alias,
           editable: true,
           placeholder: ''
         }"
@@ -55,33 +63,9 @@
           inputTagName: 'bio',
           type: 'text',
           labelName: '個人簡介',
-          originData: bio,
+          originData: profile.bio,
           editable: true,
           placeholder: ''
-        }"
-      />
-
-      <InputItem
-        :inputInfo="{
-          inputTagId: 'password',
-          inputTagName: 'password',
-          type: 'password',
-          labelName: '密碼',
-          originData: '',
-          editable: true,
-          placeholder: '請設定密碼'
-        }"
-      />
-
-      <InputItem
-        :inputInfo="{
-          inputTagId: 'checkPassword',
-          inputTagName: 'checkPassword',
-          type: 'password',
-          labelName: '密碼再確認',
-          originData: '',
-          editable: true,
-          placeholder: '請再次設定密碼'
         }"
       />
 
@@ -103,44 +87,42 @@ export default {
   data() {
     return {
       isPasswordSame: true,
-      allowedExtensions: /(\.jpeg|\.png)$/i,
-      alias: this.$store.getters.loginedUser.alias,
-      bio: this.$store.getters.loginedUser.bio
+      allowedExtensions: /(\.jpeg|\.png)$/i
+    }
+  },
+  computed: {
+    profile() {
+      return this.$store.getters.loginedUser
     }
   },
   components: { PageInfoBar, InputItem },
   methods: {
-    saveSetting(event) {
-      // ! 先確認密碼一致
-      // ! 補提交密碼變更
-      console.log(event.target)
-      const form = event.target
-      const formData = new FormData(form)
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:${value}`)
-      }
-      if (formData.get('password') !== formData.get('checkPassword')) {
-        console.log(formData.get('password'))
-        return alert('請再次確認密碼!')
+    showImagePicker(event) {
+      if (event.target.className === 'user-bg')
+        return this.$refs.backgroundInput.click()
+      this.$refs.avatarInput.click()
+    },
+    setAltImg(event){
+      if (event.target.className === 'user-bg') {
+        event.target.src = require('@/assets/images/default-profile-bg.jpg')
+        return
       }
 
-      form.submit()
+      event.target.src = require('@/assets/images/default_avatar1.png')
     },
-    showFilePicker() {
-      alert('hi')
-      this.$refs.backgroundInput.click()
+    showSelectedFile(event) {
+      const fileList = event.target.files
+      const fileURL = URL.createObjectURL(fileList[0])
+      if (event.target.name === 'backgroundImage')
+        return (this.$refs.backgroundImage.src = fileURL)
+      this.$refs.avatar.src = fileURL
     },
     validateThenSubmit() {
       alert('start validation')
       const form = this.$refs.settingForm
       const formData = new FormData(form)
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:${value}`)
-      }
 
       this.$store.dispatch('userAbout/updateProfile', formData)
-
-      // this.$refs.settingForm.submit()
     }
   }
 }
@@ -149,6 +131,10 @@ export default {
 <style lang="scss" scoped>
 .input-groups {
   margin-top: 1.5rem;
+}
+
+img {
+  cursor: pointer;
 }
 
 .user-bg {

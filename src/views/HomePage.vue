@@ -46,6 +46,10 @@ export default {
   },
   computed: {
     showingPosts() {
+      // const showingPosts = this.$store.state.postAbout.showingPosts
+      // delete showingPosts.postCount
+
+      // return showingPosts
       return this.$store.state.postAbout.showingPosts
     }
   },
@@ -67,16 +71,19 @@ export default {
         this.showLoader = true
 
         // * get more posts base on current posts
-        const newPosts = await axios.get(
+        const { data } = await axios.get(
           `${this.$store.state.API_URL}/posts/home-page`,
           {
-            params: { skipPostsCount: this.postCount }
+            params: { skipPostsCount: this.postCount, take: 10 }
           }
         )
 
+        // * modify data structure recieved from backend
+        delete data.postCount
+
         setTimeout(() => {
           this.showLoader = false
-          this.$store.state.postAbout.showingPosts.push(...newPosts.data)
+          this.$store.state.postAbout.showingPosts.push(...Object.values(data))
         }, 2000)
       }
     }
@@ -114,7 +121,7 @@ export default {
 }
 
 .post-list {
-  height: 70rem;
+  height: 73vh;
   overflow-y: auto;
 }
 

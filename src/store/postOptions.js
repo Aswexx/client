@@ -9,7 +9,9 @@ export const postOptions = {
         { params: { skipPostsCount: 0, take: 10, order: 'newest' } }
       )
 
-      context.state.showingPosts = data
+      // * modify data structure recieved from backend
+      delete data.postCount
+      context.state.showingPosts = Object.values(data)
     },
     async getUserPosts(context, userId) {
       try {
@@ -33,6 +35,8 @@ export const postOptions = {
         post
       )
 
+      data.author.avatarUrl = context.rootState.userAbout.loginedUserData.avatarUrl
+      
       context.commit('SAVE_NEW_POST', data)
       if (!context.rootState.isModalOpened) return
       context.commit('TOGGLE_MODAL', null, { root: true })
@@ -57,19 +61,32 @@ export const postOptions = {
       context,
       conditions = { skipPostsCount: 0, take: 10, order: 'newest' } //* DEFAULT CONDITIONS
     ) {
-      console.log({ conditions })
       const { data } = await axios.get(`${context.rootState.API_URL}/posts`, {
         params: {
           skipPostsCount: conditions.skipPostsCount,
           take: conditions.take,
-          order: conditions.order
+          order: conditions.order,
+          keyword: conditions.keyword
         }
       })
 
       context.state.postCount = data.postCount
+      context.state.showingPosts = data
       delete data.postCount
 
-      context.state.showingPosts = data
+      if (!conditions.keyword) return
+
+      const searchedPosts = data
+      const parsedData = Object.values(
+        JSON.parse(JSON.stringify(searchedPosts))
+      )
+
+      const showingSearchedPosts = parsedData.slice(
+        conditions.skipPostsCount,
+        conditions.take
+      )
+
+      context.commit('SHOW_SEARCHED_POSTS', showingSearchedPosts)
     },
 
     async getAllPostsCreatedTime(context, dateRange) {
@@ -97,9 +114,43 @@ export const postOptions = {
     SAVE_USER_POSTS(state, posts) {
       state.userPosts = [...posts]
     },
+    CONVERT_AVATAR_URL(state, avatarUrl) {
+      console.log(avatarUrl)
+      // const avatarUrl = 22222222222222222
+      state.userPosts.forEach((post) => {
+        post.avatarUrl = avatarUrl
+      })
+    },
     SAVE_NEW_POST(state, post) {
       state.userPosts.unshift(post)
       state.showingPosts.unshift(post)
+    },
+    // ADD_MORE_HOME_PAGE_POSTS(state, posts) {
+    //   console.log('🧨🧨', Object.values(posts))
+    //   state.showingPosts.push(...Object.values(posts))
+    // },
+    SHOW_SEARCHED_POSTS(state, data) {
+      state.showingSearchedPosts = data
+    },
+    SORT_SHOWING_POSTS(state, orderRule) {
+      const parsedPosts = Object.values(
+        JSON.parse(JSON.stringify(state.showingPosts))
+      )
+      switch (orderRule) {
+        case 'oldest':
+          parsedPosts.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          )
+          break
+        case 'mostComments':
+          parsedPosts.sort((a, b) => b.comments.length - a.comments.length)
+          break
+        case 'mostLikes':
+          parsedPosts.sort((a, b) => b.liked.length - a.liked.length)
+          break
+      }
+
+      state.showingPosts = parsedPosts
     },
     REMOVE_POST(state, postId) {
       const postToRemove = state.showingPosts.find((post) => post.id === postId)
@@ -170,6 +221,7 @@ export const postOptions = {
   state: {
     userPosts: [],
     showingPosts: [],
+    showingSearchedPosts: [],
     tempPost: {},
     postCount: 0,
     allPostsCreatedAt: []

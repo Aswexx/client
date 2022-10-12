@@ -3,7 +3,7 @@
     @click="toUserProfile(user.id)"
   >
     <div class="img-wrapper" ref="bgImgage">
-      <img :src="user.avatarUrl" alt="bg">
+      <img :src="user.avatarUrl" alt="avatar">
     </div>
 
     <div class="info-wrapper">
@@ -31,6 +31,11 @@
 
 <script>
 export default {
+  data(){
+    return {
+      defaultImgURL: `this.src=require('../assets/images/default_avatar1.png')`
+    }
+  },
   props: {
     user: {
       type: Object
@@ -49,11 +54,12 @@ export default {
         name: 'posts',
         params: { userId }
       })
-    }
+    },
   },
   mounted(){
     const imageWrapper = this.$refs.bgImgage
     imageWrapper.style.backgroundImage = `url(${this.user.bgImageUrl})`
+
   }
 }
 </script>
@@ -64,6 +70,7 @@ export default {
   width: 22rem;
   height: 30rem;
   border-radius: 15px;
+  cursor: pointer;
 
   background-color: $color-gray-200;
 }

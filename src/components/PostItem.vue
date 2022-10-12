@@ -105,7 +105,7 @@ export default {
         return this.post.author.id === this.$store.getters.loginedUserId
       }
       return ''
-    }
+    },
   },
   methods: {
     showReplyModal(post) {

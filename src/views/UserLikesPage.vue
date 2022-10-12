@@ -1,12 +1,35 @@
 <template>
-	<div>
-		<PostItem/>
-	</div>
+  <div class="post-list">
+    <PostItem v-for="post in likePosts" :key="post.id" :post="post"> </PostItem>
+  </div>
 </template>
 
 <script>
 import PostItem from '../components/PostItem.vue'
 export default {
-	components: {PostItem}
+  name: 'UserLikesPage',
+	data(){
+		return {
+			likePosts: []
+		}
+	},
+  components: { PostItem },
+  async mounted() {
+    const userId =
+      this.$store.state.userAbout.otherUserData.id ||
+      this.$store.getters.loginedUserId
+    if (userId) {
+      const { data } = await this.$axios.get(
+        `${this.$store.state.API_URL}/posts/likes/${userId}`
+      )
+      this.likePosts = data.map(obj => obj.post)
+      return
+    }
+    const { data } = await this.$axios.get(
+      `${this.$store.state.API_URL}/posts/likes/${userId}`
+    )
+
+    this.likePosts = data.map(obj => obj.post)
+  }
 }
 </script>

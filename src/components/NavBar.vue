@@ -1,10 +1,6 @@
 <template>
   <div class="nav">
-    <svg class="brand-logo">
-      <use
-        xlink:href="./../assets/images/symbol-defs.svg#icon-brand-logo"
-      ></use>
-    </svg>
+    <img class="brand-logo" src="./../assets/images/logo.svg">
 
     <ul>
       <li>
@@ -35,8 +31,8 @@
         </router-link>
       </li>
 
-      <li>
-        <router-link v-if="isAdmin" to="/stats" active-class="active">
+      <li v-if="isAdmin">
+        <router-link to="/stats" active-class="active">
           <svg>
             <use
               xlink:href="./../assets/images/symbol-defs.svg#icon-stats"
@@ -45,8 +41,8 @@
         </router-link>
       </li>
 
-      <li>
-        <router-link v-if="!isAdmin" to="/notifications" active-class="active" class="unread">
+      <li v-if="!isAdmin">
+        <router-link to="/notifications" active-class="active" class="unread">
           <span class="unread-dot">{{ unreadCounts }}</span>
           <svg>
             <use
@@ -57,8 +53,8 @@
         </router-link>
       </li>
       
-      <li>
-        <router-link v-if="!isAdmin" to="/setting" active-class="active">
+      <li v-if="!isAdmin">
+        <router-link to="/setting" active-class="active">
           <svg>
             <use
               xlink:href="./../assets/images/symbol-defs.svg#icon-setting"
@@ -66,6 +62,7 @@
           ><span>設定</span>
         </router-link>
       </li>
+
       <button v-if="!isAdmin" @click="post">
         <span>推文</span>
         <svg class="post-icon" v-if="matchTablet">
@@ -100,12 +97,13 @@ export default {
     post() {
       this.$store.commit('TOGGLE_MODAL')
     },
-    logout() {
+    async logout() {
+      await this.$axios.get(`${this.$store.state.API_URL}/users/logout`)
       if (this.isAdmin) {
         this.$router.push({ name: 'admin-login'})
       } else {
         this.$router.push({ name: 'login' })
-      } 
+      }
       window.location.reload()
       sessionStorage.clear()
     }
@@ -129,8 +127,6 @@ export default {
 }
 
 div.nav {
-  position: sticky;
-  top: 0;
   height: 98vh;
 
   display: flex;
@@ -138,7 +134,8 @@ div.nav {
   align-items: center;
 
   .brand-logo {
-    align-self: flex-start;
+    width: 8rem;
+    height: 8rem;
   }
 
   @include respond($bp-tablet) {
@@ -158,6 +155,7 @@ div.nav {
     background-color: blue;
 
     position: fixed;
+    z-index: 999;
     width: 100%;
     bottom: 0;
   }
@@ -167,7 +165,7 @@ ul {
   height: 24.4rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   @include respond($bp-tablet) {
     align-items: center;
   }

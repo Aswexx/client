@@ -14,6 +14,8 @@ import { zhTW } from 'date-fns/locale'
 
 Vue.config.productionTip = false
 axios.defaults.withCredentials = true
+Vue.prototype.$axios = axios
+
 Vue.prototype.$io = io
 Vue.prototype.$toNow = formatDistanceToNow
 Vue.prototype.$parseISO = parseISO

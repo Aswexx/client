@@ -11,7 +11,7 @@ export default {
   methods: {
     async handleToken(googleResponse) {
       await this.$store.dispatch('userAbout/googleOauth', googleResponse.credential)
-      await this.$store.dispatch('userAbout/getPopUsers')
+      await this.$store.dispatch('userAbout/getUsers')
       await this.$store.dispatch('postAbout/getHomePagePosts')
 
       this.$router.push({ name: 'home' })

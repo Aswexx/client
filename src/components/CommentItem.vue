@@ -1,6 +1,6 @@
 <template>
   <div class="comment" @click="toCommentDetail(comment, attachComments)">
-    <img class="comment__avatar" :src="comment.author.avatar.url" />
+    <img class="comment__avatar" :src="comment.author.avatarUrl" />
 
     <div class="comment__contents">
       <span class="comment__title">
@@ -9,9 +9,13 @@
       >
       <p>
         回覆
-        <button @click.stop="toProfilePage()">
-          <!-- @{{ postInfo.author.alias }} -->
-          @someOne
+        <!-- <button @click.stop="toProfilePage(comment.onPost.author.id)">
+          @{{ comment.onPost.author.alias }}
+        </button> -->
+        <button
+          @click.stop="toPostDetail(comment.onPost)"
+        >
+          @{{ comment.onPost.author.alias }}
         </button>
       </p>
       <div>{{ comment.contents }}</div>
@@ -132,10 +136,19 @@ export default {
           this.$emit('setAsTopicComment', comment, attachComments)
         })
     },
-    toProfilePage() {
+    async toProfilePage(userId) {
+      alert(userId)
+      await this.$store.dispatch('userAbout/getUser', userId)
+      await this.$store.dispatch('postAbout/getUserPosts', userId)
       this.$router.push({
         name: 'posts',
-        params: { userId: this.postInfo.author.id }
+        params: { userId }
+      })
+    },
+    async toPostDetail(post){
+      this.$router.push({
+        name: 'post-detail',
+        params: { post }
       })
     }
   },

@@ -95,13 +95,13 @@ export default {
     toggleVisible() {
       this.visible = !this.visible
     },
-    validateAndSubmit() {
+    async validateAndSubmit() {
       const hasSpace = / /
       const allowedEmailFormat =
         /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.com/
-      const form = new FormData(this.$refs.register)
+      const formData = new FormData(this.$refs.register)
 
-      if (!allowedEmailFormat.test(form.get('email'))) {
+      if (!allowedEmailFormat.test(formData.get('email'))) {
         this.$refs.emailInput.select()
         return this.$store.commit('TRIGGER_TOAST', {
           type: 'info',
@@ -109,7 +109,7 @@ export default {
         })
       }
 
-      for (const value of form.values()) {
+      for (const value of formData.values()) {
         if (hasSpace.test(value) || !value.length) {
           return this.$store.commit('TRIGGER_TOAST', {
             type: 'info',
@@ -118,22 +118,36 @@ export default {
         }
       }
 
-      if (form.get('password') !== form.get('passwordCheck')) {
+      if (formData.get('password') !== formData.get('passwordCheck')) {
         return this.$store.commit('TRIGGER_TOAST', {
           type: 'info',
           detail: '密碼不一致，請重新確認'
         })
       }
 
-      this.$refs.register.submit()
-      // TODO: make sure get home page data before direct to home
+      try {
+        await this.$axios.post(`${this.$store.state.API_URL}/users`, formData)
+      } catch (err) {
+        return this.$store.commit('TRIGGER_TOAST', {
+          type: 'info',
+          detail: err.response.data
+        })
+      }
+
+      // * direct to home page after register successfully
+      const loginInfo = {
+        account: formData.get('email'),
+        password: formData.get('password')
+      }
+      await this.$store.dispatch('userAbout/auth', loginInfo)
+      await this.$store.dispatch('userAbout/getUsers')
+      this.$router.push({ name: 'home' })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
 .register {
   margin: 6rem auto auto auto;
   width: 36rem;

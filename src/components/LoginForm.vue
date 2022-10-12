@@ -1,11 +1,7 @@
 <template>
   <div class="user-login">
-    <svg class="brand-logo">
-      <use
-        xlink:href="./../assets/images/symbol-defs.svg#icon-brand-logo"
-      ></use>
-    </svg>
-    <h3 v-if="currentPage === 'login'">登入 Alphitter</h3>
+    <img class="brand-logo" src="./../assets/images/logo.svg">
+    <h3 v-if="currentPage === 'login'">登入 Posquare</h3>
 
     <h3 v-else-if="currentPage === 'admin-login'">後台登入</h3>
 
@@ -15,7 +11,7 @@
         id="account"
         name="account"
         type="email"
-        placeholder="請輸入登入Email"
+        placeholder="請輸入Email"
         v-model="account"
       />
       <label for="password">密碼</label>
@@ -70,7 +66,8 @@ export default {
 
         if (this.currentPage === 'login') {
           await this.$store.dispatch('userAbout/auth', loginInfo)
-          await this.$store.dispatch('userAbout/getPopUsers')
+          // await this.$store.dispatch('userAbout/getPopUsers')
+          await this.$store.dispatch('userAbout/getUsers')
           this.$router.push({ name: 'home' })
           return
         }
@@ -90,6 +87,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.brand-logo {
+  width: 10rem;
+  height: 7.5rem;
+}
+
+
 .user-login {
   margin: 6rem auto auto auto;
   width: 36rem;
@@ -157,4 +160,5 @@ button {
 button:active {
   color: blue;
 }
+
 </style>

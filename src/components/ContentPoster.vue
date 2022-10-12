@@ -4,6 +4,7 @@
       alt="avatar"
       class="avatar"
       :src="$store.getters.loginedUser.avatarUrl"
+      @error="setAltImg"
     />
     <!-- :src="$store.state.userAbout.loginedUserData.avatar.url" -->
     <EmojiInput ref="emojiInput" />
@@ -99,6 +100,9 @@ export default {
     },
     showFilePicker(fileType) {
       this.$refs.emojiInput.showFilePicker(fileType)
+    },
+    setAltImg(event) {
+      event.target.src = require('@/assets/images/default_avatar1.png')
     }
   }
 }

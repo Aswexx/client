@@ -38,17 +38,18 @@ export const userOptions = {
 
     async getUsers(context) {
       const { data } = await axios.get(`${context.rootState.API_URL}/users`)
+      // console.log('🧨🧨🧨🧨' ,data)
 
-      data.sort((a, b) => {
-        return new Date(b.createdAt) - new Date(a.createdAt)
-      })
+      // data.sort((a, b) => {
+      //   return new Date(b.createdAt) - new Date(a.createdAt)
+      // })
 
       context.state.users = data
     },
 
     async getPopUsers(context) {
       const popUsers = await axios.get(
-        `${context.rootState.API_URL}/users/popular/${context.state.loginedUserData.id}`
+        `${context.rootState.API_URL}/users/popular/${context.state.loginedUserData.id}/0`
       )
 
       context.state.popUsers = popUsers.data
@@ -71,13 +72,14 @@ export const userOptions = {
 
     async updateProfile(context, newInfo) {
       try {
-        const result = await axios.patch(
+        const { data } = await axios.patch(
           `${context.rootState.API_URL}/users/${context.rootGetters.loginedUserId}`,
           newInfo
         )
-        if (!result.data) {
+        if (!data) {
           throw new Error('欄位不符')
         }
+        context.commit('SAVE_USER_DATA', data)
       } catch (err) {
         console.log(err.message)
       }
@@ -108,7 +110,10 @@ export const userOptions = {
 
   mutations: {
     SAVE_USER_DATA(state, userInfo) {
-      if (Object.hasOwn(state.loginedUserData, 'id')) {
+      if (
+        Object.hasOwn(state.loginedUserData, 'id') &&
+        userInfo.id !== state.loginedUserData.id
+      ) {
         state.otherUserData = userInfo
         return
       }
@@ -119,8 +124,24 @@ export const userOptions = {
       state.popUsers.forEach((popUser) => {
         if (popUser.id === followship.followedId) {
           popUser.followed.unshift(followship)
-          state.otherUserData.followed.unshift(followship)
+          if (state.otherUserData.followed) {
+            state.otherUserData.followed.unshift(followship)
+          }
           return
+        }
+      })
+
+      state.loginedUserData.follow.unshift(followship)
+    },
+    REMOVE_FOLLOWSHIP(state, followship) {
+      state.popUsers.forEach((popUser) => {
+        if (popUser.id === followship.followedId) {
+          const followShipIndex = popUser.followed.indexOf(followship)
+          popUser.followed.splice(followShipIndex, 1)
+          if (state.otherUserData.followed) {
+            state.otherUserData.followed.splice(followShipIndex, 1)
+          }
+          state.loginedUserData.follow.splice(followShipIndex, 1)
         }
       })
     },
@@ -161,15 +182,6 @@ export const userOptions = {
           })
           break
       }
-    },
-    REMOVE_FOLLOWSHIP(state, followship) {
-      state.popUsers.forEach((popUser) => {
-        if (popUser.id === followship.followedId) {
-          const followShipIndex = popUser.followed.indexOf(followship)
-          popUser.followed.splice(followShipIndex, 1)
-          state.otherUserData.followed.splice(followShipIndex, 1)
-        }
-      })
     }
   },
   state: {

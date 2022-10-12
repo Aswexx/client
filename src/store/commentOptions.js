@@ -5,6 +5,9 @@ export const commentOptions = {
   getters: {
     loginedUserId(state, getters, rootState, rootGetters) {
       return rootGetters.loginedUserId
+    },
+    loginedUserAvatarUrl(state, getters, rootState, rootGetters) {
+      return rootGetters.loginedUser.avatarUrl
     }
   },
   actions: {
@@ -13,6 +16,10 @@ export const commentOptions = {
         `${context.rootState.API_URL}/comments`,
         comment
       )
+
+      result.data.author.avatarUrl =
+        this.getters.loginedUser.avatarUrl
+
       context.rootState.isModalOpened = false
       if (result.data.postId) {
         context.commit('postAbout/ADD_COMMENT_ON_POST', result.data, {

@@ -1,6 +1,6 @@
 <template>
   <div class="post-list-page">
-    <PageInfoBar/>
+    <PageInfoBar />
     <div class="controls">
       <div class="order-methods">
         <label for="order">排序方式</label>
@@ -11,43 +11,72 @@
           <option value="mostLikes">被喜歡數最多到最少</option>
         </select>
       </div>
-      <div class="toggle-show-media">
-        <label>顯示圖片與短片</label>
-        <button :class="{active: isShowMedia}" @click="toggleShowMedia">顯示</button>
-        <button :class="{active: !isShowMedia}" @click="toggleShowMedia">不顯示</button>
-      </div>
       <div class="toggle-posts-per-page">
         <label>每頁顯示筆數</label>
-        <button :class="{active: postCountPerPage === 10}" @click="togglePostCountPerPage">10</button>
-        <button :class="{active: postCountPerPage === 30}" @click="togglePostCountPerPage">30</button>
-        <button :class="{active: postCountPerPage === 50}" @click="togglePostCountPerPage">50</button>
+        <button
+          :class="{ active: postCountPerPage === 10 }"
+          @click="togglePostCountPerPage"
+        >
+          10
+        </button>
+        <button
+          :class="{ active: postCountPerPage === 30 }"
+          @click="togglePostCountPerPage"
+        >
+          30
+        </button>
+        <button
+          :class="{ active: postCountPerPage === 50 }"
+          @click="togglePostCountPerPage"
+        >
+          50
+        </button>
       </div>
 
-      <div>
-        <input type="checkbox" id="search" checked="checked">
-        <label for="search">以內文查詢</label>
-        <input type="text" placeholder="xxx">
-        <button v-if="!isOnSearch">查詢</button>
+      <div class="toggle-show-media">
+        <label>顯示圖片與短片</label>
+        <label class="switch">
+          <input type="checkbox" v-model="isShowMedia" />
+          <span class="slider"></span>
+        </label>
       </div>
 
+      <div class="toggle-search-mode">
+        <label>以內文查詢</label>
+        <label class="switch">
+          <input type="checkbox" v-model="isOnSearch" />
+          <span class="slider"></span>
+        </label>
+        <div class="search" v-show="isOnSearch">
+          <input
+            type="text"
+            v-model="keyword"
+            @keyup.enter="searchByContents"
+          />
+          <button @click="searchByContents">查詢</button>
+        </div>
+      </div>
     </div>
+
     <div class="post-list">
-      <PostItem 
-        v-for="post in posts" 
-        :key="post.id" 
-        :post="post" 
-        :isShowMedia="isShowMedia">
+      <PostItem
+        v-for="post in posts"
+        :key="post.id"
+        :post="post"
+        :isShowMedia="isShowMedia"
+      >
       </PostItem>
     </div>
 
     <div class="pagination">
       <span>&#60;</span>
-      <span 
-        v-for="n in totalPages" 
-        :key="n" 
+      <span
+        v-for="n in totalPages"
+        :key="n"
         @click="switchPagination(n)"
         :class="{ active: currentPageNum === n }"
-      >{{ n }}</span>
+        >{{ n }}</span
+      >
       <span>&#62;</span>
     </div>
   </div>
@@ -57,120 +86,239 @@
 import PageInfoBar from '../../components/PageInfoBar.vue'
 import PostItem from '../../components/PostItem.vue'
 export default {
+  name: 'PostListPage',
   data() {
     return {
-      isShowMedia: true,
+      isShowMedia: false,
       order: 'newest',
       postCountPerPage: 10,
       currentPageNum: 1,
-      isOnSearch: false
+      isOnSearch: false,
+      keyword: '',
+      searchedPostsCurrentPage: []
     }
   },
   components: { PageInfoBar, PostItem },
   computed: {
-    posts(){
-      return this.$store.getters.showingPosts
+    posts() {
+      const searchedPosts = this.$store.getters.showingSearchedPosts
+      if (this.searchedPostsCurrentPage.length) return this.searchedPostsCurrentPage
+      if (!searchedPosts.length || !this.isOnSearch) return this.$store.getters.showingPosts
+      return this.$store.getters.showingSearchedPosts
     },
-    totalPages(){
+    totalPages() {
       return Math.ceil(this.$store.getters.postCount / this.postCountPerPage)
     }
   },
   watch: {
-    // * 0 represents get posts from the first one
-    order() {
+    // * 0 represents get posts from the fiWrst one
+    order(newVal) {
+      if (this.isOnSearch) {
+        // this.showSearchedPosts(0)
+        this.$store.commit('postAbout/SORT_SHOWING_POSTS', newVal)
+        this.showSearchedPosts(0)
+        return
+      }
       this.getPosts(0)
     },
     postCountPerPage(newVal) {
+      if (this.isOnSearch) {
+        this.showSearchedPosts(0)
+        return
+      }
       this.postCountPerPage = newVal
+      this.getPosts(0)
+    },
+    isOnSearch(newVal) {
+      if (newVal) return
+      // * reset data state
+      this.searchedPostsCurrentPage = []
+      this.order = 'newest',
+      this.postCountPerPage = 10
+      this.currentPageNum = 1
       this.getPosts(0)
     }
   },
   methods: {
-    REMOVE_POST(){
+    REMOVE_POST() {
       alert('22')
     },
-    toggleShowMedia(){
+    toggleShowMedia() {
       this.isShowMedia = !this.isShowMedia
     },
-    togglePostCountPerPage(event){
+    togglePostCountPerPage(event) {
       this.postCountPerPage = Number(event.target.textContent)
     },
-    switchPagination(pageToGo){
-      alert(pageToGo)
+    switchPagination(pageToGo) {
+      if (this.currentPageNum === pageToGo) return
       this.currentPageNum = pageToGo
-      this.getPosts(((pageToGo) - 1) * this.postCountPerPage)
+      if (this.isOnSearch) {
+        const index = (pageToGo - 1) * this.postCountPerPage
+        this.showSearchedPosts(index)
+        return
+      }
+      
+      this.getPosts((pageToGo - 1) * this.postCountPerPage)
     },
-    getPosts(skipPostsCount){
+    getPosts(skipPostsCount) {
       this.$store.dispatch('postAbout/getAdminPagePosts', {
         skipPostsCount,
         take: this.postCountPerPage,
         order: this.order
       })
+    },
+    searchByContents() {
+      this.$store.dispatch('postAbout/getAdminPagePosts', {
+        skipPostsCount: 0,
+        take: this.postCountPerPage,
+        order: this.order,
+        keyword: this.keyword
+      })
+    },
+    showSearchedPosts(index){
+      const searchedPosts = this.$store.getters.showingPosts
+      const parsedPosts = Object.values(JSON.parse(JSON.stringify(searchedPosts)))
+      const posts = parsedPosts.slice(index, index + this.postCountPerPage)
+      // * check order rule if is on search mode
+
+      this.searchedPostsCurrentPage = posts
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.controls {
+  position: relative;
+  height: 15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
-  .controls {
-    grid-column: 3 / 4;
-    height: 30rem;
+  border-bottom: 1px solid $color-gray-600;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+
+  div {
+    width: 50%;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
+    align-items: center;
+  }
 
-    border-bottom: 1px solid $color-gray-600;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-
-    div {
-      width: 60%;
-      display: flex;
-      align-items: center;
-
-      label {
-        flex: 1;
-      }
-    }
+  label {
+    flex: 1;
   }
 
   .toggle-show-media,
-  .toggle-posts-per-page {
+  .toggle-search-mode {
+    label {
+      flex: unset;
+    }
+  }
+
+  .search {
+    position: absolute;
+    bottom: 1rem;
+    right: 1.5rem;
+
+    width: 15rem;
+    // display: flex;
+    // flex-direction: column;
+
     button {
-      background-color: $color-gray-400;
+      background-color: aqua;
     }
-    button.active {
-      background-color: $color-brand;
+  }
+}
+
+.toggle-posts-per-page {
+  button {
+    border-radius: unset;
+    padding: 0.5rem 1.5rem 0.5rem 1.5rem;
+    background-color: $color-gray-400;
+
+    &:first-of-type {
+      border-radius: 1.5rem 0 0 1.5rem;
+    }
+
+    &:last-of-type {
+      border-radius: 0 1.5rem 1.5rem 0;
     }
   }
 
-  .post-list-page {
-    grid-column: 2/3;
+  button.active {
+    background-color: $color-brand;
   }
+}
 
-  .post-list {
-    border-bottom: 1px solid $color-gray-900;
-    height: 67rem;
-    overflow-y: auto;
+.post-list-page {
+  grid-column: 2/3;
+}
+
+.post-list {
+  border-bottom: 1px solid $color-gray-900;
+  height: 67rem;
+  overflow-y: auto;
+}
+
+.pagination {
+  width: 60%;
+  display: flex;
+  justify-content: space-around;
+  span {
+    width: 2.5rem;
+    text-align: center;
+    cursor: pointer;
   }
-
-  .pagination {
-    width: 60%;
-    display: flex;
-    justify-content: space-around;
-    span {
-      width: 2.5rem;
-      text-align: center;
-      cursor: pointer;
-    }
-    span.active {
-      background-color: $color-brand;
-    }
-    span:hover {
-      background-color: $color-brand;
-    }
+  span.active {
+    background-color: $color-brand;
   }
+  span:hover {
+    background-color: $color-brand;
+  }
+}
 
+// * switch
+.switch {
+  position: relative;
+  width: 5rem;
+  height: 2.4rem;
 
+  input {
+    display: none;
+  }
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $color-gray-400;
+  transition: 0.4s;
+  border-radius: 2rem;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 2rem;
+  width: 2rem;
+  left: 2px;
+  top: 2px;
+  background-color: $color-gray-100;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: $color-brand;
+}
+
+input:checked + .slider:before {
+  transform: translateX(2.6rem);
+}
 </style>

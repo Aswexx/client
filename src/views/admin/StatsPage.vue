@@ -84,7 +84,7 @@ export default {
         maintainAspectRatio: true,
         title: {
           display: true,
-          text: "My Data",
+          text: "使用者數據比較",
         },
       },
 
@@ -123,12 +123,8 @@ export default {
   computed: {
     multiSelectOptions(){
       const users = this.$store.getters.users
-      if (!users.length) {
-        alert('not exist')
-        return []
-      }
       return users.map((user) => {
-        return { 
+        return {
           userName: user.name, 
           ...user._count
         }
@@ -186,6 +182,9 @@ export default {
       this.barData = { ...this.barData }
     }
   },
+  beforeCreate(){
+    this.$store.dispatch('userAbout/getUsers')
+  },
 }
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
@@ -206,11 +205,6 @@ export default {
 
   .date-picker {
     width: 20rem;
-  }
-
-  .chart-wrapper {
-    width: 800px;
-    height: 800px;
   }
 
 </style>

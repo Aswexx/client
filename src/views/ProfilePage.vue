@@ -16,23 +16,18 @@
     <div class="profile-card">
       <img alt="img" :src="showingUserData.avatarUrl" />
 
-      <div class="interact">
+      <div class="interact" :class="{'not-logined-user': !isLoginedUser}">
         <button @click="triggerChat(showingUserData.id)">
           <svg>
             <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
           </svg>
         </button>
-        <button v-show="!isLoginUser" @click="email">
-          <svg class="">
-            <use xlink:href="../assets/images/symbol-defs.svg#icon-email"></use>
-          </svg>
-        </button>
         <button
-          v-show="!isLoginUser"
-          :class="{ followed: isfollowed }"
+          v-show="!isLoginedUser"
+          :class="{ followed: isFollowed }"
           @click="toggleFollow"
         >
-          <svg v-if="!isfollowed">
+          <svg v-if="!isFollowed">
             <use xlink:href="../assets/images/symbol-defs.svg#icon-bell"></use>
           </svg>
           <svg v-else>
@@ -41,7 +36,7 @@
             ></use>
           </svg>
         </button>
-        <button :class="{ end: isLoginUser }">
+        <button v-show="isLoginedUser" @click="toSettingPage">
           編輯個人資料
         </button>
       </div>
@@ -67,29 +62,32 @@
       >
     </div>
 
-    <router-view></router-view>
-    <div class="post-list">
-      <PostItem v-for="post in userPosts" :key="post.id" :post="post">
-      </PostItem>
-    </div>
+    <router-view :userPosts="userPosts"></router-view>
   </div>
 </template>
 
 <script>
 import PageInfoBar from '../components/PageInfoBar.vue'
-import PostItem from '../components/PostItem.vue'
+// import PostItem from '../components/PostItem.vue'
 import VueLoadImage from 'vue-load-image'
 import LoadSpinner from '../components/LoadSpinner.vue'
 
 export default {
-  data() {
-    return {
-      isLoginUser: false,
-      isfollowed: true
-    }
-  },
-  components: { PageInfoBar, PostItem, VueLoadImage, LoadSpinner },
+  name: 'ProfilePage',
+  components: { PageInfoBar, VueLoadImage, LoadSpinner },
   computed: {
+    isFollowed(){
+      if (!Object.hasOwn(this.$store.state.userAbout.otherUserData, 'id')) return undefined
+      const loginedUserId = this.$store.state.userAbout.loginedUserData.id
+      const followers = this.$store.state.userAbout.otherUserData.followed
+        // * convert array of observer to array of object
+      const parsedFollowers = JSON.parse(JSON.stringify(followers))
+
+      return parsedFollowers.find(follower => follower.followerId === loginedUserId) !== undefined
+    },
+    isLoginedUser(){
+      return this.showingUserData.id === this.$store.getters.loginedUserId
+    },
     showingUserData() {
       if (!this.$store.state.userAbout.otherUserData.id) {
         return this.$store.state.userAbout.loginedUserData
@@ -105,10 +103,6 @@ export default {
     toggleFollow() {
       this.isfollowed = !this.isfollowed
     },
-    email() {
-      window.location.href =
-        'mailto:a284ru8ccc@gmail.com?subject=你好啊&body=yoyoyo%0Ahey~~&cc=anita888@gmail.com'
-    },
     triggerChat(targetUserId) {
       this.$store.dispatch('sendChatNotification', targetUserId)
       // * use logined user id as roomId to specify the chat room allow target user to join
@@ -116,17 +110,28 @@ export default {
         'TOGGLE_CHAT',
         this.$store.getters.loginedUserId
       )
+    },
+    toSettingPage(){
+      this.$router.push({name: 'setting'})
     }
   },
   async created() {
     // * no route params means user try to see own profile
-    const userId =
-      this.$route.params.userId || 
-      // * load session data if unload on profile page
-      JSON.parse(sessionStorage.getItem('storeData')).postAbout.userPosts[0].author.id ||
-      this.$store.getters.loginedUserId
+    let userId
+    try {
+      userId =
+        this.$route.params.userId ||
+        // * load session data if unload on profile page
+        JSON.parse(sessionStorage.getItem('storeData')).postAbout.userPosts[0].author.id ||
+        this.$store.getters.loginedUserId
+    } catch {
+      userId = this.$store.getters.loginedUserId
+    }
+    
     await this.$store.dispatch('userAbout/getUser', userId)
     await this.$store.dispatch('postAbout/getUserPosts', userId)
+  },
+  mounted(){
   },
   destroyed() {
     this.$store.state.userAbout.otherUserData = {}
@@ -135,7 +140,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 
 .post-list {
   overflow-y: scroll;
@@ -169,8 +173,10 @@ export default {
 }
 
 .interact {
-  width: 50%;
-  border: 1px solid blue;
+  width: 30%;
+  &.not-logined-user {
+    width: 25%;
+  }
   position: absolute;
   top: 0;
   right: 1.2rem;
@@ -198,9 +204,6 @@ export default {
       }
     }
 
-    &.end {
-      margin-left: auto;
-    }
     &.followed {
       background-color: $color-brand;
       svg {
@@ -220,13 +223,38 @@ export default {
   margin-top: -7.6rem;
   margin-bottom: 2rem;
   height: 10rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 60% 40%;
+  overflow-y: hidden;
+
+  &:hover {
+    overflow-y: unset;
+    p {
+      display: block;
+      overflow: unset;
+      box-shadow: 1rem 1rem 2rem 0 #2278A0;
+      background-color: $color-gray-100;
+    }
+  }
   span {
     color: $color-gray-400;
   }
+  p {
+    grid-column: 1 / 3;
+    grid-row: 3 / 4;
+
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+
   .follows {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    justify-self: end;
     span {
       display: inline-block;
       margin-right: 2rem;

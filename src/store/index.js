@@ -11,6 +11,9 @@ const getters = {
   showingPosts(state) {
     return state.postAbout.showingPosts
   },
+  showingSearchedPosts(state) {
+    return state.postAbout.showingSearchedPosts
+  },
   postCount(state) {
     return state.postAbout.postCount
   },

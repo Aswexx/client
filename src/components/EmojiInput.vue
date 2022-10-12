@@ -2,9 +2,7 @@
   <div class="wrapper">
     <textarea
       class="regular-input"
-      :placeholder="$store.state.isModalOpened === false && $route.name === 'home' || 
-                    $store.state.isModalOpened === true && $store.state.modalType === '' ?
-                    '有什麼新鮮事?': '推你的回覆'"
+      :placeholder="placeholder"
       v-model="input"
       ref="input"
     >
@@ -67,6 +65,12 @@ export default {
       fileToUpload: '',
       fileType: '',
       allowedExtensions: /(\.mp4|\.jpeg|\.jpg|\.png|\.gif)$/i
+    }
+  },
+  computed:{
+    placeholder(){
+      if (this.$route.name === 'home') return '有什麼新鮮事?'
+      return '推你的回覆'
     }
   },
   components: { EmojiPicker },
