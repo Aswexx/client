@@ -38,11 +38,6 @@ export const userOptions = {
 
     async getUsers(context) {
       const { data } = await axios.get(`${context.rootState.API_URL}/users`)
-      // console.log('🧨🧨🧨🧨' ,data)
-
-      // data.sort((a, b) => {
-      //   return new Date(b.createdAt) - new Date(a.createdAt)
-      // })
 
       context.state.users = data
     },
@@ -86,14 +81,16 @@ export const userOptions = {
     },
 
     async addFollowship(context, userId) {
-      const followShipInfo = {
+      const followship = {
         followerId: context.state.loginedUserData.id,
         followedId: userId
       }
       const { data } = await axios.put(
         `${context.rootState.API_URL}/users/`,
-        followShipInfo
+        followship
       )
+
+      console.log('returned followship', data)
 
       context.commit('ADD_FOLLOWSHIP', data)
     },
@@ -119,31 +116,6 @@ export const userOptions = {
       }
       state.loginedUserData = userInfo
       state.userRole = userInfo.role
-    },
-    ADD_FOLLOWSHIP(state, followship) {
-      state.popUsers.forEach((popUser) => {
-        if (popUser.id === followship.followedId) {
-          popUser.followed.unshift(followship)
-          if (state.otherUserData.followed) {
-            state.otherUserData.followed.unshift(followship)
-          }
-          return
-        }
-      })
-
-      state.loginedUserData.follow.unshift(followship)
-    },
-    REMOVE_FOLLOWSHIP(state, followship) {
-      state.popUsers.forEach((popUser) => {
-        if (popUser.id === followship.followedId) {
-          const followShipIndex = popUser.followed.indexOf(followship)
-          popUser.followed.splice(followShipIndex, 1)
-          if (state.otherUserData.followed) {
-            state.otherUserData.followed.splice(followShipIndex, 1)
-          }
-          state.loginedUserData.follow.splice(followShipIndex, 1)
-        }
-      })
     },
     ARRANGE_USERS(state, orderRule) {
       switch (orderRule) {
@@ -190,6 +162,5 @@ export const userOptions = {
     loginedUserData: {},
     otherUserData: {},
     users: [],
-    popUsers: []
   }
 }

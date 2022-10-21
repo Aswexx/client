@@ -17,6 +17,7 @@ export default {
   methods: {
     async direct(notif) {
       this.read(notif)
+      let chatSocket = this.$store.state.chatSocket
       switch (notif.notifType) {
         case 'follow':
           this.$router.push({
@@ -25,7 +26,60 @@ export default {
           })
           break
         case 'inviteChat':
-          this.$store.commit('TOGGLE_CHAT', notif.informerId)
+          // this.$store.commit('TRIGGER_CHAT', notif.informerId)
+          // * if trigger has been offline
+          // * ............
+
+          // * if trigger is online
+          if (!chatSocket) {
+            chatSocket = await this.$io(`${this.$store.state.API_URL}/chat`)
+            this.$store.commit('SET_CHAT_SOCKET', chatSocket)
+
+            chatSocket.on('checkRoomId', (roomInfo) => {
+              const { roomId, chatRecord } = roomInfo
+              this.$store.commit('SET_ROOM_ID', roomId)
+              const mappedMessages = chatRecord.map((msg) => {
+                const parsedMsg = JSON.parse(msg)
+                return {
+                  contents: parsedMsg.message,
+                  createdTime: parsedMsg.createdTime,
+                  isSenderMsg:
+                    parsedMsg.sender === this.$store.getters.loginedUserId
+                }
+              })
+              this.$store.commit('LOAD_MESSAGE', mappedMessages)
+            })
+
+            chatSocket.on('existRoomId', async (roomId) => {
+              console.log('checkRoomId', roomId)
+              const { existRoomId, chatRecord } = roomId
+              const mappedChatRecord = chatRecord.map((c) => {
+                const parsedMsg = JSON.parse(c)
+                return {
+                  contents: parsedMsg.message,
+                  createdTime: parsedMsg.createdTime,
+                  isSenderMsg:
+                    parsedMsg.sender === this.$store.getters.loginedUserId
+                }
+              })
+              await this.$store.commit('SET_ROOM_ID', existRoomId)
+              await this.$store.commit('LOAD_MESSAGE', mappedChatRecord)
+            })
+
+            // * listening the message target user sends
+            chatSocket.on('newMsg', (msg) => {
+              console.log(msg)
+              this.$store.commit('SAVE_MESSAGE', msg)
+            })
+          }
+          chatSocket.emit('joinRoom', {
+            triggerUser: notif.informerId,
+            targetUser: this.$store.getters.loginedUserId
+          })
+
+          // * confirm target then render chat window
+          this.$store.commit('JOIN_CHAT', notif.informerId)
+
           break
         case 'replyPost':
         case 'likePost': {
@@ -50,7 +104,6 @@ export default {
             'commentAbout/getAttachComments',
             notif.targetCommentId
           )
-          console.log(attachComments, comment)
 
           this.$router.push({
             name: 'comment-detail',
@@ -96,7 +149,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .notif {
   display: flex;
   justify-content: space-between;

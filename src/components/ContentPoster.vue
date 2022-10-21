@@ -6,10 +6,9 @@
       :src="$store.getters.loginedUser.avatarUrl"
       @error="setAltImg"
     />
-    <!-- :src="$store.state.userAbout.loginedUserData.avatar.url" -->
     <EmojiInput ref="emojiInput" />
     <div class="upload-wrapper">
-      <svg class="upload-img" @click="showFilePicker('image/png, image/jpeg')">
+      <svg class="upload-img" @click="showFilePicker('image/png, image/jpeg, image/gif')">
         <use xlink:href="./../assets/images/symbol-defs.svg#icon-images"></use>
       </svg>
       <svg class="upload-film" @click="showFilePicker('video/mp4,video/x-m4v')">
@@ -58,6 +57,10 @@ export default {
       emojiInput.fileToUpload = ''
       emojiInput.cancelUpload()
 
+      // * reset file input
+      // * to make sure user can upload next post with file immediately
+      this.$refs.emojiInput.$refs.fileInput.value = ''
+
       // * reply comment in comment detail page
       if (this.$route.name === 'comment-detail' && !this.source) {
         const commentId = this.commentId || this.source.id
@@ -97,6 +100,7 @@ export default {
           contentsToSubmit
         )
       }
+
     },
     showFilePicker(fileType) {
       this.$refs.emojiInput.showFilePicker(fileType)

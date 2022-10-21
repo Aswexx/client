@@ -14,6 +14,7 @@ import UserLikesPage from '../views/UserLikesPage.vue'
 import PostDetailPage from '../views/PostDetailPage.vue'
 import CommentDetailPage from '../views/CommentDetailPage.vue'
 import NotificationPage from '../views/NotificationPage.vue'
+import FollowshipPage from '../views/FollowshipPage.vue'
 // * admin pages
 import PostListPage from '../views/admin/PostListPage.vue'
 import UserListPage from '../views/admin/UserListPage.vue'
@@ -75,6 +76,11 @@ const routes = [
         path: 'comment-detail',
         name: 'comment-detail',
         component: CommentDetailPage
+      },
+      {
+        path: 'followship',
+        name: 'followship',
+        component: FollowshipPage
       },
       // * admin pages
       {

@@ -45,6 +45,7 @@
         @change="showSelectedFile"
       />
 
+
       <InputItem
         :inputInfo="{
           inputTagId: 'alias',
@@ -69,13 +70,7 @@
         }"
       />
 
-      <button
-        @click.prevent="validateThenSubmit"
-        form="setting"
-        :disabled="!isPasswordSame"
-      >
-        儲存
-      </button>
+      <button @click.prevent="validateThenSubmit" form="setting">儲存</button>
     </form>
   </div>
 </template>
@@ -84,15 +79,30 @@
 import PageInfoBar from '../components/PageInfoBar.vue'
 import InputItem from '../components/InputItem.vue'
 export default {
+  name: 'SettingPage',
   data() {
     return {
-      isPasswordSame: true,
-      allowedExtensions: /(\.jpeg|\.png)$/i
+      allowedExtensions: /(\.jpeg|\.png)$/i,
+      currentData: '',
+      bgToUpdate:'',
+      avatarToUpdate:'',
     }
   },
   computed: {
     profile() {
       return this.$store.getters.loginedUser
+    },
+    isDataChanged(){
+      const form = this.$refs.settingForm
+      const formData = new FormData(form)
+      if (
+        formData.get('alias') === this.currentData.alias &&
+        formData.get('bio') === this.currentData.bio
+      ) {
+        return false
+      }
+
+      return true
     }
   },
   components: { PageInfoBar, InputItem },
@@ -113,16 +123,35 @@ export default {
     showSelectedFile(event) {
       const fileList = event.target.files
       const fileURL = URL.createObjectURL(fileList[0])
-      if (event.target.name === 'backgroundImage')
+      if (event.target.name === 'backgroundImage'){
+        this.bgToUpdate = fileURL
         return (this.$refs.backgroundImage.src = fileURL)
+      }
+      this.avatarToUpdate = fileURL
       this.$refs.avatar.src = fileURL
     },
     validateThenSubmit() {
-      alert('start validation')
       const form = this.$refs.settingForm
       const formData = new FormData(form)
 
+      if (
+        formData.get('alias') === this.currentData.alias &&
+        formData.get('bio') === this.currentData.bio &&
+        !this.bgToUpdate &&
+        !this.avatarToUpdate
+      ) return this.$store.commit('TRIGGER_TOAST', {
+        type: 'info',
+        detail: '請更新個人資訊、頭像或背景圖再嘗試'
+      })
+
+
       this.$store.dispatch('userAbout/updateProfile', formData)
+    }
+  },
+  mounted(){
+    this.currentData = {
+      alias: this.$store.getters.loginedUser.alias,
+      bio: this.$store.getters.loginedUser.bio
     }
   }
 }

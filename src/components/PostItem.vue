@@ -218,6 +218,8 @@ export default {
 
   video {
     padding-bottom: 1.5rem;
+    aspect-ratio: 16/9;
+    object-fit: cover;
   }
 
   .controls {

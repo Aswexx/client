@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <PageInfoBar> </PageInfoBar>
+  <div class="profile-page">
+    <PageInfoBar class="page-info"> </PageInfoBar>
     <VueLoadImage>
       <img
         class="user-bg"
@@ -11,13 +11,15 @@
       <div slot="preloader" class="user-bg">
         <LoadSpinner />
       </div>
-      <div slot="error">error!!</div>
+      <div slot="error">
+        <img class="user-bg" src="@/assets/images/default-profile-bg.jpg">
+      </div>
     </VueLoadImage>
     <div class="profile-card">
-      <img alt="img" :src="showingUserData.avatarUrl" />
+      <img alt="img" :src="showingUserData.avatarUrl" @error="useFallbackImg" />
 
       <div class="interact" :class="{'not-logined-user': !isLoginedUser}">
-        <button @click="triggerChat(showingUserData.id)">
+        <button @click="triggerChat(showingUserData)">
           <svg>
             <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
           </svg>
@@ -68,7 +70,6 @@
 
 <script>
 import PageInfoBar from '../components/PageInfoBar.vue'
-// import PostItem from '../components/PostItem.vue'
 import VueLoadImage from 'vue-load-image'
 import LoadSpinner from '../components/LoadSpinner.vue'
 
@@ -103,16 +104,25 @@ export default {
     toggleFollow() {
       this.isfollowed = !this.isfollowed
     },
-    triggerChat(targetUserId) {
-      this.$store.dispatch('sendChatNotification', targetUserId)
+    triggerChat(targetUser) {
+      this.$store.dispatch('sendChatNotification', targetUser.id)
       // * use logined user id as roomId to specify the chat room allow target user to join
       this.$store.commit(
-        'TOGGLE_CHAT',
-        this.$store.getters.loginedUserId
+        'TRIGGER_CHAT',
+        { loginedUserId: this.$store.getters.loginedUserId,
+          targetUser
+        }
       )
     },
     toSettingPage(){
       this.$router.push({name: 'setting'})
+    },
+    useFallbackImg(event){
+      if (event.target.className === 'user-bg') {
+        event.target.src = require('@/assets/images/default-profile-bg.jpg')
+      } else {
+        event.target.src = require('@/assets/images/default_avatar1.png')
+      }
     }
   },
   async created() {
@@ -140,6 +150,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.profile-page {
+  @include respond($bp-tablet) {
+    margin-top: 1rem;
+    .page-info {
+      display: none;
+    }
+  }
+}
 
 .post-list {
   overflow-y: scroll;

@@ -63,12 +63,29 @@
         </router-link>
       </li>
 
+      <li v-if="!isAdmin && this.$store.state.viewport < 576">
+        <router-link to="/followship" active-class="active">
+          <svg>
+            <use
+              xlink:href="./../assets/images/symbol-defs.svg#icon-search"
+            ></use></svg
+          ><span>mmm</span>
+        </router-link>
+      </li>
+
+      <button @click="triggerChat">
+        <svg class="chat-icon">
+          <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
+        </svg>
+      </button>
+
       <button v-if="!isAdmin" @click="post">
         <span>推文</span>
         <svg class="post-icon" v-if="matchTablet">
           <use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use>
         </svg>
       </button>
+
     </ul>
 
     <div class="logout" @click="logout">
@@ -96,6 +113,13 @@ export default {
   methods: {
     post() {
       this.$store.commit('TOGGLE_MODAL')
+    },
+    triggerChat(){
+      if (!this.$store.state.isChatActivated) {
+        this.$store.commit('TRIGGER_CHAT')
+      } else {
+        this.$store.commit('MINIMIZE_CHAT_SECTION')
+      }
     },
     async logout() {
       await this.$axios.get(`${this.$store.state.API_URL}/users/logout`)
@@ -127,7 +151,7 @@ export default {
 }
 
 div.nav {
-  height: 98vh;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
@@ -207,6 +231,12 @@ svg {
   }
   &.post-icon {
     fill: $color-gray-100;
+  }
+  &.chat-icon {
+    width: 2rem;
+    height: 2rem;
+    stroke: $color-gray-100;
+    stroke-width: 1.5;
   }
 }
 

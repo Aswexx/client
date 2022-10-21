@@ -53,7 +53,7 @@ const actions = {
       notifType: 'inviteChat'
     }
     await axios.post(`${context.state.API_URL}/notifications`, notifData)
-    // context.commit('TOGGLE_CHAT', notifData.informerId)
+    // context.commit('TRIGGER_CHAT', notifData.informerId)
   },
   async getNotifications(context) {
     const userId = context.getters.loginedUserId
@@ -81,6 +81,7 @@ const mutations = {
     state.modalType = contents.modalType
   },
   TRIGGER_TOAST(state, toast) {
+    if (state.isChatActivated) return
     state.toastType = ''
     state.toastDetail = ''
     state.toastType = toast.type
@@ -92,9 +93,89 @@ const mutations = {
     }, 5300)
     console.log(window.timer)
   },
-  TOGGLE_CHAT(state, roomId) {
-    state.isChatRoomOn = !state.isChatRoomOn
+  TRIGGER_CHAT(state, info) {
+    if (!state.isChatActivated) state.isChatActivated = true
+    console.log('info:', info)
+
+    // if (typeof info === 'string') {
+
+    //   // const targetUser = state.getters.users
+    //   // console.log(targetUser)
+    //   // alert(info)
+    //   alert('idonly')
+    //   state.isChatActivated = true
+    //   state.chatRoomId = info
+    //   // state.currentChatTarget = info.targetUser
+    //   // state.chatTargetList.push(info.targetUser)
+    //   return
+    // }
+
+    // * no info means user trigger chat window via nav bar
+    if (info) {
+      const isInChatList =
+        // * shallow copy the state to get array without __observer__
+        Array.from(state.chatTargetList).includes(info.targetUser)
+      // state.chatRoomId = info.roomId
+      state.currentChatTarget = info.targetUser
+      if (isInChatList) return
+      state.chatTargetList.push(info.targetUser)
+    }
+  },
+  JOIN_CHAT(state, targetId) {
+    if (!state.isChatActivated) state.isChatActivated = true
+
+    // * confirm target then render chat window
+    const targetUser = Array.from(state.userAbout.users).find(user => user.id === targetId)
+    console.log(targetUser, targetId)
+    state.chatTargetList.push(targetUser)
+    state.currentChatTarget = targetUser
+    // state.currentChatTarget = info.triggerUser
+    // state.chatTargetList.push(info.triggerUser)
+  },
+  SAVE_MESSAGE(state, msgInfo) {
+    
+        // { isSenderMsg: false, contents: 'wow', createdTime: Date.now() },
+        // { isSenderMsg: true, contents: 'hey', createdTime: Date.now() },
+      //
+    // * load msg recieved while user havent login yet
+
+    // * convert message
+    const msgToAdd = {
+      isSenderMsg: false,
+      contents: msgInfo.message,
+      createdTime: msgInfo.createdTime
+    }
+    state.currentMsgCollection.push(msgToAdd)
+  },
+  LOAD_MESSAGE(state, messages) {
+    state.currentMsgCollection.push(...messages)
+  },
+  SET_ROOM_ID(state, roomId) {
     state.chatRoomId = roomId
+  },
+  SWITCH_CHAT_TARGET(state, target) {
+    state.currentChatTarget = target
+    
+  },
+  REMOVE_CHAT_TARGET(state, targetIndex) {
+    state.chatTargetList.splice(targetIndex, 1)
+    state.currentChatTarget = ''
+  },
+  RESET_CHAT_STATE(state) {
+    // state.chatRoomId = ''
+    state.currentMsgCollection = []
+  },
+  MINIMIZE_CHAT_SECTION(state) {
+    state.isChatActivated = false
+  },
+  SET_CHAT_SOCKET(state, chatSocket) {
+    state.chatSocket = chatSocket
+  },
+  SET_NOTIF_SOCKET(state, notifSocket) {
+    state.notifSocket = notifSocket
+  },
+  UPDATE_ONLINE_USERS(state, users) {
+    state.onlineUsers = users
   },
   ADD_NOTIFICATION(state, notification) {
     if (notification instanceof Array)
@@ -120,11 +201,17 @@ const state = {
   toastType: '',
   toastDetail: '',
 
-  isChatRoomOn: false,
+  isChatActivated: false,
   chatRoomId: '',
+  currentChatTarget: '',
+  currentMsgCollection: [],
+  chatTargetList: [],
+  chatSocket: '',
 
   sourcePostOrComment: {},
   notifications: [],
+  notifSocket: undefined,
+  onlineUsers: [],
   API_URL: 'http://localhost:4000'
 }
 

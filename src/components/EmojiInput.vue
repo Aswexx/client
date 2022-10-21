@@ -10,7 +10,7 @@
 
     <input type="file" hidden @change="readyToUpload" ref="fileInput" />
     <div class="fileToUpload-wrapper" v-show="fileURL">
-      <span @click="cancelUpload">X</span>
+      <svg @click="cancelUpload"><use href="@/assets/images/symbol-defs.svg#icon-cross"></use></svg>
       <img class="fileToUpload" v-if="fileType === 'image'" :src="fileURL" />
       <div class="video-container" v-else>
         <video @click="togglePlay" :src="fileURL"></video>
@@ -93,7 +93,12 @@ export default {
       console.log(this.fileToUpload.name)
       if (!this.allowedExtensions.exec(this.fileToUpload.name)) {
         // TODO: optimize notification
-        alert('invalid')
+        this.$store.commit('TRIGGER_TOAST', {
+          type: 'info',
+          detail: '目前支援的圖片檔案格式: jpeg、jpg、gif、png',
+        })
+        // * clear fileList via value property because files prop is read-only
+        this.$refs.fileInput.value = ''
         return
       }
 
@@ -147,6 +152,20 @@ export default {
 .wrapper {
   position: relative;
   display: inline-block;
+}
+
+.fileToUpload-wrapper {
+  position: relative;
+  svg {
+    position: absolute;
+    top: -1rem;
+    left: -1rem;
+    width: 2rem;
+    height: 2rem;
+    padding: .3rem;
+    border-radius: 50%;
+    border: 2px solid $color-brand;
+  }
 }
 
 .regular-input {

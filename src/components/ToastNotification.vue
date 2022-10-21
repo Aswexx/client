@@ -16,6 +16,11 @@
             v-if="toastType === 'success'"
             href="./../assets/images/symbol-defs.svg#icon-check"
           ></use>
+                    <use
+            v-else-if="toastType === 'info'"
+            href="./../assets/images/symbol-defs.svg#icon-info"
+          ></use>
+
           <use
             v-else-if="toastType === 'error'"
             href="./../assets/images/symbol-defs.svg#icon-cross"
@@ -32,7 +37,6 @@
         </svg>
       </div>
 
-      <div ref="progress" class="toast__progress"></div>
     </div>
   </div>
 </template>
@@ -70,14 +74,6 @@ export default {
       return ''
     }
   },
-  watch: {
-    isTriggered() {
-      this.$refs.progress.classList.add('active')
-      setTimeout(() => {
-        this.$refs.progress.classList.remove('active')
-      }, 5500)
-    }
-  }
 }
 </script>
 
@@ -102,10 +98,11 @@ svg {
 }
 
 .toast {
+  background-color: $color-gray-100;
   border-radius: 1.2rem;
   padding: 2rem 3rem 2rem 3rem;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-  border-left: 0.5rem solid $color-success;
+  border: 0.5rem solid $color-success;
   overflow: hidden;
   transform: translateY(calc(100% + 1rem));
   transition: all 0.5s ease-in;
@@ -128,38 +125,23 @@ svg {
 }
 
 .toast.success {
-  border-left: 0.5rem solid $color-success;
+  border: 0.5rem solid $color-success;
   svg.toast__icon--main {
     background-color: $color-success;
-  }
-  .toast__progress {
-    &:before {
-      background-color: $color-success;
-    }
   }
 }
 
 .toast.info {
-  border-left: 0.5rem solid $color-sup-blue;
+  border: 0.5rem solid $color-sup-blue;
   svg.toast__icon--main {
     background-color: $color-sup-blue;
-  }
-  .toast__progress {
-    &:before {
-      background-color: $color-sup-blue;
-    }
   }
 }
 
 .toast.error {
-  border-left: 0.5rem solid $color-error;
+  border: 0.5rem solid $color-error;
   svg.toast__icon--main {
     background-color: $color-error;
-  }
-  .toast__progress {
-    &:before {
-      background-color: $color-error;
-    }
   }
 }
 
@@ -184,38 +166,9 @@ svg {
   }
 }
 
-.toast__progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 0.3rem;
-  width: 100%;
-  background-color: $color-gray-100;
-
-  &:before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0%; // progerss controls
-    width: 100%;
-    height: 100%;
-    background-color: $color-success;
-  }
-}
 
 .toast.active {
   transform: translateY(0%);
 }
 
-.toast__progress.active {
-  &:before {
-    animation: progress 5s linear forwards;
-  }
-}
-
-@keyframes progress {
-  100% {
-    right: 100%;
-  }
-}
 </style>

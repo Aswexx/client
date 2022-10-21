@@ -3,13 +3,15 @@
     <NavBar />
 
     <transition name="fade" mode="out-in">
-      <router-view></router-view>
+      <router-view class="main-contents"></router-view>
     </transition>
 
     <PopUserList v-show="userRole === 'normal'" />
 
     <ActionModal />
-    <ChatRoom v-if="isChatRoomOn" />
+    <transition name="fade-scale">
+      <ChatRoom v-if="this.$store.state.isChatActivated" />
+    </transition>
   </div>
 </template>
 
@@ -27,11 +29,6 @@ export default {
     }
   },
   components: { NavBar, PopUserList, ActionModal, ChatRoom },
-  computed: {
-    isChatRoomOn() {
-      return this.$store.state.isChatRoomOn
-    }
-  }
 }
 </script>
 
@@ -58,6 +55,10 @@ export default {
   }
 }
 
+.main-contents {
+  border: 1px solid blue;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease-in-out;
@@ -72,4 +73,28 @@ export default {
 .fade-leave {
   opacity: 1;
 }
+
+
+.fade-scale-enter-active {
+  transition: all 0.2s ease-in-out;
+}
+
+.fade-scale-leave-active {
+  transition: all 0.2s ease-in-out 0.3s;
+}
+
+.fade-scale-enter,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform-origin: top left;
+  transform: scale(0);
+}
+
+.fade-scale-enter-to,
+.fade-scale-leave {
+  opacity: 1;
+  transform-origin: top left;
+  transform: scale(1);
+}
+
 </style>

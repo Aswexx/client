@@ -1,73 +1,112 @@
 <template>
   <div class="pop-user-list">
     <div class="controls">
-      <h5>活躍人物</h5>
-      <p>發文數最多</p>
-      <input type="text" v-model="aliasFilter">
+      <SearchBar class="search-bar" @typing="setKeyword"></SearchBar>
+      <div class="toggle-follow-list">
+        <button @click="showFollowingUsers" :class="{active: controlMode ==='following'}">我的關注</button>
+        <button @click="showFollowed" :class="{active: controlMode ==='followedBy'}">關注我的用戶</button>
+      </div>
     </div>
     <div class="user-card-wraper">
       <div
         class="user-card"
         @click="toUserProfile(user.id)"
-        v-for="user in users"
+        v-for="user in showingUsers"
         :key="user.id"
       >
-        <img :src="user.avatarUrl" alt="avatar" />
+        <img :src="user.avatarUrl" alt="avatar" @error="useFallbackImg" />
         <h5>{{ user.name }}</h5>
-        <button
-          :class="{ 'not-follow': !showFollowState(user) }"
-          @click.stop="toggleFollow(user)"
-        >
-          {{ showFollowState(user) ? '正在追隨' : '追隨' }}
-        </button>
+        <div class="interact">
+          <button
+            :class="{ 'not-follow': !showFollowState(user) }"
+            @click.stop="toggleFollow(user)"
+          >
+            {{ showFollowState(user) ? '已追隨' : '追隨' }}
+          </button>
+          <svg class="chat-icon" @click="triggerChat(user)">
+            <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
+          </svg>
+        </div>
         <span>@{{ user.alias }}</span>
       </div>
 
-      <button class="load-more" @click="loadMoreUsers">載入更多</button>
+      <div class="page-switcher">
+        <button v-show="showUsersFromIndex" @click="showPrevOrNextPage(-10)">上一頁</button>
+        <button v-show="!isLastPage" @click="showPrevOrNextPage(10)">下一頁</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import SearchBar from '@/components/SearchBar.vue'
 export default {
   name: 'PopUserList',
+  components: { SearchBar },
   data() {
     return {
-      users: [],
-      currentUsersCount: 10,
-      aliasFilter: ''
+      showingUsers: [],
+      showUsersFromIndex: 0,
+      isLastPage: false,
+      keyword: '',
+      filteredUsers: [],
+      controlMode: '' //* following / followedBy/ filter
     }
   },
-  computed: {
-    // users(){
-    //   const allUsers = this.$store.state.userAbout.users
-    //   allUsers.sort((a,b) => {
-    //     return b.posts.length - a.posts.length
-    //   })
-    //   return this.$store.state.userAbout.users.slice(0,10)
-    // }
-  },
   watch:{
-    aliasFilter(newVal){
-      const allUsers = this.$store.state.userAbout.users
-      const keyword = new RegExp(newVal, 'i')
-      this.users = allUsers.filter(user => keyword.exec(user.alias))
+    keyword: {
+      immediate: true,
+      handler(newVal) {
+        this.controlMode = 'filter'
+        const allUsers = this.$store.state.userAbout.users
+        const loginedUserId = this.$store.getters.loginedUserId
+        const keyword = new RegExp(newVal, 'i')
+        this.filteredUsers =
+          allUsers.filter(user => keyword.exec(user.alias) && user.id !== loginedUserId)
+        
+        this.showUsersFromIndex = 0
+        this.showPrevOrNextPage(0)
+      }
     }
   },
   methods: {
-    toggleFollow(user) {
+    setKeyword(keyword){
+      this.keyword = keyword
+    },
+    useFallbackImg(event){
+      event.target.src = require('@/assets/images/default_avatar1.png')
+    },
+    async toggleFollow(user) {
       const isFollowing = this.showFollowState(user)
       if (!isFollowing) {
-        this.$store.dispatch('userAbout/addFollowship', user.id)
+        const newFollowship = await this.$axios.post(`${this.$API_URL}/users/follow`, {
+          followerId: this.$store.getters.loginedUserId,
+          followedId: user.id
+        })
+        user.followed.unshift(newFollowship.data)
+        this.showingUsers.forEach(showingUser => {
+          if (showingUser.id === user.id) {
+            showingUser.followed = user.followed
+          }
+        })
         return
-      }
+      } else {
+        const followshipToRemove = user.followed.find(followship => {
+          return followship.followerId === this.$store.getters.loginedUserId
+        })
+        const followedIndex = user.followed.indexOf(followshipToRemove)
 
-      const followship = user.followed.find(
-        (r) => r.followerId === this.$store.getters.loginedUserId
-      )
-      return this.$store.dispatch('userAbout/removeFollowship', followship)
+        await this.$axios.delete(`${this.$API_URL}/users/follow/${followshipToRemove.id}`)
+        user.followed.splice(followedIndex, 1)
+        this.showingUsers.forEach(showingUser => {
+          if (showingUser.id === user.id) {
+            showingUser.followed = user.followed
+          }
+        })
+      }
     },
     showFollowState(user) {
+      // * return state about the followship between logined user and other user
       if (!user.followed.length) {
         return false
       }
@@ -101,26 +140,94 @@ export default {
       await this.$store.dispatch('userAbout/getUser', userId)
       await this.$store.dispatch('postAbout/getUserPosts', userId)
     },
-    loadMoreUsers() {
-      const usersToLoad = this.$store.state.userAbout.users.slice(this.currentUsersCount,this.currentUsersCount + 10)
-      this.currentUsersCount += 10
-      this.users.push(...usersToLoad)
-    }
+    showFollowingUsers(){
+      this.controlMode = 'following'
+      const allUsers = this.$store.state.userAbout.users
+      const loginedUserId = this.$store.getters.loginedUserId
+
+      this.filteredUsers = allUsers.filter(user => 
+        user.followed.find(followship => followship.followerId === loginedUserId))
+      
+      this.showUsersFromIndex = 0
+      this.showingUsers = this.filteredUsers.slice(0, 10)
+    },
+    showFollowed(){
+      this.controlMode = 'followedBy'
+      const allUsers = this.$store.state.userAbout.users
+      const loginedUserId = this.$store.getters.loginedUserId
+
+      this.filteredUsers = allUsers.filter(user => 
+        user.follow.find(followship => followship.followedId === loginedUserId))
+
+      this.showUsersFromIndex = 0
+      this.showingUsers = this.filteredUsers.slice(0, 10)
+
+    },
+    showPrevOrNextPage(numToChangeIndexFrom) {
+      const userCount = this.filteredUsers.length
+      let usersToLoad
+
+      this.showUsersFromIndex += numToChangeIndexFrom
+
+      usersToLoad = this.filteredUsers.slice(this.showUsersFromIndex,this.showUsersFromIndex + 10)
+
+      this.showingUsers = usersToLoad
+      if ((this.showUsersFromIndex + 10 ) >= userCount && (numToChangeIndexFrom >= 0)) {
+        this.isLastPage = true
+      } else {
+        this.isLastPage = false
+      }
+    },
+    async triggerChat(targetUser) {
+      this.$store.dispatch('sendChatNotification', targetUser.id)
+      this.$store.commit('RESET_CHAT_STATE')
+      // * use logined user id as roomId to specify the chat room allow target user to join
+      let chatSocket = this.$store.state.chatSocket
+      // * avoid duplicate connection and event listening
+      if (!chatSocket) {
+          chatSocket = await this.$io(`${this.$store.state.API_URL}/chat`)
+          chatSocket.on('newMsg', (msgInfo) => {
+          console.log(msgInfo)
+          this.$store.commit('SAVE_MESSAGE', msgInfo)
+        })
+
+        chatSocket.on('existRoomId', async (roomId) => {
+          console.log('checkRoomId', roomId)
+          const { existRoomId, chatRecord } = roomId
+          const mappedChatRecord = chatRecord.map(c => {
+            const parsedMsg = JSON.parse(c)
+            return {
+              contents: parsedMsg.message,
+              createdTime: parsedMsg.createdTime,
+              isSenderMsg: parsedMsg.sender === this.$store.getters.loginedUserId
+            }
+          })
+          await this.$store.commit('SET_ROOM_ID', existRoomId)
+          await this.$store.commit('LOAD_MESSAGE', mappedChatRecord)
+        })
+
+        this.$store.commit('SET_CHAT_SOCKET', chatSocket)
+      }
+
+      chatSocket.emit('startChat', {
+        triggerUser: this.$store.getters.loginedUserId,
+        targetUser: targetUser.id,
+      })
+
+      await this.$store.commit(
+        'TRIGGER_CHAT',
+        { loginedUserId: this.$store.getters.loginedUserId,
+          targetUser,
+        }
+      )
+    },
   },
-  beforeMount(){
-    const allUsers = this.$store.state.userAbout.users
-    allUsers.sort((a,b) => {
-      return b.posts.length - a.posts.length
-    })
-    this.users = this.$store.state.userAbout.users.slice(0,10)
-  }
 }
 </script>
 
 <style lang="scss" scoped>
 .pop-user-list {
   top: 0;
-  height: 98vh;
   grid-column: 3/4;
   @include respond($bp-mobile) {
     display: none;
@@ -130,13 +237,40 @@ export default {
 .controls {
   padding: 1rem 0 1rem 0;
   border-bottom: 1px solid $color-gray-600;
+
+  .toggle-follow-list {
+    display: flex;
+
+    button {
+      font-size: 1.4rem;
+      padding: .5rem 1rem .5rem 1rem;
+      background-color: $color-gray-400;
+      &.active {
+        background-color: $color-brand;
+      }
+      &:first-of-type {
+        border-radius: 3rem 0 0 3rem;
+      }
+      &:last-of-type {
+        border-radius: 0rem 3rem 3rem 0;
+      }
+    }
+  }
+
+  @include respond($bp-mobile) {
+    display: flex;
+    justify-content: space-between;
+
+    .search-bar {
+      flex: 1;
+    }
+  }
+
 }
 
 .user-card-wraper {
   display: flex;
   flex-direction: column;
-  height: 92vh;
-  overflow-y: scroll;
 
   .not-follow {
     background-color: $color-gray-100;
@@ -151,13 +285,18 @@ export default {
   }
 
   button {
-    padding: 1.2rem;
+    padding: .5rem 1rem .5rem 1rem;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-  }
 
-  .load-more {
+    svg {
+      all: none;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+  .page-switcher {
     align-self: center;
   }
 }
@@ -165,8 +304,8 @@ export default {
 .user-card {
   padding: 1rem 0;
   display: grid;
-  grid-template-columns: min-content 1fr 1fr;
-  grid-column-gap: 0.5rem;
+  grid-template-columns: min-content 1fr min-content;
+  grid-column-gap: .5rem;
 
   align-items: center;
   cursor: pointer;
@@ -174,30 +313,45 @@ export default {
   box-shadow: inset 0 0 0 0 $color-brand;
   transition: color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 
+  .interact {
+    grid-row: 1/3;
+    display: flex;
+    flex-direction: column;
+
+    .chat-icon {
+      width: 2rem;
+      height: 2rem;
+      align-self: flex-end;
+      stroke: $color-brand;
+      cursor: pointer;
+      transition: all .2s ease-in;
+
+      &:hover {
+        transform: scale(1.3);
+      }
+    }
+  }
+
+  img {
+    grid-row: 1/3;
+  }
+
+  span {
+    grid-column: 2/3;
+    grid-row: 2/3;
+  }
+
   &:hover {
     box-shadow: inset 20px 0 0 0 $color-brand;
   }
+
 }
 
-h5 {
+h5,span {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-// h4 {
-//   height: 6.1rem;
-//   border-bottom: 1px solid $color-gray-400;
-//   padding: 1.5rem 0;
-// }
 
-img,
-button {
-  grid-row: 1/3;
-}
-
-span {
-  grid-column: 2/3;
-  grid-row: 2/3;
-}
 </style>

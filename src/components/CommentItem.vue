@@ -7,7 +7,7 @@
         <b>{{ comment.author.name }}</b>
         {{ comment.author.alias }}．{{ timeRelativeToNow }}</span
       >
-      <p>
+      <p v-if="comment.onPost">
         回覆
         <!-- <button @click.stop="toProfilePage(comment.onPost.author.id)">
           @{{ comment.onPost.author.alias }}

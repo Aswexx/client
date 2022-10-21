@@ -9,6 +9,7 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import { format } from 'date-fns'
 import { parseISO } from 'date-fns/esm/fp'
 import { zhTW } from 'date-fns/locale'
+import { v4 as uuidv4 } from 'uuid'
 
 // import './registerServiceWorker'
 
@@ -21,6 +22,9 @@ Vue.prototype.$toNow = formatDistanceToNow
 Vue.prototype.$parseISO = parseISO
 Vue.prototype.$format = format
 Vue.prototype.$zhTW = zhTW
+Vue.prototype.$uuid = uuidv4
+
+Vue.prototype.$API_URL = 'http://localhost:4000'
 
 new Vue({
   router,
