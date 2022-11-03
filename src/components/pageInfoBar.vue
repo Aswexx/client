@@ -26,14 +26,9 @@
       </svg>
       <h5>{{ showingUserInfo.name }}</h5>
       <p>@ {{ showingUserInfo.alias }}</p>
-    </div>
-
-    <div
-      class="personal-mobile-view"
-      v-else-if="$route.name !== 'setting' && matchMobile"
-    >
-      <img src="../assets/images/default-avatar.jpg" alt="img" />
-      <h2>test</h2>
+      <img class="medal" src="./../assets/images/medal.svg" 
+        v-if="$store.getters.loginedUser.isSponsor"
+      >
     </div>
 
     <div class="setting" v-else-if="$route.name === 'notifications'">
@@ -42,6 +37,10 @@
 
     <div class="setting" v-else-if="$route.name === 'comment-detail'">
       <h3>評論</h3>
+    </div>
+
+    <div class="setting" v-else-if="$route.name === 'sponsor'">
+      <h3>Sponsor</h3>
     </div>
 
     <div class="setting" v-else>
@@ -71,12 +70,8 @@ export default {
       return this.viewport <= 576
     },
     adminPageTitle() {
-      // if (this.currentPage === 'post-list') {
-      //   return '推文清單'
-      // }
-      // return '使用者列表'
       return this.currentPage === 'post-list'
-        ? '推文清單'
+        ? '推文列表'
         : this.currentPage === 'user-list'
         ? '使用者列表'
         : '統計圖表'
@@ -101,6 +96,7 @@ export default {
 
 <style lang="scss" scoped>
 @import './../assets/scss/base.scss';
+
 
 div.page-info {
   border-bottom: 1px solid $color-gray-400;
@@ -128,12 +124,23 @@ svg {
 
 .personal {
   display: grid;
-  grid-template-columns: repeat(2, max-content);
+  grid-template-columns: repeat(3, max-content);
   grid-column-gap: 1.5rem;
+
+  p {
+    grid-column: 2/3;
+  }
 
   svg {
     grid-row: 1/3;
     align-self: center;
+  }
+
+  .medal {
+    width: 5rem;
+    height: 5rem;
+    grid-row: 1/3;
+    grid-column: 3/4;
   }
 }
 

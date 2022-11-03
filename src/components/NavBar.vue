@@ -1,6 +1,6 @@
 <template>
   <div class="nav">
-    <img class="brand-logo" src="./../assets/images/logo.svg">
+    <img class="brand-logo" src="./../assets/images/logo.svg" />
 
     <ul>
       <li>
@@ -13,10 +13,10 @@
               xlink:href="./../assets/images/symbol-defs.svg#icon-home"
             ></use>
           </svg>
-          <span>{{ isAdmin ? '推文清單' : '首頁' }}</span>
+          <span>{{ isAdmin ? "推文列表" : "首頁" }}</span>
         </router-link>
       </li>
-      
+
       <li>
         <router-link
           :to="isAdmin ? '/user-list' : '/profile/posts'"
@@ -27,7 +27,7 @@
               xlink:href="./../assets/images/symbol-defs.svg#icon-user"
             ></use>
           </svg>
-          <span>{{ isAdmin ? '使用者列表' : '個人資料' }}</span>
+          <span>{{ isAdmin ? "使用者列表" : "個人資料" }}</span>
         </router-link>
       </li>
 
@@ -52,7 +52,7 @@
           <span>通知</span>
         </router-link>
       </li>
-      
+
       <li v-if="!isAdmin">
         <router-link to="/setting" active-class="active">
           <svg>
@@ -73,19 +73,37 @@
         </router-link>
       </li>
 
+      <li>
+        <router-link to="/sponsor" active-class="active">
+          <!-- <img class="medal" src="./../assets/images/medal.svg"> -->
+          <svg>
+            <use
+              xlink:href="./../assets/images/symbol-defs.svg#icon-medal"
+            ></use>
+          </svg>
+          <span>會員升級</span>
+        </router-link>
+      </li>
+
       <button @click="triggerChat">
-        <svg class="chat-icon">
+        <svg
+          class="chat-icon"
+          :class="{ active: $store.state.isChatActivated }"
+        >
           <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
         </svg>
       </button>
 
       <button v-if="!isAdmin" @click="post">
         <span>推文</span>
-        <svg class="post-icon" v-if="matchTablet">
+        <svg
+          class="post-icon"
+          :class="{ active: $store.state.isModalOpened }"
+          v-if="matchTablet"
+        >
           <use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use>
         </svg>
       </button>
-
     </ul>
 
     <div class="logout" @click="logout">
@@ -101,48 +119,49 @@
 export default {
   data() {
     return {
-      matchTablet: window.matchMedia('(max-width: 768px)').matches,
-      isAdmin: this.$store.state.userAbout.userRole === 'admin'
-    }
+      matchTablet: window.matchMedia("(max-width: 768px)").matches,
+      isAdmin: this.$store.state.userAbout.userRole === "admin",
+    };
   },
   computed: {
     unreadCounts() {
-      return this.$store.getters.unreadNotifs
-    }
+      return this.$store.getters.unreadNotifs;
+    },
   },
   methods: {
     post() {
-      this.$store.commit('TOGGLE_MODAL')
+      // this.$refs.iconPost.classList.toggle('active')
+      this.$store.commit("TOGGLE_MODAL");
     },
-    triggerChat(){
+    triggerChat() {
+      // this.$refs.iconChat.classList.toggle('active')
       if (!this.$store.state.isChatActivated) {
-        this.$store.commit('TRIGGER_CHAT')
+        this.$store.commit("TRIGGER_CHAT");
       } else {
-        this.$store.commit('MINIMIZE_CHAT_SECTION')
+        this.$store.commit("MINIMIZE_CHAT_SECTION");
       }
     },
     async logout() {
-      await this.$axios.get(`${this.$store.state.API_URL}/users/logout`)
+      await this.$axios.get(`${this.$store.state.API_URL}/users/logout`);
       if (this.isAdmin) {
-        this.$router.push({ name: 'admin-login'})
+        this.$router.push({ name: "admin-login" });
       } else {
-        this.$router.push({ name: 'login' })
+        this.$router.push({ name: "login" });
       }
-      window.location.reload()
-      sessionStorage.clear()
-    }
+      window.location.reload();
+      sessionStorage.clear();
+    },
   },
   mounted() {
-    window.addEventListener('resize', () => {
-      this.matchTablet = window.matchMedia('(max-width: 768px)').matches
-      this.$store.commit('CHANGE_VIEWPORT', window.innerWidth)
-    })
-  }
-}
+    window.addEventListener("resize", () => {
+      this.matchTablet = window.matchMedia("(max-width: 768px)").matches;
+      this.$store.commit("CHANGE_VIEWPORT", window.innerWidth);
+    });
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-
 .active {
   color: $color-brand;
   fill: $color-brand;
@@ -151,7 +170,7 @@ export default {
 }
 
 div.nav {
-  height: 100%;
+  height: 98vh;
 
   display: flex;
   flex-direction: column;
@@ -197,9 +216,6 @@ ul {
   @include respond($bp-mobile) {
     flex-direction: row;
     width: 100%;
-    button {
-      background-color: white;
-    }
   }
 }
 
@@ -279,8 +295,22 @@ svg {
 }
 
 @include respond($bp-mobile) {
+  button {
+    background-color: blue;
+  }
+  svg.chat-icon {
+    stroke: $color-gray-900;
+    scale: 2.5;
+  }
+  svg.chat-icon.active {
+    stroke: $color-brand;
+  }
+
   svg.post-icon {
     fill: $color-gray-900;
+  }
+  svg.post-icon.active {
+    fill: $color-brand;
   }
 }
 </style>

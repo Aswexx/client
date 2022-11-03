@@ -3,18 +3,8 @@
     <PageInfoBar />
     <PostItem class="post" :post="post" ref="post" />
     <div class="info">
-      <span>發表於 {{ formattedTime }}</span>
-      <span v-if="post.liked">{{ post.liked.length }} 個人喜歡</span>
-    </div>
-
-    <div class="interact">
-      <a @click="showModal(post)">
-        <svg>
-          <use
-            xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"
-          ></use>
-        </svg>
-      </a>
+      <span>{{ formattedTime }} 發布</span>
+      <span v-if="post.liked">有 {{ post.liked.length }} 個人喜歡</span>
       <a @click="likePost(post)">
         <svg v-if="!isLike">
           <use
@@ -56,26 +46,6 @@ export default {
     }
   },
   computed: {
-    // showingPosts() {
-    //   return this.$store.state.postAbout.showingPosts
-    // },
-    // comments: {
-    //   get() {
-    //     const index = this.showingPosts.indexOf(this.post)
-    //     if (index === -1) return []
-    //     return this.showingPosts[index].comments
-    //   }
-    // },
-    // isLike() {
-    //   // * reload make this.post undefined,
-    //   const showingPosts = this.$store.getters.showingPosts
-    //   const targetPostIndex = showingPosts.indexOf(this.$store.getters.tempPost)
-    //   const post = this.$route.params.post || showingPosts[targetPostIndex]
-    //   console.log(post)
-    //   return post.liked.some(
-    //     (like) => like.userId === this.$store.getters.loginedUserId
-    //   )
-    // },
     formattedTime() {
       const post = this.post || this.$store.getters.tempPost
       return this.$format(new Date(post.createdAt), 'yyyy-MM-dd HH:mm:ss', {
@@ -117,6 +87,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.comment-list {
+  height: 53vh;
+  max-height: 34rem;
+  overflow-x: auto;
+}
+
 div {
   padding: 1rem;
 }
@@ -128,16 +104,15 @@ svg {
 }
 
 .info {
+  display: flex;
   border-bottom: 1px solid $color-gray-400;
   span {
-    display: inline-block;
-    margin-right: 1rem;
+    margin-right: 1.5rem;
+  }
+
+  a {
+    margin-left: auto;
   }
 }
 
-.interact {
-  width: 50%;
-  display: flex;
-  justify-content: space-around;
-}
 </style>

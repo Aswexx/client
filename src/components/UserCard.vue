@@ -3,7 +3,10 @@
     @click="toUserProfile(user.id)"
   >
     <div class="img-wrapper" ref="bgImgage">
-      <img :src="user.avatarUrl" alt="avatar">
+      <img 
+        :src="user.avatarUrl" alt="avatar"
+        @error="setAltImg"
+      >
     </div>
 
     <div class="info-wrapper">
@@ -49,6 +52,13 @@ export default {
     }
   },
   methods: {
+    setAltImg(event){
+      if (event.target.className === 'user-bg') {
+        event.target.src = require('@/assets/images/default-profile-bg.jpg')
+        return
+      }
+      event.target.src = require('@/assets/images/default_avatar1.png')
+    },
     toUserProfile(userId) {
       this.$router.push({
         name: 'posts',
@@ -78,7 +88,6 @@ export default {
 .img-wrapper{
   width: 100%;
   height: 13rem;
-  // background-image: url('../assets/images/default-profile-bg.jpg');
   background-size: cover;
   background-position: center;
   position: relative;

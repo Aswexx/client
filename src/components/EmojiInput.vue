@@ -111,6 +111,7 @@ export default {
         this.fileToUpload.name.slice(-4) === '.mp4' ? 'film' : 'image'
     },
     cancelUpload() {
+      this.$refs.fileInput.value = ''
       this.fileToUpload = ''
       this.fileURL = ''
     },

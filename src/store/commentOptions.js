@@ -28,7 +28,6 @@ export const commentOptions = {
         return
       }
 
-      alert('commentOnComment!')
       context.commit('ADD_COMMENT_ON_ATTACH_COMMENT', result.data)
     },
     async getComment(context, commentId) {

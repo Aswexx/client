@@ -23,11 +23,12 @@
           >
             {{ showFollowState(user) ? '已追隨' : '追隨' }}
           </button>
-          <svg class="chat-icon" @click="triggerChat(user)">
+          <svg class="chat-icon" @click.stop="triggerChat(user)">
             <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
           </svg>
         </div>
         <span>@{{ user.alias }}</span>
+        <div class="spot" v-if="$store.state.onlineUsers.has(user.id)"></div>
       </div>
 
       <div class="page-switcher">
@@ -89,7 +90,6 @@ export default {
             showingUser.followed = user.followed
           }
         })
-        return
       } else {
         const followshipToRemove = user.followed.find(followship => {
           return followship.followerId === this.$store.getters.loginedUserId
@@ -227,6 +227,7 @@ export default {
 
 <style lang="scss" scoped>
 .pop-user-list {
+  height: 98vh;
   top: 0;
   grid-column: 3/4;
   @include respond($bp-mobile) {
@@ -269,6 +270,10 @@ export default {
 }
 
 .user-card-wraper {
+  height: 85%;
+  padding: 0 1rem 0 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 
@@ -280,7 +285,7 @@ export default {
     justify-self: end;
 
     &:hover {
-      color: $color-sup-orange;
+      color: $color-brand-deep;
     }
   }
 
@@ -302,6 +307,7 @@ export default {
 }
 
 .user-card {
+  position: relative;
   padding: 1rem 0;
   display: grid;
   grid-template-columns: min-content 1fr min-content;
@@ -330,6 +336,16 @@ export default {
         transform: scale(1.3);
       }
     }
+  }
+
+  .spot {
+    position: absolute;
+    top: .5rem;
+    left: 0rem;
+    width: .75rem;
+    height: .75rem;
+    border-radius: 50%;
+    background-color: #29c25c;
   }
 
   img {

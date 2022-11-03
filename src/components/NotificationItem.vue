@@ -51,7 +51,6 @@ export default {
             })
 
             chatSocket.on('existRoomId', async (roomId) => {
-              console.log('checkRoomId', roomId)
               const { existRoomId, chatRecord } = roomId
               const mappedChatRecord = chatRecord.map((c) => {
                 const parsedMsg = JSON.parse(c)
@@ -153,13 +152,18 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding: .5rem 2rem .5rem 0;
+  border-bottom: 1px solid $color-gray-400;
   width: 100%;
   cursor: pointer;
+  transition: all .2s ease-in;
 
   &__description {
     flex: 1;
+  }
+
+  &:hover {
+    background-color: rgba($color-brand,.4);
   }
 }
 

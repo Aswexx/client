@@ -7,7 +7,7 @@
 			:id="inputInfo.inputTagId"
 			:type="inputInfo.type"
 			:name="inputInfo.inputTagName"
-			v-model="typing"
+			v-model.trim="typing"
 		>
 
 		<input

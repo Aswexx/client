@@ -66,7 +66,6 @@ export default {
 
         if (this.currentPage === 'login') {
           await this.$store.dispatch('userAbout/auth', loginInfo)
-          // await this.$store.dispatch('userAbout/getPopUsers')
           await this.$store.dispatch('userAbout/getUsers')
           this.$router.push({ name: 'home' })
           return

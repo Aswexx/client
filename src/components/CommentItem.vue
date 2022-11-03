@@ -1,6 +1,9 @@
 <template>
   <div class="comment" @click="toCommentDetail(comment, attachComments)">
-    <img class="comment__avatar" :src="comment.author.avatarUrl" />
+    <img class="comment__avatar" 
+      :src="comment.author.avatarUrl"
+      @error="setAltImg"
+    />
 
     <div class="comment__contents">
       <span class="comment__title">
@@ -9,9 +12,6 @@
       >
       <p v-if="comment.onPost">
         回覆
-        <!-- <button @click.stop="toProfilePage(comment.onPost.author.id)">
-          @{{ comment.onPost.author.alias }}
-        </button> -->
         <button
           @click.stop="toPostDetail(comment.onPost)"
         >
@@ -21,15 +21,16 @@
       <div>{{ comment.contents }}</div>
       <template v-if="comment.media">
         <img
+          class="comment__img"
           v-if="comment.media.type !== 'video/mp4'"
           :src="comment.media.url"
         />
-        <video
-          v-else
-          autoplay
-          :src="comment.media.url"
-          @click="togglePlay"
-        ></video>
+        <div v-else class="comment__video" @click.stop="">
+          <video
+            controls
+            :src="comment.media.url"
+          ></video>
+        </div>
       </template>
     </div>
     <div
@@ -92,14 +93,12 @@ export default {
     }
   },
   methods: {
-    togglePlay(event) {
-      const video = event.target
-      console.log(video)
-      if (video.paused || video.ended) {
-        video.play()
-      } else {
-        video.pause()
+    setAltImg(event){
+      if (event.target.className === 'user-bg') {
+        event.target.src = require('@/assets/images/default-profile-bg.jpg')
+        return
       }
+      event.target.src = require('@/assets/images/default_avatar1.png')
     },
     toggleCommentLike(comment) {
       const isLike = !this.isLike
@@ -189,6 +188,25 @@ export default {
     display: inline-block;
     padding-bottom: 0.5rem;
   }
+
+  &__img {
+    width: 90%;
+    height: unset;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  &__video {
+      width: 90%;
+
+  video {
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 1.5rem;
+  }
+
+  }
 }
 
 .comment__interact {
@@ -205,4 +223,16 @@ export default {
     margin-right: 1rem;
   }
 }
+
+.video-wrapper {
+  width: 90%;
+
+  video {
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 1.5rem;
+  }
+}
+
+
 </style>

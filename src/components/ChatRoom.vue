@@ -1,6 +1,11 @@
 <template>
   <transition name="modal-fade">
-    <div class="chat-room-wrapper" :class="{ active: isActivated }">
+    <div
+      class="chat-room-wrapper"
+      :class="{ active: isActivated }"
+      draggable="true"
+      ref="chatRoomWrapper"
+    >
       <div class="opened-chat-list">
         <img
           :class="{ active: user.id === currentChatTarget.id }"
@@ -8,13 +13,12 @@
           :key="user.id"
           :src="user.avatarUrl"
           @click="switchChatTo(user)"
+          @error="setAltImg"
         />
-        <svg @click="minimize">
-          <use
-            xlink:href="../assets/images/symbol-defs.svg#icon-minimize"
-          ></use>
-        </svg>
       </div>
+      <svg class="icon-minimize" @click="minimize">
+        <use xlink:href="../assets/images/symbol-defs.svg#icon-minimize"></use>
+      </svg>
 
       <div
         class="chat-room"
@@ -42,7 +46,7 @@
             :key="index"
             :class="{
               'chat-room__msg-wrapper': !msg.isSenderMsg,
-              'chat-room__msg-wrapper--user': msg.isSenderMsg
+              'chat-room__msg-wrapper--user': msg.isSenderMsg,
             }"
           >
             <template v-if="!msg.isSenderMsg">
@@ -73,100 +77,119 @@
 export default {
   data() {
     return {
-      message: '',
-      isZoomOut: false
-    }
+      message: "",
+      isZoomOut: false,
+    };
   },
+  props: ["dropPosition"],
   computed: {
     chatTargetList() {
-      return this.$store.state.chatTargetList
+      return this.$store.state.chatTargetList;
     },
     isActivated() {
-      return this.$store.state.isChatActivated
+      return this.$store.state.isChatActivated;
     },
     currentChatTarget() {
-      return this.$store.state.currentChatTarget
+      return this.$store.state.currentChatTarget;
     },
     msgCollection() {
-      return this.$store.state.currentMsgCollection
-    }
+      return this.$store.state.currentMsgCollection;
+    },
+  },
+  watch: {
+    dropPosition: {
+      deep: true,
+      handler(newVal) {
+        const chatRoomWrapper = this.$refs.chatRoomWrapper;
+        console.log(newVal.top);
+        chatRoomWrapper.style.top = newVal.top + "px";
+        chatRoomWrapper.style.left = newVal.left + "px";
+      },
+    },
   },
   methods: {
+    setAltImg(event) {
+      if (event.target.className === "user-bg") {
+        event.target.src = require("@/assets/images/default-profile-bg.jpg");
+        return;
+      }
+      event.target.src = require("@/assets/images/default_avatar1.png");
+    },
     minimize() {
-      this.$store.commit('MINIMIZE_CHAT_SECTION')
+      this.$store.commit("MINIMIZE_CHAT_SECTION");
     },
     scrollToBottom() {
-      const chatBody = this.$refs.chatBody
-      chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight
+      const chatBody = this.$refs.chatBody;
+      chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight;
     },
     switchChatTo(target) {
-      this.$store.commit('SWITCH_CHAT_TARGET', target)
-      this.$store.commit('RESET_CHAT_STATE')
+      this.$store.commit("SWITCH_CHAT_TARGET", target);
+      this.$store.commit("RESET_CHAT_STATE");
       // * update current chat roomId
-      this.$store.state.chatSocket.emit('changeRoom', {
+      this.$store.state.chatSocket.emit("changeRoom", {
         triggerUser: this.$store.getters.loginedUserId,
-        targetUser: this.$store.state.currentChatTarget.id
-      })
+        targetUser: this.$store.state.currentChatTarget.id,
+      });
     },
     endChat() {
-      const targetIndex = this.chatTargetList.indexOf(this.currentChatTarget)
-      this.$store.commit('REMOVE_CHAT_TARGET', targetIndex)
+      const targetIndex = this.chatTargetList.indexOf(this.currentChatTarget);
+      this.$store.commit("REMOVE_CHAT_TARGET", targetIndex);
 
-      this.$store.state.chatSocket.emit('leaveRoom', {
+      this.$store.state.chatSocket.emit("leaveRoom", {
         roomId: this.$store.state.chatRoomId,
-        records: this.$store.state.currentMsgCollection
-      })
-      this.$store.commit('RESET_CHAT_STATE')
+        records: this.$store.state.currentMsgCollection,
+      });
+      this.$store.commit("RESET_CHAT_STATE");
     },
     sendMessage() {
-      this.$store.state.chatSocket.emit('newMsg', {
+      this.$store.state.chatSocket.emit("newMsg", {
         roomId: this.$store.state.chatRoomId,
         message: this.message,
         sender: this.$store.getters.loginedUserId,
         reciever: this.$store.state.currentChatTarget.id,
-        createdTime: this.$format(Date.now(), 'yyyy-MM-dd HH:mm:ss', {
-          locale: this.$zhTW
-        })
+        createdTime: this.$format(Date.now(), "yyyy-MM-dd HH:mm:ss", {
+          locale: this.$zhTW,
+        }),
       })
 
       if (this.$store.state.chatSocket) {
-        this.$store.state.chatSocket.on('checkRoomId', (roomInfo) => {
-          const { roomId, chatRecord } = roomInfo
-          this.$store.commit('SET_ROOM_ID', roomId)
+        this.$store.state.chatSocket.on("checkRoomId", (roomInfo) => {
+          const { roomId, chatRecord } = roomInfo;
+          this.$store.commit("SET_ROOM_ID", roomId);
           const mappedMessages = chatRecord.map((msg) => {
-            const parsedMsg = JSON.parse(msg)
+            const parsedMsg = JSON.parse(msg);
             return {
               contents: parsedMsg.message,
               createdTime: parsedMsg.createdTime,
               isSenderMsg:
-                parsedMsg.sender === this.$store.getters.loginedUserId
-            }
-          })
-          this.$store.commit('LOAD_MESSAGE', mappedMessages)
-        })
+                parsedMsg.sender === this.$store.getters.loginedUserId,
+            };
+          });
+          this.$store.commit("LOAD_MESSAGE", mappedMessages);
+        });
       }
 
       this.msgCollection.push({
         isSenderMsg: true,
         contents: this.message,
-        createdTime: this.$format(Date.now(), 'yyyy-MM-dd HH:mm:ss', {
-          locale: this.$zhTW
-        })
-      })
+        createdTime: this.$format(Date.now(), "yyyy-MM-dd HH:mm:ss", {
+          locale: this.$zhTW,
+        }),
+      });
 
-      this.message = ''
+      this.message = "";
 
-      const chatBody = this.$refs.chatBody
+      const chatBody = this.$refs.chatBody;
       this.$nextTick(() => {
-        chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight
-      })
-    }
-  }
-}
+        chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight;
+      });
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-@import './../assets/scss/base.scss';
+@import "./../assets/scss/base.scss";
 
 .chat-room-wrapper.active {
   position: absolute;
@@ -175,6 +198,7 @@ export default {
 
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
   align-items: center;
 
   width: 60%;
@@ -182,14 +206,15 @@ export default {
   height: 70vh;
   border-radius: 2rem;
   background-color: rgba($color: $color-gray-700, $alpha: 0.9);
-  // overflow: hidden;
 
   .opened-chat-list {
     display: flex;
+    align-items: center;
 
     width: 80%;
-    height: 8rem;
+    height: 7.5rem;
     white-space: nowrap;
+    overflow-y: hidden;
     overflow-x: auto;
 
     img {
@@ -209,17 +234,20 @@ export default {
           0 6px 6px rgba(0, 0, 0, 0.23);
       }
     }
-
-    svg {
-      margin-left: auto;
-      width: 2.5rem;
-      height: 2.5rem;
-      cursor: pointer;
-    }
+  }
+  svg.icon-minimize {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    margin-left: auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    cursor: pointer;
   }
 
   @include respond($bp-mobile) {
-    background-color: $color-gray-100;
+    width: 80%;
+    right: 10%;
   }
 }
 
@@ -234,7 +262,6 @@ export default {
   box-shadow: 0.2rem 0.2rem 2rem rgba($color-gray-100, 0.4);
 
   .controls {
-    border: 1px solid red;
 
     svg {
       margin: 0 0.5rem 0 0.5rem;
@@ -291,7 +318,6 @@ export default {
       cursor: pointer;
 
       &:hover {
-        background-color: blue;
         transition: 0.2s ease;
       }
     }
@@ -320,27 +346,7 @@ export default {
   }
 }
 
-.chat-room__contents::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
-  border-radius: 10px;
-  background-color: #cccccc;
-}
-
-.chat-room__contents::-webkit-scrollbar {
-  width: 12px;
-  // background-color: #f5f5f5;
-}
-
-.chat-room__contents::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background-color: $color-brand;
-  background-image: -webkit-linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 0, 0, 0.4) 50%,
-    transparent,
-    transparent
-  );
+div::-webkit-scrollbar {
+  height: 12px;
 }
 </style>

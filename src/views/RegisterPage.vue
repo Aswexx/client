@@ -1,10 +1,6 @@
 <template>
   <div class="register">
-    <svg class="brand-logo">
-      <use
-        xlink:href="./../assets/images/symbol-defs.svg#icon-brand-logo"
-      ></use>
-    </svg>
+    <img class="brand-logo" src="./../assets/images/logo.svg">
     <h3>建立你的帳號</h3>
 
     <form
@@ -74,6 +70,7 @@
 
 <script>
 export default {
+  name: 'RegisterPage',
   data() {
     return {
       visible: false,
@@ -118,6 +115,13 @@ export default {
         }
       }
 
+      if (formData.get('name').length > 20 || formData.get('alias').length > 20) {
+        return this.$store.commit('TRIGGER_TOAST', {
+          type: 'error',
+          detail: '名稱或別名最多 20 個字元'
+        })
+      }
+
       if (formData.get('password') !== formData.get('passwordCheck')) {
         return this.$store.commit('TRIGGER_TOAST', {
           type: 'info',
@@ -134,20 +138,19 @@ export default {
         })
       }
 
-      // * direct to home page after register successfully
-      const loginInfo = {
-        account: formData.get('email'),
-        password: formData.get('password')
-      }
-      await this.$store.dispatch('userAbout/auth', loginInfo)
-      await this.$store.dispatch('userAbout/getUsers')
-      this.$router.push({ name: 'home' })
+      // * wait for email vertification
+      this.$router.push({ name: 'email-vertification' , params: { email: formData.get('email')}})
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.brand-logo {
+  width: 10rem;
+  height: 7.5rem;
+}
+
 .register {
   margin: 6rem auto auto auto;
   width: 36rem;

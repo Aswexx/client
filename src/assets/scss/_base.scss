@@ -59,7 +59,7 @@ button {
   transition: all .2s ease-in;
 
   &:hover {
-    background-color: $color-sup-orange
+    background-color: $color-brand-deep
   }
 }
 
@@ -109,4 +109,28 @@ video {
 // * data-picker
 .mx-datepicker {
   width: 21rem !important;
+}
+
+// * custom scrollbar
+div::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+  border-radius: 10px;
+  background-color: #cccccc;
+}
+
+div::-webkit-scrollbar {
+  width: 12px;
+}
+
+div::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: $color-brand;
+  background-image: -webkit-linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent,
+    transparent
+  );
 }

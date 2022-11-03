@@ -2,9 +2,13 @@ import axios from 'axios'
 
 export const userOptions = {
   namespaced: true,
+  getters: {
+    loginedUserId(state, getters, rootState, rootGetters) {
+      return rootGetters.loginedUserId
+    }
+  },
   actions: {
     async googleOauth(context, token) {
-      console.log(token)
       const { data } = await axios.post(
         `${context.rootState.API_URL}/users/google`,
         { token }
@@ -72,39 +76,21 @@ export const userOptions = {
           newInfo
         )
         if (!data) {
-          throw new Error('欄位不符')
+          throw new Error()
         }
         context.commit('SAVE_USER_DATA', data)
       } catch (err) {
-        console.log(err.message)
+        context.commit(
+          'TRIGGER_TOAST',
+          {
+            type: 'error',
+            detail: '別名已存在'
+          },
+          { root: true }
+        )
       }
-    },
-
-    async addFollowship(context, userId) {
-      const followship = {
-        followerId: context.state.loginedUserData.id,
-        followedId: userId
-      }
-      const { data } = await axios.put(
-        `${context.rootState.API_URL}/users/`,
-        followship
-      )
-
-      console.log('returned followship', data)
-
-      context.commit('ADD_FOLLOWSHIP', data)
-    },
-
-    async removeFollowship(context, followship) {
-      const followShipId = followship.id
-      const { data } = await axios.delete(
-        `${context.rootState.API_URL}/users/${followShipId}`
-      )
-
-      context.commit('REMOVE_FOLLOWSHIP', data)
     }
   },
-
   mutations: {
     SAVE_USER_DATA(state, userInfo) {
       if (
@@ -154,6 +140,34 @@ export const userOptions = {
           })
           break
       }
+    },
+    UPDATE_FOLLOWSHIP(state, followship) {
+      // * followship param not passed in means remove exist followship
+      if (followship) {
+        for (const user of state.users) {
+          if (user.id === followship.followedId) {
+            user.followed.unshift(followship)
+            state.otherUserData.followed.unshift(followship)
+            return
+          }
+        }
+      }
+
+      for (const user of state.users) {
+        if (user.id === state.otherUserData.id) {
+          const targetFollowship = user.followed.find(
+            (f) => f.followerId === this.getters.loginedUserId
+          )
+          const targetFollowshipIndex = user.followed.indexOf(targetFollowship)
+          user.followed.splice(targetFollowshipIndex, 1)
+          state.otherUserData.followed.splice(targetFollowshipIndex, 1)
+          return
+        }
+      }
+    },
+    UPDATE_SPONSOR_STATE(state) {
+      console.log('ready to mutate')
+      state.loginedUserData.isSponsor = true
     }
   },
   state: {
@@ -161,6 +175,6 @@ export const userOptions = {
     userRole: 'normal',
     loginedUserData: {},
     otherUserData: {},
-    users: [],
+    users: []
   }
 }

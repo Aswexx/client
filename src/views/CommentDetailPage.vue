@@ -121,6 +121,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.comment-list {
+  height: 53vh;
+  overflow-x: auto;
+}
+
 div {
   padding: 1rem;
 }

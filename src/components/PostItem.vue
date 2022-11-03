@@ -5,6 +5,7 @@
       alt="avatar"
       v-if="post.author"
       :src="post.author.avatarUrl"
+      @error="setAltImg"
     />
     <div class="interact">
       <template v-if="post.author">
@@ -33,20 +34,13 @@
       />
       <div v-else class="video-wrapper">
         <video
+          controls
           :src="post.media.url"
           alt="post-video"
           ref="video"
-          @click.stop="togglePlay"
           :hidden="!isShowMedia && $store.getters.loginedUser.role === 'admin'"
+          @click.stop=""
         ></video>
-        <svg class="toggle-play" v-show="isVideoPaused">
-          <use xlink:href="./../assets/images/symbol-defs.svg#icon-play"></use>
-        </svg>
-        <div class="controls">
-          <div class="progress-track">
-            <div class="progerss-bar" ref="progressBar"></div>
-          </div>
-        </div>
       </div>
     </template>
 
@@ -108,6 +102,13 @@ export default {
     },
   },
   methods: {
+    setAltImg(event){
+      if (event.target.className === 'user-bg') {
+        event.target.src = require('@/assets/images/default-profile-bg.jpg')
+        return
+      }
+      event.target.src = require('@/assets/images/default_avatar1.png')
+    },
     showReplyModal(post) {
       post = {
         ...post,
@@ -136,32 +137,6 @@ export default {
         params: { post }
       })
     },
-    togglePlay() {
-      const video = this.$refs.video
-      const progressBar = this.$refs.progressBar
-      if (!video.paused) {
-        this.$refs.video.pause()
-        this.isVideoPaused = true
-        return
-      }
-      video.play()
-      this.isVideoPaused = false
-      let progress
-
-      const handleTimeUpdate = () => {
-        progress = video.currentTime / video.duration
-        progressBar.style.width = progress * 100 + '%'
-      }
-
-      const handleEnded = () => {
-        this.isVideoPaused = true
-        video.removeEventListener('ended', handleEnded)
-        video.removeEventListener('timeupdate', handleTimeUpdate)
-      }
-
-      video.addEventListener('timeupdate', handleTimeUpdate)
-      video.addEventListener('ended', handleEnded)
-    }
   },
   mounted() {
     if (this.post) {
@@ -213,43 +188,11 @@ export default {
 
 .video-wrapper {
   width: 90%;
-  position: relative;
-  overflow: hidden;
 
   video {
-    padding-bottom: 1.5rem;
     aspect-ratio: 16/9;
     object-fit: cover;
-  }
-
-  .controls {
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-    background-color: $color-gray-600;
-    height: 2rem;
-    transform: translateY(100%);
-    transition: all 0.2s ease-in;
-  }
-
-  .toggle-play {
-    position: absolute;
-    fill: $color-gray-100;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  .progress-track {
-    width: 100%;
-    height: 0.5rem;
-    background-color: $color-gray-400;
-  }
-
-  .progerss-bar {
-    width: 0%;
-    height: 0.5rem;
-    background-color: red;
+    border-radius: 1.5rem;
   }
 }
 

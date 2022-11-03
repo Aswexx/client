@@ -48,7 +48,9 @@
           <span class="slider"></span>
         </label>
         <div class="search" v-show="isOnSearch">
+          <label for="keyword">輸入內文關鍵字</label>
           <input
+            id="keyword"
             type="text"
             v-model="keyword"
             @keyup.enter="searchByContents"
@@ -85,6 +87,7 @@
 <script>
 import PageInfoBar from '../../components/PageInfoBar.vue'
 import PostItem from '../../components/PostItem.vue'
+// import SearchBar from '../../components/SearchBar.vue'
 export default {
   name: 'PostListPage',
   data() {
@@ -223,11 +226,13 @@ export default {
     right: 1.5rem;
 
     width: 15rem;
-    // display: flex;
-    // flex-direction: column;
+    height: 10rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 
     button {
-      background-color: aqua;
+      background-color: $color-brand;
     }
   }
 }

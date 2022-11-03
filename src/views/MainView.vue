@@ -1,5 +1,5 @@
 <template>
-  <div class="main-view">
+  <div class="main-view" @drop="drop" @dragover.prevent="">
     <NavBar />
 
     <transition name="fade" mode="out-in">
@@ -10,7 +10,7 @@
 
     <ActionModal />
     <transition name="fade-scale">
-      <ChatRoom v-if="this.$store.state.isChatActivated" />
+      <ChatRoom v-if="this.$store.state.isChatActivated" :dropPosition="dropPosition"/>
     </transition>
   </div>
 </template>
@@ -26,9 +26,19 @@ export default {
   data() {
     return {
       userRole: this.$store.state.userAbout.userRole,
+      dropPosition: {
+        top: 0,
+        left: 0
+      }
     }
   },
   components: { NavBar, PopUserList, ActionModal, ChatRoom },
+  methods: {
+    drop(e){
+      this.dropPosition.top = e.clientY
+      this.dropPosition.left = e.clientX
+    },
+  }
 }
 </script>
 
@@ -56,7 +66,8 @@ export default {
 }
 
 .main-contents {
-  border: 1px solid blue;
+  border-left: 1px solid $color-gray-700;
+  border-right: 1px solid $color-gray-700;
 }
 
 .fade-enter-active,

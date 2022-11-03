@@ -95,27 +95,12 @@ const mutations = {
   },
   TRIGGER_CHAT(state, info) {
     if (!state.isChatActivated) state.isChatActivated = true
-    console.log('info:', info)
-
-    // if (typeof info === 'string') {
-
-    //   // const targetUser = state.getters.users
-    //   // console.log(targetUser)
-    //   // alert(info)
-    //   alert('idonly')
-    //   state.isChatActivated = true
-    //   state.chatRoomId = info
-    //   // state.currentChatTarget = info.targetUser
-    //   // state.chatTargetList.push(info.targetUser)
-    //   return
-    // }
 
     // * no info means user trigger chat window via nav bar
     if (info) {
       const isInChatList =
         // * shallow copy the state to get array without __observer__
-        Array.from(state.chatTargetList).includes(info.targetUser)
-      // state.chatRoomId = info.roomId
+        Array.from(state.chatTargetList).find(e => e.id === info.targetUser.id)
       state.currentChatTarget = info.targetUser
       if (isInChatList) return
       state.chatTargetList.push(info.targetUser)
@@ -126,11 +111,10 @@ const mutations = {
 
     // * confirm target then render chat window
     const targetUser = Array.from(state.userAbout.users).find(user => user.id === targetId)
-    console.log(targetUser, targetId)
-    state.chatTargetList.push(targetUser)
+    if (!Array.from(state.chatTargetList).includes(targetUser)) {
+      state.chatTargetList.push(targetUser)
+    }
     state.currentChatTarget = targetUser
-    // state.currentChatTarget = info.triggerUser
-    // state.chatTargetList.push(info.triggerUser)
   },
   SAVE_MESSAGE(state, msgInfo) {
     
@@ -162,7 +146,6 @@ const mutations = {
     state.currentChatTarget = ''
   },
   RESET_CHAT_STATE(state) {
-    // state.chatRoomId = ''
     state.currentMsgCollection = []
   },
   MINIMIZE_CHAT_SECTION(state) {
@@ -175,7 +158,7 @@ const mutations = {
     state.notifSocket = notifSocket
   },
   UPDATE_ONLINE_USERS(state, users) {
-    state.onlineUsers = users
+    state.onlineUsers = new Set(users)
   },
   ADD_NOTIFICATION(state, notification) {
     if (notification instanceof Array)
@@ -211,7 +194,7 @@ const state = {
   sourcePostOrComment: {},
   notifications: [],
   notifSocket: undefined,
-  onlineUsers: [],
+  onlineUsers: new Set(),
   API_URL: 'http://localhost:4000'
 }
 

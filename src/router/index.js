@@ -15,6 +15,8 @@ import PostDetailPage from '../views/PostDetailPage.vue'
 import CommentDetailPage from '../views/CommentDetailPage.vue'
 import NotificationPage from '../views/NotificationPage.vue'
 import FollowshipPage from '../views/FollowshipPage.vue'
+import SponsorPage from '../views/SponsorPage.vue'
+import EmailVertificationPage from '../views/EmailVertificationPage.vue'
 // * admin pages
 import PostListPage from '../views/admin/PostListPage.vue'
 import UserListPage from '../views/admin/UserListPage.vue'
@@ -78,6 +80,11 @@ const routes = [
         component: CommentDetailPage
       },
       {
+        path: 'sponsor',
+        name: 'sponsor',
+        component: SponsorPage
+      },
+      {
         path: 'followship',
         name: 'followship',
         component: FollowshipPage
@@ -114,6 +121,16 @@ const routes = [
     path: '/register',
     name: 'register',
     component: RegisterPage
+  },
+  {
+    path: '/email-vertification',
+    name: 'email-vertification',
+    component: EmailVertificationPage
+  },
+  {
+    path: '/pay-confirmed',
+    name: 'pay-confirmed',
+    component: () => import('../views/PayConfirmedPage.vue')
   },
   {
     path: '*',

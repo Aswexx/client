@@ -28,8 +28,4 @@ export default {
 
 <style lang="scss">
 @import './assets/scss/base.scss';
-#app {
-  position: relative;
-  border: 1px solid red;
-}
 </style>

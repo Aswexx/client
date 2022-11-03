@@ -2,8 +2,8 @@
   <div class="notif-page">
     <PageInfoBar />
 
-    <div class="notification-list" v-for="notif in notifications" :key="notif.id">
-      <NotificationItem :notif="notif" />
+    <div class="notification-list">
+      <NotificationItem v-for="notif in notifications" :key="notif.id" :notif="notif" />
     </div>
 
   </div>
@@ -25,9 +25,12 @@ export default {
 }
 </script>
 
-<style lang="scss">
-  .notif-page {
-    height: 95vh;
-    overflow-y: auto;
-  }
+<style lang="scss" scoped>
+.notif-page {
+  height: 98vh;
+}
+.notification-list {
+  height: 90%;
+  overflow-y: auto;
+}
 </style>

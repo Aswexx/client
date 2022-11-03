@@ -18,9 +18,6 @@ export default {
       keyword: '',
     }
   },
-  computed: {
-
-  },
   watch: {
     keyword(newVal){
       this.$emit('typing', newVal)

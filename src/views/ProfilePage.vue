@@ -12,13 +12,13 @@
         <LoadSpinner />
       </div>
       <div slot="error">
-        <img class="user-bg" src="@/assets/images/default-profile-bg.jpg">
+        <img class="user-bg" src="@/assets/images/default-profile-bg.jpg" />
       </div>
     </VueLoadImage>
     <div class="profile-card">
       <img alt="img" :src="showingUserData.avatarUrl" @error="useFallbackImg" />
 
-      <div class="interact" :class="{'not-logined-user': !isLoginedUser}">
+      <div class="interact" :class="{ 'not-logined-user': !isLoginedUser }">
         <button @click="triggerChat(showingUserData)">
           <svg>
             <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
@@ -77,16 +77,21 @@ export default {
   name: 'ProfilePage',
   components: { PageInfoBar, VueLoadImage, LoadSpinner },
   computed: {
-    isFollowed(){
-      if (!Object.hasOwn(this.$store.state.userAbout.otherUserData, 'id')) return undefined
+    isFollowed() {
+      if (!Object.hasOwn(this.$store.state.userAbout.otherUserData, 'id'))
+        return undefined
       const loginedUserId = this.$store.state.userAbout.loginedUserData.id
       const followers = this.$store.state.userAbout.otherUserData.followed
-        // * convert array of observer to array of object
+      // * convert array of observer to array of object
       const parsedFollowers = JSON.parse(JSON.stringify(followers))
 
-      return parsedFollowers.find(follower => follower.followerId === loginedUserId) !== undefined
+      return (
+        parsedFollowers.find(
+          (follower) => follower.followerId === loginedUserId
+        ) !== undefined
+      )
     },
-    isLoginedUser(){
+    isLoginedUser() {
       return this.showingUserData.id === this.$store.getters.loginedUserId
     },
     showingUserData() {
@@ -101,23 +106,33 @@ export default {
     }
   },
   methods: {
-    toggleFollow() {
-      this.isfollowed = !this.isfollowed
+    async toggleFollow() {
+      if (!this.isFollowed) {
+        const newFollowship = await this.$axios.post(
+          `${this.$API_URL}/users/follow`,
+          {
+            followerId: this.$store.getters.loginedUserId,
+            followedId: this.showingUserData.id
+          }
+        )
+        this.$store.commit('userAbout/UPDATE_FOLLOWSHIP', newFollowship.data)
+      } else {
+        const followshipToRemove = this.showingUserData.followed.find(e => e.followerId === this.$store.getters.loginedUserId)
+        await this.$axios.delete(`${this.$API_URL}/users/follow/${followshipToRemove.id}`)
+        this.$store.commit('userAbout/UPDATE_FOLLOWSHIP')
+      }
     },
     triggerChat(targetUser) {
       this.$store.dispatch('sendChatNotification', targetUser.id)
-      // * use logined user id as roomId to specify the chat room allow target user to join
-      this.$store.commit(
-        'TRIGGER_CHAT',
-        { loginedUserId: this.$store.getters.loginedUserId,
-          targetUser
-        }
-      )
+      this.$store.commit('TRIGGER_CHAT', {
+        loginedUserId: this.$store.getters.loginedUserId,
+        targetUser
+      })
     },
-    toSettingPage(){
-      this.$router.push({name: 'setting'})
+    toSettingPage() {
+      this.$router.push({ name: 'setting' })
     },
-    useFallbackImg(event){
+    useFallbackImg(event) {
       if (event.target.className === 'user-bg') {
         event.target.src = require('@/assets/images/default-profile-bg.jpg')
       } else {
@@ -132,16 +147,15 @@ export default {
       userId =
         this.$route.params.userId ||
         // * load session data if unload on profile page
-        JSON.parse(sessionStorage.getItem('storeData')).postAbout.userPosts[0].author.id ||
+        JSON.parse(sessionStorage.getItem('storeData')).postAbout.userPosts[0]
+          .author.id ||
         this.$store.getters.loginedUserId
     } catch {
       userId = this.$store.getters.loginedUserId
     }
-    
+
     await this.$store.dispatch('userAbout/getUser', userId)
     await this.$store.dispatch('postAbout/getUserPosts', userId)
-  },
-  mounted(){
   },
   destroyed() {
     this.$store.state.userAbout.otherUserData = {}
@@ -150,7 +164,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .profile-page {
   @include respond($bp-tablet) {
     margin-top: 1rem;
@@ -251,7 +264,7 @@ export default {
     p {
       display: block;
       overflow: unset;
-      box-shadow: 1rem 1rem 2rem 0 #2278A0;
+      box-shadow: 1rem 1rem 2rem 0 #2278a0;
       background-color: $color-gray-100;
     }
   }
@@ -268,7 +281,6 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
 
   .follows {
     grid-column: 2 / 3;
