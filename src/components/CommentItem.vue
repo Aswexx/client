@@ -136,7 +136,6 @@ export default {
         })
     },
     async toProfilePage(userId) {
-      alert(userId)
       await this.$store.dispatch('userAbout/getUser', userId)
       await this.$store.dispatch('postAbout/getUserPosts', userId)
       this.$router.push({

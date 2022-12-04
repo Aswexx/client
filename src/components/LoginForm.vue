@@ -1,47 +1,54 @@
 <template>
   <div class="user-login">
     <img class="brand-logo" src="./../assets/images/logo.svg">
-    <h3 v-if="currentPage === 'login'">登入 Posquare</h3>
+    <h3 v-if="currentPage === 'login'">歡迎使用 Posquare</h3>
 
     <h3 v-else-if="currentPage === 'admin-login'">後台登入</h3>
 
-    <form action="">
-      <label for="account">登入Email</label>
-      <input
-        id="account"
-        name="account"
-        type="email"
-        placeholder="請輸入Email"
-        v-model="account"
-      />
-      <label for="password">密碼</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        placeholder="請輸入密碼"
-        v-model="password"
-      />
+    <form>
+      <HollowInput 
+        :labelName="$route.name ==='login' ? '登入Email': '管理者帳號'" 
+        forAttr="account">
+        <input
+          id="account"
+          name="account"
+          type="account"
+          v-model="account"
+        />
+      </HollowInput>
+
+      <HollowInput labelName="密碼" forAttr="password">
+        <input
+          id="password"
+          name="password"
+          type="password"
+          v-model="password"
+        />
+      </HollowInput>
+
     </form>
-    <button @click="login">登入</button>
-    <div class="other">
+    <div class="other" :class="{ 'cms-login': $route.name === 'admin-login' }">
+      <button @click="login">登入</button>
       <GoogleSignInButton v-if="currentPage === 'login'"></GoogleSignInButton>
-      <router-link v-show="currentPage === 'login'" to="/register"
-        >註冊</router-link
-      >
 
-      <span v-if="currentPage === 'login'">·</span>
-      <router-link v-if="currentPage === 'login'" to="/admin-login"
-        >後台登入</router-link
-      >
+      <div class="non-login">
+        <router-link v-show="currentPage === 'login'" to="/register"
+          >註冊</router-link
+        >
+        <!-- <span v-if="currentPage === 'login'">·</span> -->
+        <router-link v-if="currentPage === 'login'" to="/admin-login"
+          >後台登入</router-link
+        >
+        <router-link v-else to="/login">前台登入</router-link>
+      </div>
 
-      <router-link v-else to="/login">前台登入</router-link>
     </div>
   </div>
 </template>
 
 <script>
 import GoogleSignInButton from './GoogleSignInButton.vue'
+import HollowInput from './HollowInput.vue'
 export default {
   data() {
     return {
@@ -50,7 +57,7 @@ export default {
       password: ''
     }
   },
-  components: { GoogleSignInButton },
+  components: { GoogleSignInButton, HollowInput },
   methods: {
     async login() {
       const loginInfo = {
@@ -81,7 +88,7 @@ export default {
         })
       }
     }
-  }
+  },
 }
 </script>
 
@@ -91,11 +98,10 @@ export default {
   height: 7.5rem;
 }
 
-
 .user-login {
   margin: 6rem auto auto auto;
   width: 36rem;
-  height: 42rem;
+  height: 45rem;
 
   display: flex;
   flex-direction: column;
@@ -111,44 +117,56 @@ svg {
 form {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   width: 100%;
-
-  & > * {
-    background-color: $color-gray-200;
-    padding-left: 1rem;
-  }
+  height: 11rem;
 }
 
-label {
-  padding-bottom: 0.7rem;
-  font-size: 1.4rem;
-}
-
-input {
-  border: none;
-  outline: none;
-  border-bottom: 1px solid $color-gray-800;
-  padding-bottom: 0.3rem;
-  margin-bottom: 2rem;
-  font-size: 1.6rem;
-}
 
 .other {
   width: 100%;
+  height: 12rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
 
-  .google-icon {
-    width: 3rem;
-    height: 3rem;
-    margin-right: auto;
-    cursor: pointer;
+  .non-login {
+    width: 100%;
+
+    a {
+      display: inline-block;
+      width: 50%;
+      text-decoration: none;
+      text-align: center;
+      padding: .8rem 0;
+      border: 1px solid #dadce0;
+      border-radius: 2rem;
+      font-size: 1.4rem;
+      color: $color-gray-800;
+
+      &:hover {
+        background-color: #F8FAFF;
+      }
+    }
   }
 
-  span {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  button {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(45deg, $color-brand-deep, $color-brand);
+    transition: all .2s ease-in-out;
+
+    &:hover {
+      transform: scaleX(1.05) scaleY(1.1);
+    }
+  }
+}
+
+.other.cms-login {
+  height: 7rem;
+  a {
+    width: 100%;
   }
 }
 

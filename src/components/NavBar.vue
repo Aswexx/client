@@ -13,7 +13,7 @@
               xlink:href="./../assets/images/symbol-defs.svg#icon-home"
             ></use>
           </svg>
-          <span>{{ isAdmin ? "推文列表" : "首頁" }}</span>
+          <span>{{ isAdmin ? '推文列表' : '首頁' }}</span>
         </router-link>
       </li>
 
@@ -27,7 +27,7 @@
               xlink:href="./../assets/images/symbol-defs.svg#icon-user"
             ></use>
           </svg>
-          <span>{{ isAdmin ? "使用者列表" : "個人資料" }}</span>
+          <span>{{ isAdmin ? '使用者列表' : '個人資料' }}</span>
         </router-link>
       </li>
 
@@ -68,14 +68,13 @@
           <svg>
             <use
               xlink:href="./../assets/images/symbol-defs.svg#icon-search"
-            ></use></svg
-          ><span>mmm</span>
+            ></use>
+          </svg>
         </router-link>
       </li>
 
-      <li>
+      <li v-if="!isAdmin">
         <router-link to="/sponsor" active-class="active">
-          <!-- <img class="medal" src="./../assets/images/medal.svg"> -->
           <svg>
             <use
               xlink:href="./../assets/images/symbol-defs.svg#icon-medal"
@@ -119,46 +118,46 @@
 export default {
   data() {
     return {
-      matchTablet: window.matchMedia("(max-width: 768px)").matches,
-      isAdmin: this.$store.state.userAbout.userRole === "admin",
-    };
+      matchTablet: window.matchMedia('(max-width: 768px)').matches,
+      isAdmin: this.$store.state.userAbout.userRole === 'admin'
+    }
   },
   computed: {
     unreadCounts() {
-      return this.$store.getters.unreadNotifs;
-    },
+      return this.$store.getters.unreadNotifs
+    }
   },
   methods: {
     post() {
       // this.$refs.iconPost.classList.toggle('active')
-      this.$store.commit("TOGGLE_MODAL");
+      this.$store.commit('TOGGLE_MODAL')
     },
     triggerChat() {
       // this.$refs.iconChat.classList.toggle('active')
       if (!this.$store.state.isChatActivated) {
-        this.$store.commit("TRIGGER_CHAT");
+        this.$store.commit('TRIGGER_CHAT')
       } else {
-        this.$store.commit("MINIMIZE_CHAT_SECTION");
+        this.$store.commit('MINIMIZE_CHAT_SECTION')
       }
     },
     async logout() {
-      await this.$axios.get(`${this.$store.state.API_URL}/users/logout`);
+      await this.$axios.get(`${this.$store.state.API_URL}/users/logout`)
       if (this.isAdmin) {
-        this.$router.push({ name: "admin-login" });
+        this.$router.push({ name: 'admin-login' })
       } else {
-        this.$router.push({ name: "login" });
+        this.$router.push({ name: 'login' })
       }
-      window.location.reload();
-      sessionStorage.clear();
-    },
+      window.location.reload()
+      sessionStorage.clear()
+    }
   },
   mounted() {
-    window.addEventListener("resize", () => {
-      this.matchTablet = window.matchMedia("(max-width: 768px)").matches;
-      this.$store.commit("CHANGE_VIEWPORT", window.innerWidth);
-    });
-  },
-};
+    window.addEventListener('resize', () => {
+      this.matchTablet = window.matchMedia('(max-width: 768px)').matches
+      this.$store.commit('CHANGE_VIEWPORT', window.innerWidth)
+    })
+  }
+}
 </script>
 
 <style lang="scss" scoped>

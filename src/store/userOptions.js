@@ -54,7 +54,7 @@ export const userOptions = {
       context.state.popUsers = popUsers.data
     },
     async getUser(context, userId) {
-      //* avoid logined user makeing infos request again.
+      //* avoid logined user making infos request again.
       if (userId === context.state.loginedUserData.id) return
 
       const { data } = await axios.get(

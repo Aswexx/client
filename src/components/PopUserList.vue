@@ -3,8 +3,24 @@
     <div class="controls">
       <SearchBar class="search-bar" @typing="setKeyword"></SearchBar>
       <div class="toggle-follow-list">
-        <button @click="showFollowingUsers" :class="{active: controlMode ==='following'}">我的關注</button>
-        <button @click="showFollowed" :class="{active: controlMode ==='followedBy'}">關注我的用戶</button>
+        <button
+          @click="showFilteredUsers('all')"
+          :class="{ active: controlMode === 'all' }"
+        >
+          全部
+        </button>
+        <button
+          @click="showFilteredUsers('following')"
+          :class="{ active: controlMode === 'following' }"
+        >
+          我的關注
+        </button>
+        <button
+          @click="showFilteredUsers('followedBy')"
+          :class="{ active: controlMode === 'followedBy' }"
+        >
+          關注我的用戶
+        </button>
       </div>
     </div>
     <div class="user-card-wraper">
@@ -28,12 +44,16 @@
           </svg>
         </div>
         <span>@{{ user.alias }}</span>
-        <div class="spot" v-if="$store.state.onlineUsers.has(user.id)"></div>
+        <div class="spot" v-if="Number($store.state.onlineUsers[user.id])"></div>
       </div>
 
       <div class="page-switcher">
-        <button v-show="showUsersFromIndex" @click="showPrevOrNextPage(-10)">上一頁</button>
-        <button v-show="!isLastPage" @click="showPrevOrNextPage(10)">下一頁</button>
+        <button v-show="showUsersFromIndex" @click="showPrevOrNextPage(-10)">
+          上一頁
+        </button>
+        <button v-show="!isLastPage" @click="showPrevOrNextPage(10)">
+          下一頁
+        </button>
       </div>
     </div>
   </div>
@@ -51,10 +71,10 @@ export default {
       isLastPage: false,
       keyword: '',
       filteredUsers: [],
-      controlMode: '' //* following / followedBy/ filter
+      controlMode: '' //*all/ following / followedBy/ filter
     }
   },
-  watch:{
+  watch: {
     keyword: {
       immediate: true,
       handler(newVal) {
@@ -62,43 +82,49 @@ export default {
         const allUsers = this.$store.state.userAbout.users
         const loginedUserId = this.$store.getters.loginedUserId
         const keyword = new RegExp(newVal, 'i')
-        this.filteredUsers =
-          allUsers.filter(user => keyword.exec(user.alias) && user.id !== loginedUserId)
-        
+        this.filteredUsers = allUsers.filter(
+          (user) => keyword.exec(user.alias) && user.id !== loginedUserId
+        )
+
         this.showUsersFromIndex = 0
         this.showPrevOrNextPage(0)
       }
     }
   },
   methods: {
-    setKeyword(keyword){
+    setKeyword(keyword) {
       this.keyword = keyword
     },
-    useFallbackImg(event){
+    useFallbackImg(event) {
       event.target.src = require('@/assets/images/default_avatar1.png')
     },
     async toggleFollow(user) {
       const isFollowing = this.showFollowState(user)
       if (!isFollowing) {
-        const newFollowship = await this.$axios.post(`${this.$API_URL}/users/follow`, {
-          followerId: this.$store.getters.loginedUserId,
-          followedId: user.id
-        })
+        const newFollowship = await this.$axios.post(
+          `${this.$API_URL}/users/follow`,
+          {
+            followerId: this.$store.getters.loginedUserId,
+            followedId: user.id
+          }
+        )
         user.followed.unshift(newFollowship.data)
-        this.showingUsers.forEach(showingUser => {
+        this.showingUsers.forEach((showingUser) => {
           if (showingUser.id === user.id) {
             showingUser.followed = user.followed
           }
         })
       } else {
-        const followshipToRemove = user.followed.find(followship => {
+        const followshipToRemove = user.followed.find((followship) => {
           return followship.followerId === this.$store.getters.loginedUserId
         })
         const followedIndex = user.followed.indexOf(followshipToRemove)
 
-        await this.$axios.delete(`${this.$API_URL}/users/follow/${followshipToRemove.id}`)
+        await this.$axios.delete(
+          `${this.$API_URL}/users/follow/${followshipToRemove.id}`
+        )
         user.followed.splice(followedIndex, 1)
-        this.showingUsers.forEach(showingUser => {
+        this.showingUsers.forEach((showingUser) => {
           if (showingUser.id === user.id) {
             showingUser.followed = user.followed
           }
@@ -137,31 +163,42 @@ export default {
           })
       }
 
-      await this.$store.dispatch('userAbout/getUser', userId)
       await this.$store.dispatch('postAbout/getUserPosts', userId)
+      await this.$store.dispatch('userAbout/getUser', userId)
     },
-    showFollowingUsers(){
-      this.controlMode = 'following'
+    showFilteredUsers(controlMode) {
+      this.isLastPage = false
       const allUsers = this.$store.state.userAbout.users
       const loginedUserId = this.$store.getters.loginedUserId
+      switch (controlMode) {
+        case 'all':
+          this.controlMode = 'all'
+          this.filteredUsers = allUsers.filter(
+            (user) => user.id !== loginedUserId
+          )
+          break
+        case 'following':
+          this.controlMode = 'following'
+          this.filteredUsers = allUsers.filter((user) =>
+            user.followed.find(
+              (followship) => followship.followerId === loginedUserId
+            )
+          )
+          break
+        case 'followedBy':
+          this.controlMode = 'followedBy'
+          this.filteredUsers = allUsers.filter((user) =>
+            user.follow.find(
+              (followship) => followship.followedId === loginedUserId
+            )
+          )
+      }
 
-      this.filteredUsers = allUsers.filter(user => 
-        user.followed.find(followship => followship.followerId === loginedUserId))
-      
-      this.showUsersFromIndex = 0
       this.showingUsers = this.filteredUsers.slice(0, 10)
-    },
-    showFollowed(){
-      this.controlMode = 'followedBy'
-      const allUsers = this.$store.state.userAbout.users
-      const loginedUserId = this.$store.getters.loginedUserId
-
-      this.filteredUsers = allUsers.filter(user => 
-        user.follow.find(followship => followship.followedId === loginedUserId))
-
       this.showUsersFromIndex = 0
-      this.showingUsers = this.filteredUsers.slice(0, 10)
-
+      if (this.filteredUsers.length <= 10) {
+        this.isLastPage = true
+      }
     },
     showPrevOrNextPage(numToChangeIndexFrom) {
       const userCount = this.filteredUsers.length
@@ -169,10 +206,16 @@ export default {
 
       this.showUsersFromIndex += numToChangeIndexFrom
 
-      usersToLoad = this.filteredUsers.slice(this.showUsersFromIndex,this.showUsersFromIndex + 10)
+      usersToLoad = this.filteredUsers.slice(
+        this.showUsersFromIndex,
+        this.showUsersFromIndex + 10
+      )
 
       this.showingUsers = usersToLoad
-      if ((this.showUsersFromIndex + 10 ) >= userCount && (numToChangeIndexFrom >= 0)) {
+      if (
+        this.showUsersFromIndex + 10 >= userCount &&
+        numToChangeIndexFrom >= 0
+      ) {
         this.isLastPage = true
       } else {
         this.isLastPage = false
@@ -185,25 +228,65 @@ export default {
       let chatSocket = this.$store.state.chatSocket
       // * avoid duplicate connection and event listening
       if (!chatSocket) {
-          chatSocket = await this.$io(`${this.$store.state.API_URL}/chat`)
-          chatSocket.on('newMsg', (msgInfo) => {
-          console.log(msgInfo)
+        chatSocket = await this.$io(`${this.$store.state.API_URL}/chat`)
+        chatSocket.on('newMsg', (msgInfo) => {
+          msgInfo.createdTime = this.$format(
+            new Date(msgInfo.createdTime),
+            'yyyy-MM-dd HH:mm:ss',
+            {
+              locale: this.$zhTW
+            }
+          )
           this.$store.commit('SAVE_MESSAGE', msgInfo)
         })
 
         chatSocket.on('existRoomId', async (roomId) => {
-          console.log('checkRoomId', roomId)
           const { existRoomId, chatRecord } = roomId
-          const mappedChatRecord = chatRecord.map(c => {
+          const mappedChatRecord = chatRecord.map((c) => {
             const parsedMsg = JSON.parse(c)
+            const timeFormat = (timestamp) => {
+              return this.$format(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss', {
+                locale: this.$zhTW
+              })
+            }
+            const timeValue = parsedMsg.createdTime || parsedMsg.createdAt
+            const formattedCreatedTime = timeFormat(timeValue)
+            console.log({ timeValue, formattedCreatedTime })
             return {
-              contents: parsedMsg.message,
-              createdTime: parsedMsg.createdTime,
-              isSenderMsg: parsedMsg.sender === this.$store.getters.loginedUserId
+              contents: parsedMsg.message || parsedMsg.contents,
+              createdTime: formattedCreatedTime,
+              isSenderMsg:
+                parsedMsg.sender === this.$store.getters.loginedUserId ||
+                parsedMsg.senderId === this.$store.getters.loginedUserId
             }
           })
           await this.$store.commit('SET_ROOM_ID', existRoomId)
           await this.$store.commit('LOAD_MESSAGE', mappedChatRecord)
+        })
+
+        chatSocket.on('checkRoomId', (roomInfo) => {
+          const { roomId, chatRecord } = roomInfo
+          this.$store.commit('SET_ROOM_ID', roomId)
+
+          const mappedMessages = chatRecord.map((msg) => {
+            const parsedMsg = JSON.parse(msg)
+            const timeFormat = (timestamp) => {
+              return this.$format(new Date(timestamp), 'yyyy-MM-dd HH:mm:ss', {
+                locale: this.$zhTW
+              })
+            }
+            const timeValue = parsedMsg.createdTime || parsedMsg.createdAt
+            const formattedCreatedTime = timeFormat(timeValue)
+
+            return {
+              contents: parsedMsg.message || parsedMsg.contents,
+              createdTime: formattedCreatedTime,
+              isSenderMsg:
+                parsedMsg.sender === this.$store.getters.loginedUserId ||
+                parsedMsg.senderId === this.$store.getters.loginedUserId
+            }
+          })
+          this.$store.commit('LOAD_MESSAGE', mappedMessages)
         })
 
         this.$store.commit('SET_CHAT_SOCKET', chatSocket)
@@ -212,16 +295,15 @@ export default {
       chatSocket.emit('startChat', {
         triggerUser: this.$store.getters.loginedUserId,
         targetUser: targetUser.id,
+        isTriggerUserSponsor: this.$store.getters.loginedUser.isSponsor
       })
 
-      await this.$store.commit(
-        'TRIGGER_CHAT',
-        { loginedUserId: this.$store.getters.loginedUserId,
-          targetUser,
-        }
-      )
-    },
-  },
+      await this.$store.commit('TRIGGER_CHAT', {
+        loginedUserId: this.$store.getters.loginedUserId,
+        targetUser
+      })
+    }
+  }
 }
 </script>
 
@@ -244,8 +326,9 @@ export default {
 
     button {
       font-size: 1.4rem;
-      padding: .5rem 1rem .5rem 1rem;
+      padding: 0.5rem 1rem 0.5rem 1rem;
       background-color: $color-gray-400;
+      border-radius: unset;
       &.active {
         background-color: $color-brand;
       }
@@ -266,7 +349,6 @@ export default {
       flex: 1;
     }
   }
-
 }
 
 .user-card-wraper {
@@ -290,7 +372,7 @@ export default {
   }
 
   button {
-    padding: .5rem 1rem .5rem 1rem;
+    padding: 0.5rem 1rem 0.5rem 1rem;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -311,7 +393,7 @@ export default {
   padding: 1rem 0;
   display: grid;
   grid-template-columns: min-content 1fr min-content;
-  grid-column-gap: .5rem;
+  grid-column-gap: 0.5rem;
 
   align-items: center;
   cursor: pointer;
@@ -330,7 +412,7 @@ export default {
       align-self: flex-end;
       stroke: $color-brand;
       cursor: pointer;
-      transition: all .2s ease-in;
+      transition: all 0.2s ease-in;
 
       &:hover {
         transform: scale(1.3);
@@ -340,10 +422,10 @@ export default {
 
   .spot {
     position: absolute;
-    top: .5rem;
+    top: 0.5rem;
     left: 0rem;
-    width: .75rem;
-    height: .75rem;
+    width: 0.75rem;
+    height: 0.75rem;
     border-radius: 50%;
     background-color: #29c25c;
   }
@@ -360,14 +442,12 @@ export default {
   &:hover {
     box-shadow: inset 20px 0 0 0 $color-brand;
   }
-
 }
 
-h5,span {
+h5,
+span {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-
 </style>

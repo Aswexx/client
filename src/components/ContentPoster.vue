@@ -8,7 +8,10 @@
     />
     <EmojiInput ref="emojiInput" />
     <div class="upload-wrapper">
-      <svg class="upload-img" @click="showFilePicker('image/png, image/jpeg, image/gif')">
+      <svg
+        class="upload-img"
+        @click="showFilePicker('image/png, image/jpeg, image/gif')"
+      >
         <use xlink:href="./../assets/images/symbol-defs.svg#icon-images"></use>
       </svg>
       <svg class="upload-film" @click="showFilePicker('video/mp4,video/x-m4v')">
@@ -42,14 +45,12 @@ export default {
     }
   },
   methods: {
-    submitContents() {
+    async submitContents() {
+      // await this.notifTagedUsers()
       const emojiInput = this.$refs.emojiInput
       const contentsToSubmit = new FormData()
 
-      contentsToSubmit.append(
-        'authorId',
-        this.$store.getters.loginedUserId
-      )
+      contentsToSubmit.append('authorId', this.$store.getters.loginedUserId)
       contentsToSubmit.append('contents', emojiInput.input)
       contentsToSubmit.append('file', emojiInput.fileToUpload)
 
@@ -80,6 +81,8 @@ export default {
             contentsToSubmit
           )
         }
+        contentsToSubmit.append('tagedUsers', JSON.stringify(this.$refs.emojiInput.tagedUserList))
+        this.$refs.emojiInput.tagedUserList = {}
         return this.$store.dispatch('postAbout/submitNewPost', contentsToSubmit)
       }
 
@@ -100,20 +103,35 @@ export default {
           contentsToSubmit
         )
       }
-
     },
     showFilePicker(fileType) {
       this.$refs.emojiInput.showFilePicker(fileType)
     },
     setAltImg(event) {
       event.target.src = require('@/assets/images/default_avatar1.png')
+    },
+    async notifTagedUsers() {
+      const tagedUsers = this.$refs.emojiInput.tagedUserList
+      if (!tagedUsers.size) return
+      alert(`taged ${tagedUsers.size} users!`)
+      tagedUsers.forEach(user => {
+        console.log(user)
+        // const notifData = {
+        //   informerId: this.$store.getters.loginedUserId,
+        //   receiverId: user,
+        //   notifType: 'mention'
+        // }
+        // this.$axios.post(
+        //   `${this.$API_URL}/notifications`,
+        //   notifData
+        // )
+      })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-
 div {
   padding: 1rem;
 }

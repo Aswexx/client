@@ -154,8 +154,8 @@ export default {
       userId = this.$store.getters.loginedUserId
     }
 
-    await this.$store.dispatch('userAbout/getUser', userId)
     await this.$store.dispatch('postAbout/getUserPosts', userId)
+    await this.$store.dispatch('userAbout/getUser', userId)
   },
   destroyed() {
     this.$store.state.userAbout.otherUserData = {}

@@ -21,6 +21,9 @@ import EmailVertificationPage from '../views/EmailVertificationPage.vue'
 import PostListPage from '../views/admin/PostListPage.vue'
 import UserListPage from '../views/admin/UserListPage.vue'
 import StatsPage from '../views/admin/StatsPage.vue'
+// *
+import store from './../store/index'
+import axios from 'axios'
 
 Vue.use(VueRouter)
 
@@ -28,8 +31,26 @@ const routes = [
   {
     path: '/',
     name: 'primary',
-    redirect: '/login',
     component: MainView,
+    beforeEnter: async (_to, _from, next) => {
+      try {
+        const API_URL = store.state.API_URL
+        const { data } = await axios.get(`${API_URL}/auth`)
+        store.commit('userAbout/SAVE_USER_DATA', data)
+        store.state.isAuthenticated = true
+        await store.dispatch('userAbout/getUsers')
+        console.log(data)
+        // alert(`next to mainview, userRole: ${data.userRole}`)
+        // if (data.userRole === 'normal') {
+        //   next()
+        // } else {
+        //   next('/post-list')
+        // }
+        next()
+      } catch (err) {
+        next('/login')
+      }
+    },
     children: [
       {
         path: 'home',
@@ -152,14 +173,13 @@ const router = new VueRouter({
   routes
 })
 
-// router.beforeEach((to, from, next) => {
-//   console.log(to, from)
-//   if (from.name === 'home') {
-//     to.meta.keepAlive = true
+// router.beforeEach((to,_from,next) => {
+//   if (to.name !== 'login' && to.name !== 'admin-login' && !store.state.userAbout.isAuthenticated) {
+//     alert('請先登入')
+//     next('/login')
 //   } else {
-//     to.meta.keepAlive = false
+//     next()
 //   }
-//   next()
 // })
 
 export default router

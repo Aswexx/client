@@ -75,7 +75,8 @@ export default {
         datasets: [{
           label: '發文總數',
           data: [],
-          backgroundColor: this.gradient
+          // backgroundColor: this.gradient
+          backgroundColor: "#FC766A"
         }]
       },
       
@@ -95,9 +96,9 @@ export default {
           {
             label: "時段發文次數",
             data: [],
-            backgroundColor: this.gradient,
-            borderColor: "#FC2525",
-            pointBackgroundColor: "rgba(171.71.188.1)"
+            backgroundColor: "#FED2CE",
+            borderColor: "#FC766A",
+            pointBackgroundColor: "#FC766A"
           }
         ]
       },

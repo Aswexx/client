@@ -38,6 +38,13 @@ export default {
       this.dropPosition.top = e.clientY
       this.dropPosition.left = e.clientX
     },
+  },
+  beforeCreate(){
+    if (this.$store.getters.loginedUser.role === 'admin') {
+      this.$router.push({ name: 'post-list' })
+    } else {
+      this.$router.push({ name: 'home' })
+    }
   }
 }
 </script>

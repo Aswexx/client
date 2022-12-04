@@ -1,6 +1,9 @@
 <template>
   <div class="notif" :class="{ read: notif.isRead }" @click="direct(notif)">
-    <img src="../assets/images/default_avatar1.png" alt="avatar" />
+    <img class="notif__avatar"
+      :src="notif.informer.avatarUrl"
+      @error="useFallbackImg"
+    />
     <span class="notif__description">{{ description }}</span>
     <span>{{ formattedTime }}</span>
   </div>
@@ -38,13 +41,27 @@ export default {
             chatSocket.on('checkRoomId', (roomInfo) => {
               const { roomId, chatRecord } = roomInfo
               this.$store.commit('SET_ROOM_ID', roomId)
+
               const mappedMessages = chatRecord.map((msg) => {
                 const parsedMsg = JSON.parse(msg)
+                const timeFormat = (timestamp) => {
+                  return this.$format(
+                    new Date(timestamp),
+                    'yyyy-MM-dd HH:mm:ss',
+                    {
+                      locale: this.$zhTW
+                    }
+                  )
+                }
+                const timeValue = parsedMsg.createdTime || parsedMsg.createdAt
+                const formattedCreatedTime = timeFormat(timeValue)
+
                 return {
-                  contents: parsedMsg.message,
-                  createdTime: parsedMsg.createdTime,
+                  contents: parsedMsg.message || parsedMsg.contents,
+                  createdTime: formattedCreatedTime,
                   isSenderMsg:
-                    parsedMsg.sender === this.$store.getters.loginedUserId
+                    parsedMsg.sender === this.$store.getters.loginedUserId ||
+                    parsedMsg.senderId === this.$store.getters.loginedUserId
                 }
               })
               this.$store.commit('LOAD_MESSAGE', mappedMessages)
@@ -56,7 +73,13 @@ export default {
                 const parsedMsg = JSON.parse(c)
                 return {
                   contents: parsedMsg.message,
-                  createdTime: parsedMsg.createdTime,
+                  createdTime: this.$format(
+                    new Date(parsedMsg.createdTime),
+                    'yyyy-MM-dd HH:mm:ss',
+                    {
+                      locale: this.$zhTW
+                    }
+                  ),
                   isSenderMsg:
                     parsedMsg.sender === this.$store.getters.loginedUserId
                 }
@@ -68,12 +91,18 @@ export default {
             // * listening the message target user sends
             chatSocket.on('newMsg', (msg) => {
               console.log(msg)
+              msg.createdTime = this.$format(
+                new Date(msg.createdTime),
+                'yyyy-MM-dd HH:mm:ss',
+                { locale: this.$zhTW }
+              )
               this.$store.commit('SAVE_MESSAGE', msg)
             })
           }
           chatSocket.emit('joinRoom', {
             triggerUser: notif.informerId,
-            targetUser: this.$store.getters.loginedUserId
+            targetUser: this.$store.getters.loginedUserId,
+            isTargetUserSponsor: this.$store.getters.loginedUser.isSponsor
           })
 
           // * confirm target then render chat window
@@ -114,7 +143,10 @@ export default {
     },
     read(notif) {
       this.$store.commit('TURN_NOTIF_READ', notif.id)
-    }
+    },
+    useFallbackImg(event) {
+      event.target.src = require('@/assets/images/default_avatar1.png')
+    },
   },
   computed: {
     description() {
@@ -132,6 +164,8 @@ export default {
           return `${notif.informer.name} 喜歡你的貼文`
         case 'likeComment':
           return `${notif.informer.name} 喜歡你的評論`
+        case 'mention':
+          return `${notif.informer.name} 提到了你`
         default:
           return ''
       }
@@ -142,7 +176,7 @@ export default {
         'yyyy-MM-dd HH:mm:ss',
         { locale: this.$zhTW }
       )
-    }
+    },
   }
 }
 </script>
@@ -152,18 +186,22 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: .5rem 2rem .5rem 0;
+  padding: 0.5rem 2rem 0.5rem 0;
   border-bottom: 1px solid $color-gray-400;
   width: 100%;
   cursor: pointer;
-  transition: all .2s ease-in;
+  transition: all 0.2s ease-in;
+
+  &__avatar {
+    margin-right: 1rem;
+  }
 
   &__description {
     flex: 1;
   }
 
   &:hover {
-    background-color: rgba($color-brand,.4);
+    background-color: rgba($color-brand, 0.4);
   }
 }
 

@@ -95,23 +95,26 @@ export default {
   },
   mounted() {
     let notificationSocket = this.$store.state.notifSocket
+    console.log(notificationSocket)
     if (!notificationSocket) {
       notificationSocket = this.$io(`${this.$store.state.API_URL}/notification`)
+      notificationSocket.on('connect', ()=> {
+        notificationSocket.emit('setOnlineUser', this.$store.getters.loginedUserId)
+        notificationSocket.emit('setChannel', this.$store.getters.loginedUserId)
+      })
+
       this.$store.commit('SET_NOTIF_SOCKET', notificationSocket)
+
+      notificationSocket.on('onlineUsers', (users) => {
+        this.$store.commit('UPDATE_ONLINE_USERS', users)
+      })
+
+      notificationSocket.on('notification', (notification) => {
+        console.log(notification)
+        this.$store.commit('ADD_NOTIFICATION', notification)
+      })
+
     }
-
-    notificationSocket.emit('setOnlineUser', this.$store.getters.loginedUserId)
-
-    notificationSocket.on('onlineUsers', (users) => {
-      this.$store.commit('UPDATE_ONLINE_USERS', users)
-    })
-
-    notificationSocket.on('notification', (notification) => {
-      console.log(notification)
-      this.$store.commit('ADD_NOTIFICATION', notification)
-    })
-
-    notificationSocket.emit('setChannel', this.$store.getters.loginedUserId)
   }
 }
 </script>

@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div id="google-sign-in-button"></div>
-  </div>
+  <div id="google-sign-in-button"></div>
 </template>
 
 <script>
@@ -26,8 +24,16 @@ export default {
 
     window.google.accounts.id.renderButton(
       document.getElementById('google-sign-in-button'),
-      { theme: 'outline', size: 'large' }
+      { theme: 'outline',
+        size: 'medium',
+        shape: 'circle',
+        logo_alignment: 'center',
+        width: 358,
+      }
     )
   }
 }
 </script>
+
+<style lang="scss" scoped>
+</style>

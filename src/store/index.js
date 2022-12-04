@@ -47,25 +47,30 @@ const getters = {
 
 const actions = {
   async sendChatNotification(context, receiverId) {
+    const recentChatNotifTargets = context.state.recentChatNotifTargets
+    const lastNotifTime = recentChatNotifTargets.get(receiverId)
+
+    if (lastNotifTime && Date.now() - lastNotifTime <= 1000 * 60 * 30) return
+    recentChatNotifTargets.set(receiverId, Date.now())
+    console.log({ recentChatNotifTargets })
+
     const notifData = {
       informerId: context.state.userAbout.loginedUserData.id,
       receiverId,
       notifType: 'inviteChat'
     }
-    await axios.post(`${context.state.API_URL}/notifications`, notifData)
-    // context.commit('TRIGGER_CHAT', notifData.informerId)
+    const notif = await axios.post(`${context.state.API_URL}/notifications`, notifData)
+    console.log('notiffff', notif)
   },
   async getNotifications(context) {
     const userId = context.getters.loginedUserId
     const { data } = await axios.get(
       `${context.state.API_URL}/notifications/${userId}`
     )
-
-    console.log(data)
-
     context.commit('ADD_NOTIFICATION', data)
   }
 }
+
 const mutations = {
   CHANGE_VIEWPORT(state, value) {
     state.viewport = value
@@ -75,7 +80,7 @@ const mutations = {
     if (!contents) {
       state.modalType = ''
       state.sourcePostOrComment = {}
-      return // contents null represents try to close modal or trigger post modal
+      return //* contents null represents try to close modal or trigger post modal
     }
     state.sourcePostOrComment = contents
     state.modalType = contents.modalType
@@ -139,7 +144,6 @@ const mutations = {
   },
   SWITCH_CHAT_TARGET(state, target) {
     state.currentChatTarget = target
-    
   },
   REMOVE_CHAT_TARGET(state, targetIndex) {
     state.chatTargetList.splice(targetIndex, 1)
@@ -158,7 +162,8 @@ const mutations = {
     state.notifSocket = notifSocket
   },
   UPDATE_ONLINE_USERS(state, users) {
-    state.onlineUsers = new Set(users)
+    // state.onlineUsers = new Set(users)
+    state.onlineUsers = users
   },
   ADD_NOTIFICATION(state, notification) {
     if (notification instanceof Array)
@@ -190,11 +195,13 @@ const state = {
   currentMsgCollection: [],
   chatTargetList: [],
   chatSocket: '',
+  recentChatNotifTargets: new Map(),
 
   sourcePostOrComment: {},
   notifications: [],
-  notifSocket: undefined,
+  notifSocket: '',
   onlineUsers: new Set(),
+  HOST_URL: 'http://localhost:8080',
   API_URL: 'http://localhost:4000'
 }
 

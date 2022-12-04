@@ -1,18 +1,31 @@
 import axios from 'axios'
 
+function directToLoginPageAndResetSocket (context) {
+  window.location.href = 'http://localhost:8080/#/login'
+  context.rootState.notifSocket.disconnect()
+  context.rootState.notifSocket = ''
+}
+
 export const postOptions = {
   namespaced: true,
   actions: {
     async getHomePagePosts(context) {
-      const { data } = await axios.get(
-        `${context.rootState.API_URL}/posts/home-page`,
-        { params: { skipPostsCount: 0, take: 10, order: 'newest' } }
-      )
+      try {
+        const { data } = await axios.get(
+          `${context.rootState.API_URL}/posts/home-page`,
+          { params: { skipPostsCount: 0, take: 10, order: 'newest' } }
+        )
 
-      // * modify data structure recieved from backend
-      delete data.postCount
-      context.state.showingPosts = Object.values(data)
+        // * modify data structure recieved from backend
+        delete data.postCount
+        context.state.showingPosts = Object.values(data)
+      } catch (err) {
+        console.error(err)
+        alert('請嘗試重新登入 fromHomePost')
+        directToLoginPageAndResetSocket(context)
+      }
     },
+
     async getUserPosts(context, userId) {
       try {
         const { data } = await axios.get(
@@ -21,7 +34,8 @@ export const postOptions = {
         context.commit('SAVE_USER_POSTS', data)
       } catch (err) {
         console.error(err)
-        alert('請重登')
+        alert('請嘗試重新登入 fromUserPost')
+        directToLoginPageAndResetSocket(context)
       }
     },
 
@@ -29,14 +43,16 @@ export const postOptions = {
       return await axios.get(`${context.rootState.API_URL}/posts/${postId}`)
     },
 
-    async submitNewPost(context, post) {
+    async submitNewPost(context, postInfo) {
+      // const { post, tagedUsers } = postInfo
       const { data } = await axios.post(
         `${context.rootState.API_URL}/posts/`,
-        post
+        postInfo
       )
 
-      data.author.avatarUrl = context.rootState.userAbout.loginedUserData.avatarUrl
-      
+      data.author.avatarUrl =
+        context.rootState.userAbout.loginedUserData.avatarUrl
+
       context.commit('SAVE_NEW_POST', data)
       if (!context.rootState.isModalOpened) return
       context.commit('TOGGLE_MODAL', null, { root: true })
@@ -47,6 +63,7 @@ export const postOptions = {
 
       context.commit('REMOVE_POST', postId)
     },
+
     async togglePostLike(context, postInfo) {
       postInfo = {
         ...postInfo,

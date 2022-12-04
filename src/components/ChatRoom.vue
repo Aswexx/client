@@ -29,7 +29,7 @@
           <img :src="currentChatTarget.avatarUrl" alt="pic" />
           <div class="info">
             <h5>{{ currentChatTarget.name }}</h5>
-            <span>在/不在線上</span>
+            <span>{{ isOnline }}</span>
           </div>
 
           <div class="controls">
@@ -46,7 +46,7 @@
             :key="index"
             :class="{
               'chat-room__msg-wrapper': !msg.isSenderMsg,
-              'chat-room__msg-wrapper--user': msg.isSenderMsg,
+              'chat-room__msg-wrapper--user': msg.isSenderMsg
             }"
           >
             <template v-if="!msg.isSenderMsg">
@@ -77,119 +77,132 @@
 export default {
   data() {
     return {
-      message: "",
-      isZoomOut: false,
-    };
+      message: '',
+      isZoomOut: false
+    }
   },
-  props: ["dropPosition"],
+  props: ['dropPosition'],
   computed: {
     chatTargetList() {
-      return this.$store.state.chatTargetList;
+      return this.$store.state.chatTargetList
     },
     isActivated() {
-      return this.$store.state.isChatActivated;
+      return this.$store.state.isChatActivated
     },
     currentChatTarget() {
-      return this.$store.state.currentChatTarget;
+      return this.$store.state.currentChatTarget
     },
     msgCollection() {
-      return this.$store.state.currentMsgCollection;
+      return this.$store.state.currentMsgCollection
     },
+    isOnline() {
+      const chatTargetId = this.$store.state.currentChatTarget.id
+      return this.$store.state.onlineUsers.has(chatTargetId)
+        ? '正在線上'
+        : '不在線上'
+    }
   },
   watch: {
     dropPosition: {
       deep: true,
       handler(newVal) {
-        const chatRoomWrapper = this.$refs.chatRoomWrapper;
-        console.log(newVal.top);
-        chatRoomWrapper.style.top = newVal.top + "px";
-        chatRoomWrapper.style.left = newVal.left + "px";
-      },
+        const chatRoomWrapper = this.$refs.chatRoomWrapper
+        console.log(newVal.top)
+        chatRoomWrapper.style.top = newVal.top + 'px'
+        chatRoomWrapper.style.left = newVal.left + 'px'
+      }
     },
+    msgCollection() {
+      const chatBody = this.$refs.chatBody
+      this.$nextTick(() => {
+        chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight
+      })
+    }
   },
   methods: {
     setAltImg(event) {
-      if (event.target.className === "user-bg") {
-        event.target.src = require("@/assets/images/default-profile-bg.jpg");
-        return;
+      if (event.target.className === 'user-bg') {
+        event.target.src = require('@/assets/images/default-profile-bg.jpg')
+        return
       }
-      event.target.src = require("@/assets/images/default_avatar1.png");
+      event.target.src = require('@/assets/images/default_avatar1.png')
     },
     minimize() {
-      this.$store.commit("MINIMIZE_CHAT_SECTION");
+      this.$store.commit('MINIMIZE_CHAT_SECTION')
     },
     scrollToBottom() {
-      const chatBody = this.$refs.chatBody;
-      chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight;
+      const chatBody = this.$refs.chatBody
+      chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight
     },
     switchChatTo(target) {
-      this.$store.commit("SWITCH_CHAT_TARGET", target);
-      this.$store.commit("RESET_CHAT_STATE");
+      this.$store.commit('SWITCH_CHAT_TARGET', target)
+      this.$store.commit('RESET_CHAT_STATE')
       // * update current chat roomId
-      this.$store.state.chatSocket.emit("changeRoom", {
+      this.$store.state.chatSocket.emit('changeRoom', {
         triggerUser: this.$store.getters.loginedUserId,
-        targetUser: this.$store.state.currentChatTarget.id,
-      });
+        targetUser: this.$store.state.currentChatTarget.id
+      })
     },
     endChat() {
-      const targetIndex = this.chatTargetList.indexOf(this.currentChatTarget);
-      this.$store.commit("REMOVE_CHAT_TARGET", targetIndex);
+      const targetIndex = this.chatTargetList.indexOf(this.currentChatTarget)
+      this.$store.commit('REMOVE_CHAT_TARGET', targetIndex)
 
-      this.$store.state.chatSocket.emit("leaveRoom", {
+      this.$store.state.chatSocket.emit('leaveRoom', {
         roomId: this.$store.state.chatRoomId,
-        records: this.$store.state.currentMsgCollection,
-      });
-      this.$store.commit("RESET_CHAT_STATE");
+        records: this.$store.state.currentMsgCollection
+      })
+      this.$store.commit('RESET_CHAT_STATE')
     },
     sendMessage() {
-      this.$store.state.chatSocket.emit("newMsg", {
+      this.$store.state.chatSocket.emit('newMsg', {
         roomId: this.$store.state.chatRoomId,
         message: this.message,
         sender: this.$store.getters.loginedUserId,
         reciever: this.$store.state.currentChatTarget.id,
-        createdTime: this.$format(Date.now(), "yyyy-MM-dd HH:mm:ss", {
-          locale: this.$zhTW,
-        }),
+        createdTime: Date.now(),
+        persist:
+          this.$store.getters.loginedUser.isSponsor ||
+          this.$store.state.currentChatTarget.isSponsor
       })
 
       if (this.$store.state.chatSocket) {
-        this.$store.state.chatSocket.on("checkRoomId", (roomInfo) => {
-          const { roomId, chatRecord } = roomInfo;
-          this.$store.commit("SET_ROOM_ID", roomId);
+        this.$store.state.chatSocket.on('checkRoomId', (roomInfo) => {
+          const { roomId, chatRecord } = roomInfo
+          this.$store.commit('SET_ROOM_ID', roomId)
           const mappedMessages = chatRecord.map((msg) => {
-            const parsedMsg = JSON.parse(msg);
+            const parsedMsg = JSON.parse(msg)
             return {
               contents: parsedMsg.message,
               createdTime: parsedMsg.createdTime,
               isSenderMsg:
-                parsedMsg.sender === this.$store.getters.loginedUserId,
-            };
-          });
-          this.$store.commit("LOAD_MESSAGE", mappedMessages);
-        });
+                parsedMsg.sender === this.$store.getters.loginedUserId
+            }
+          })
+          this.$store.commit('LOAD_MESSAGE', mappedMessages)
+        })
       }
 
       this.msgCollection.push({
         isSenderMsg: true,
         contents: this.message,
-        createdTime: this.$format(Date.now(), "yyyy-MM-dd HH:mm:ss", {
-          locale: this.$zhTW,
-        }),
-      });
+        createdTime: this.$format(Date.now(), 'yyyy-MM-dd HH:mm:ss', {
+          locale: this.$zhTW
+        })
+      })
 
-      this.message = "";
+      this.message = ''
 
-      const chatBody = this.$refs.chatBody;
-      this.$nextTick(() => {
-        chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight;
-      });
-    },
-  },
-};
+      // const chatBody = this.$refs.chatBody
+      // this.$nextTick(() => {
+      //   chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight
+      // })
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
-@import "./../assets/scss/base.scss";
+@import './../assets/scss/base.scss';
 
 .chat-room-wrapper.active {
   position: absolute;
@@ -198,7 +211,6 @@ export default {
 
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
   align-items: center;
 
   width: 60%;
@@ -208,6 +220,8 @@ export default {
   background-color: rgba($color: $color-gray-700, $alpha: 0.9);
 
   .opened-chat-list {
+    padding: 0 0.3rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
 
@@ -262,7 +276,6 @@ export default {
   box-shadow: 0.2rem 0.2rem 2rem rgba($color-gray-100, 0.4);
 
   .controls {
-
     svg {
       margin: 0 0.5rem 0 0.5rem;
       width: 2rem;

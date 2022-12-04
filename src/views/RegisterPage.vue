@@ -9,7 +9,7 @@
       ref="register"
       method="post"
     >
-      <label for="email">Email</label>
+      <!-- <label for="email">Email</label>
       <input
         id="email"
         type="email"
@@ -38,8 +38,8 @@
         minlength="8"
         maxlength="16"
         :type="visible ? 'text' : 'password'"
-      />
-      <label for="password-check">確認密碼</label>
+      /> -->
+      <!-- <label for="password-check">確認密碼</label>
       <input
         id="password-check"
         name="passwordCheck"
@@ -47,8 +47,8 @@
         minlength="8"
         maxlength="16"
         :type="visible ? 'text' : 'password'"
-      />
-      <label for="name">名稱</label>
+      /> -->
+      <!-- <label for="name">名稱</label>
       <input
         id="name"
         type="text"
@@ -61,16 +61,81 @@
         type="text"
         name="alias"
         placeholder="請設定顯示在平台上的別名"
-      />
+      /> -->
+        <span class="eye-wrapper">
+          <svg class="eye" v-if="visible" @click="toggleVisible">
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-eye"></use>
+          </svg>
+          <svg class="eye" v-else @click="toggleVisible">
+            <use
+              xlink:href="./../assets/images/symbol-defs.svg#icon-eye-blocked"
+            ></use>
+          </svg>
+        </span>
+      
+      <HollowInput labelName="Email" forAttr="email">
+        <input
+          id="email"
+          type="email"
+          name="email"
+          placeholder="請輸入註冊Email"
+          v-model="email"
+          ref="emailInput"
+        />
+      </HollowInput>
+
+      <HollowInput labelName="密碼" forAttr="password">
+        <input
+          id="password"
+          name="password"
+          placeholder="請設定8至16位密碼"
+          minlength="8"
+          maxlength="16"
+          :type="visible ? 'text' : 'password'"
+        />
+      </HollowInput>
+
+      <HollowInput labelName="確認密碼" forAttr="password-check">
+        <input
+          id="password-check"
+          name="passwordCheck"
+          placeholder="請再次確認密碼"
+          minlength="8"
+          maxlength="16"
+          :type="visible ? 'text' : 'password'"
+        />
+      </HollowInput>
+
+      <HollowInput labelName="名稱" forAttr="name">
+        <input
+          id="name"
+          type="text"
+          name="name"
+          placeholder="請設定顯示在平台上的名稱"
+        />
+      </HollowInput>
+
+      <HollowInput labelName="別名" forAttr="alias">
+        <input
+          id="alias"
+          type="text"
+          name="alias"
+          placeholder="請設定顯示在平台上的別名"
+        />
+      </HollowInput>
     </form>
-    <button @click.prevent="validateAndSubmit" form="register">註冊</button>
-    <router-link to="/login">取消</router-link>
+    <div class="control">
+      <button @click.prevent="validateAndSubmit" form="register">註冊</button>
+      <router-link to="/login">取消</router-link>
+    </div>
   </div>
 </template>
 
 <script>
+import HollowInput from '@/components/HollowInput.vue'
 export default {
   name: 'RegisterPage',
+  components: { HollowInput },
   data() {
     return {
       visible: false,
@@ -93,6 +158,7 @@ export default {
       this.visible = !this.visible
     },
     async validateAndSubmit() {
+
       const hasSpace = / /
       const allowedEmailFormat =
         /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.com/
@@ -162,13 +228,6 @@ export default {
   align-items: center;
 }
 
-.eye-wrapper {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin-left: 1rem;
-}
-
 svg {
   width: 5rem;
   height: 5rem;
@@ -181,44 +240,53 @@ svg {
 }
 
 form {
+  position: relative;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   width: 100%;
+  height: 30rem;
 
-  & > * {
-    background-color: $color-gray-200;
-    padding-left: 1rem;
-  }
-}
-
-label {
-  padding-bottom: 0.7rem;
-  font-size: 1.4rem;
-}
-
-input {
-  border: none;
-  outline: none;
-  border-bottom: 1px solid $color-gray-800;
-  padding-bottom: 0.3rem;
-  margin-bottom: 2rem;
-  font-size: 1.6rem;
-}
-
-.other {
-  padding: 0.7rem;
-  width: 50%;
-  margin-left: auto;
-  text-align: end;
-
-  span {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  .eye-wrapper {
+    position: absolute;
+    top: 7.25rem;
+    right: 1rem;
+    margin-left: 1rem;
+    z-index: 3;
   }
 }
 
 button {
-  margin-top: -1rem;
+  width: 100%;
+  background: linear-gradient(45deg, $color-brand-deep, $color-brand);
+  transition: all .2s ease-in-out;
+
+  &:hover {
+    transform: scaleX(1.05) scaleY(1.1);
+  }
+}
+
+a {
+  display: inline-block;
+  width: 100%;
+  text-decoration: none;
+  text-align: center;
+  padding: .8rem 0;
+  border: 1px solid #dadce0;
+  border-radius: 2rem;
+  font-size: 1.4rem;
+  color: $color-gray-800;
+
+  &:hover {
+    background-color: #F8FAFF;
+  }
+}
+
+.control {
+  width: 100%;
+  button {
+    margin-bottom: 1rem;
+  }
 }
 
 .password {

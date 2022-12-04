@@ -92,7 +92,7 @@ svg {
 
 .toast-container {
   position: absolute;
-  top: 30%;
+  top: 20%;
   right: 0;
   overflow: hidden;
 }

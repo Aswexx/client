@@ -1,5 +1,10 @@
 <template>
   <div class="wrapper">
+    <div class="tagedUserList">
+      <a href="" v-for="(user,key) in tagedUserList" :key="key">
+        @{{ key }}
+      </a>
+    </div>
     <textarea
       class="regular-input"
       :placeholder="placeholder"
@@ -9,6 +14,18 @@
     </textarea>
 
     <input type="file" hidden @change="readyToUpload" ref="fileInput" />
+
+    <div class="tagUserPicker" v-show="tagUserPicker">
+      <p
+        class="user" 
+        v-for="user in users" 
+        :key="user.id"
+        @click="tagUser({ userId: user.id, userAlias: user.alias })"
+      >
+        @{{ user.alias }}
+      </p>
+    </div>
+
     <div class="fileToUpload-wrapper" v-show="fileURL">
       <svg @click="cancelUpload"><use href="@/assets/images/symbol-defs.svg#icon-cross"></use></svg>
       <img class="fileToUpload" v-if="fileType === 'image'" :src="fileURL" />
@@ -59,6 +76,8 @@ export default {
   data() {
     return {
       input: '',
+      tagUserPicker: false,
+      tagedUserList: {},
       search: '',
       cursorPosition: 0,
       fileURL: '',
@@ -67,14 +86,54 @@ export default {
       allowedExtensions: /(\.mp4|\.jpeg|\.jpg|\.png|\.gif)$/i
     }
   },
+  watch: {
+    input(newVal) {
+      if (/@/.exec(newVal)) {
+        console.log('@@!')
+        this.tagUserPicker = true
+      } else {
+        this.tagUserPicker = false
+      }
+
+      const targetEl = this.$refs.input
+      targetEl.style.height = 'auto'
+      targetEl.style.height = targetEl.scrollHeight + 'px'
+      targetEl.scrollTop = targetEl.scrollHeight
+      window.scrollTo(
+        window.scrollLeft,
+        targetEl.scrollTop + targetEl.scrollHeight
+      )
+      this.cursorPosition = targetEl.selectionStart
+    }
+  },
   computed:{
     placeholder(){
       if (this.$route.name === 'home') return '有什麼新鮮事?'
       return '推你的回覆'
+    },
+    users() {
+      const allUsers = this.$store.getters.users
+      const atIndex = this.input.indexOf('@') + 1
+      const keyword = this.input.substring(atIndex, this.input.length)
+      console.log(keyword)
+      const keywordRegExp = new RegExp(keyword, 'i')
+      const filteredUsers = allUsers.filter(user => keywordRegExp.exec(user.alias))
+      return filteredUsers
     }
   },
   components: { EmojiPicker },
   methods: {
+    tagUser(userInfo) {
+      const { userId, userAlias } = userInfo
+      const currentInput = this.input
+      const atIndex = currentInput.indexOf('@') + 1
+      const keyword = currentInput.substring(atIndex, currentInput.length)
+
+      this.input = this.input.replace(`@${keyword}`, '')
+      this.tagedUserList[userAlias] = userId
+      this.tagUserPicker = false
+      this.$refs.input.focus()
+    },
     append(emoji) {
       const targetEl = this.$refs.input
       const foreSubstring = this.input.slice(0, targetEl.selectionStart)
@@ -92,7 +151,6 @@ export default {
 
       console.log(this.fileToUpload.name)
       if (!this.allowedExtensions.exec(this.fileToUpload.name)) {
-        // TODO: optimize notification
         this.$store.commit('TRIGGER_TOAST', {
           type: 'info',
           detail: '目前支援的圖片檔案格式: jpeg、jpg、gif、png',
@@ -123,19 +181,6 @@ export default {
       } else {
         video.pause()
       }
-    }
-  },
-  watch: {
-    input() {
-      const targetEl = this.$refs.input
-      targetEl.style.height = 'auto'
-      targetEl.style.height = targetEl.scrollHeight + 'px'
-      targetEl.scrollTop = targetEl.scrollHeight
-      window.scrollTo(
-        window.scrollLeft,
-        targetEl.scrollTop + targetEl.scrollHeight
-      )
-      this.cursorPosition = targetEl.selectionStart
     }
   },
   directives: {
@@ -181,6 +226,35 @@ export default {
 
   &:focus {
     color: $color-gray-900;
+  }
+}
+
+.tagUserPicker {
+  background-color: $color-gray-100;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 999;
+  height: 13rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  box-shadow: 12px 9px 19px 5px $color-gray-600;
+  border-radius: 1rem;
+
+  p {
+    cursor: pointer;
+  }
+
+  p:hover {
+    background-color: $color-brand;
+    color: $color-gray-100;
+  }
+}
+
+.tagedUserList {
+  a {
+    color: $color-primary;
   }
 }
 
