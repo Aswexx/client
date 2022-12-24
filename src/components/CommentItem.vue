@@ -1,23 +1,29 @@
 <template>
   <div class="comment" @click="toCommentDetail(comment, attachComments)">
-    <img class="comment__avatar" 
+    <img class="comment__avatar"
       :src="comment.author.avatarUrl"
       @error="setAltImg"
     />
+
+      <svg class="comment__delete-icon"
+        @click.stop="deleteComment(comment.id)"
+      >
+        <use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use>
+      </svg>
+
 
     <div class="comment__contents">
       <span class="comment__title">
         <b>{{ comment.author.name }}</b>
         {{ comment.author.alias }}．{{ timeRelativeToNow }}</span
       >
-      <p v-if="comment.onPost">
-        回覆
-        <button
-          @click.stop="toPostDetail(comment.onPost)"
-        >
-          @{{ comment.onPost.author.alias }}
-        </button>
-      </p>
+      <div class="taged-users" v-if="comment.mention && comment.mention.length">
+        <span 
+          v-for="(mention, index) in comment.mention" :key="index"
+          @click.stop="toUserProfile(mention.mentionedUserId)"
+        >@{{ mention.mentionedUser.alias }}</span>
+      </div>
+
       <div>{{ comment.contents }}</div>
       <template v-if="comment.media">
         <img
@@ -100,6 +106,10 @@ export default {
       }
       event.target.src = require('@/assets/images/default_avatar1.png')
     },
+    deleteComment(commentId) {
+      alert(commentId)
+      this.$store.dispatch('commentAbout/deleteComment', commentId)
+    },
     toggleCommentLike(comment) {
       const isLike = !this.isLike
       const commentInfo = {
@@ -143,10 +153,10 @@ export default {
         params: { userId }
       })
     },
-    async toPostDetail(post){
+    toUserProfile(userId) {
       this.$router.push({
-        name: 'post-detail',
-        params: { post }
+        name: 'posts',
+        params: { userId }
       })
     }
   },
@@ -155,6 +165,7 @@ export default {
       this.comment.id &&
       this.comment.id !== this.$store.getters.topicComment.id
     ) {
+      if (!this.comment._count?.commentByComments) return
       await this.$store.dispatch(
         'commentAbout/getAttachComments',
         this.comment.id
@@ -183,6 +194,8 @@ export default {
   grid-row-gap: 1rem;
   cursor: pointer;
 
+  position: relative;
+
   &__title {
     display: inline-block;
     padding-bottom: 0.5rem;
@@ -197,14 +210,22 @@ export default {
   }
 
   &__video {
-      width: 90%;
+    width: 90%;
 
-  video {
-    aspect-ratio: 16/9;
-    object-fit: cover;
-    border-radius: 1.5rem;
+    video {
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 1.5rem;
+    }
   }
 
+  &__delete-icon {
+    fill: red;
+    width: 1.25rem;
+    height: 1.25rem;
+
+    position: absolute;
+    right: 1rem;
   }
 }
 
@@ -232,6 +253,19 @@ export default {
     border-radius: 1.5rem;
   }
 }
+
+.taged-users {
+  color: $color-primary;
+
+  span {
+    padding-right: .5rem;
+  }
+
+  span:hover {
+    text-decoration: underline;
+  }
+}
+
 
 
 </style>

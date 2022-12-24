@@ -55,12 +55,12 @@
     </div>
 
     <div class="profile-nav">
-      <router-link to="/profile/posts" active-class="active">推文</router-link>
+      <router-link to="/profile/posts" active-class="active">貼文</router-link>
       <router-link to="/profile/replies" active-class="active"
         >回覆</router-link
       >
       <router-link to="/profile/likes" active-class="active"
-        >喜歡的內容</router-link
+        >喜歡的貼文</router-link
       >
     </div>
 

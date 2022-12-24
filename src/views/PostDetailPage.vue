@@ -3,7 +3,7 @@
     <PageInfoBar />
     <PostItem class="post" :post="post" ref="post" />
     <div class="info">
-      <span>{{ formattedTime }} 發布</span>
+      <span>{{ formattedTime }} 發布 </span>
       <span v-if="post.liked">有 {{ post.liked.length }} 個人喜歡</span>
       <a @click="likePost(post)">
         <svg v-if="!isLike">
@@ -89,7 +89,6 @@ export default {
 <style lang="scss" scoped>
 .comment-list {
   height: 53vh;
-  max-height: 34rem;
   overflow-x: auto;
 }
 

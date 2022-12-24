@@ -1,7 +1,8 @@
 import axios from 'axios'
 
 function directToLoginPageAndResetSocket (context) {
-  window.location.href = 'http://localhost:8080/#/login'
+  // window.location.href = 'http://localhost:8080/#/login'
+  window.location.href = 'http://192.168.1.106:8080/#/login'
   context.rootState.notifSocket.disconnect()
   context.rootState.notifSocket = ''
 }
@@ -21,7 +22,7 @@ export const postOptions = {
         context.state.showingPosts = Object.values(data)
       } catch (err) {
         console.error(err)
-        alert('請嘗試重新登入 fromHomePost')
+        alert('請重新登入')
         directToLoginPageAndResetSocket(context)
       }
     },
@@ -33,8 +34,7 @@ export const postOptions = {
         )
         context.commit('SAVE_USER_POSTS', data)
       } catch (err) {
-        console.error(err)
-        alert('請嘗試重新登入 fromUserPost')
+        alert('請嘗試重新登入')
         directToLoginPageAndResetSocket(context)
       }
     },
@@ -44,7 +44,6 @@ export const postOptions = {
     },
 
     async submitNewPost(context, postInfo) {
-      // const { post, tagedUsers } = postInfo
       const { data } = await axios.post(
         `${context.rootState.API_URL}/posts/`,
         postInfo
@@ -133,7 +132,6 @@ export const postOptions = {
     },
     CONVERT_AVATAR_URL(state, avatarUrl) {
       console.log(avatarUrl)
-      // const avatarUrl = 22222222222222222
       state.userPosts.forEach((post) => {
         post.avatarUrl = avatarUrl
       })
@@ -142,10 +140,6 @@ export const postOptions = {
       state.userPosts.unshift(post)
       state.showingPosts.unshift(post)
     },
-    // ADD_MORE_HOME_PAGE_POSTS(state, posts) {
-    //   console.log('🧨🧨', Object.values(posts))
-    //   state.showingPosts.push(...Object.values(posts))
-    // },
     SHOW_SEARCHED_POSTS(state, data) {
       state.showingSearchedPosts = data
     },
@@ -191,8 +185,17 @@ export const postOptions = {
     },
     UPDATE_POST_LIKE_STATE(state, likePostInfo) {
       console.log({ likePostInfo })
+      // * update home posts
       if (!likePostInfo.isLike) {
         for (const post of state.showingPosts) {
+          if (post.id === likePostInfo.postId) {
+            const index = post.liked.indexOf(likePostInfo)
+            post.liked.splice(index, 1)
+            break
+          }
+        }
+        // * update posts at profile page
+        for (const post of state.userPosts) {
           if (post.id === likePostInfo.postId) {
             const index = post.liked.indexOf(likePostInfo)
             post.liked.splice(index, 1)
@@ -201,6 +204,13 @@ export const postOptions = {
         }
       }
       for (const post of state.showingPosts) {
+        if (post.id === likePostInfo.postId) {
+          post.liked.push(likePostInfo)
+          break
+        }
+      }
+      // * update posts at profile page
+      for (const post of state.userPosts) {
         if (post.id === likePostInfo.postId) {
           post.liked.push(likePostInfo)
           return

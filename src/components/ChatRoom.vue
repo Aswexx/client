@@ -97,7 +97,7 @@ export default {
     },
     isOnline() {
       const chatTargetId = this.$store.state.currentChatTarget.id
-      return this.$store.state.onlineUsers.has(chatTargetId)
+      return Number(this.$store.state.onlineUsers[chatTargetId])
         ? '正在線上'
         : '不在線上'
     }

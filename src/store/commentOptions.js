@@ -17,8 +17,7 @@ export const commentOptions = {
         comment
       )
 
-      result.data.author.avatarUrl =
-        this.getters.loginedUser.avatarUrl
+      result.data.author.avatarUrl = this.getters.loginedUser.avatarUrl
 
       context.rootState.isModalOpened = false
       if (result.data.postId) {
@@ -45,6 +44,14 @@ export const commentOptions = {
       context.commit('SET_ATTACH_COMMENTS', { commentId, attachComments: data })
       return data
     },
+
+    async getUserRecentComments(context, userId) {
+      const { data } = await axios.get(
+        `${context.rootState.API_URL}/comments/recent/${userId}`
+      )
+      context.commit('SET_USER_RECENT_COMMENTS', data)
+    },
+
     async toggleCommentLike(context, commentInfo) {
       const commentInfoToUpdate = {
         commentId: commentInfo.commentId,
@@ -68,6 +75,14 @@ export const commentOptions = {
           commentId: commentInfo.commentId
         })
       }
+    },
+    async deleteComment(context, commentId) {
+      const { data } = await axios.delete(
+        `${context.rootState.API_URL}/comments/${commentId}`
+      )
+
+      console.log(`${data} deleted!`)
+      context.commit('DELETE_USER_RECENT_COMMENT', commentId)
     }
   },
   mutations: {
@@ -78,6 +93,13 @@ export const commentOptions = {
           return
         }
       }
+    },
+    SET_USER_RECENT_COMMENTS(state, comments) {
+      state.userRecentComments = comments
+    },
+    DELETE_USER_RECENT_COMMENT(state, commentId) {
+      state.userRecentComments =
+        state.userRecentComments.filter(comment => comment.id !== commentId)
     },
     SET_ATTACH_COMMENTS(state, attachComments) {
       state.attachComments[attachComments.commentId] =
@@ -133,6 +155,7 @@ export const commentOptions = {
   state: {
     topicComment: {},
     attachComments: {},
-    tempComment: {}
+    tempComment: {},
+    userRecentComments: []
   }
 }

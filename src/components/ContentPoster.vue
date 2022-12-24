@@ -22,7 +22,7 @@
           $store.state.modalType === 'replyPost' ||
           $route.name === 'post-detail'
             ? '回覆'
-            : '推文'
+            : '貼文'
         }}
       </button>
     </div>
@@ -66,6 +66,9 @@ export default {
       if (this.$route.name === 'comment-detail' && !this.source) {
         const commentId = this.commentId || this.source.id
         contentsToSubmit.append('commentId', commentId)
+
+        contentsToSubmit.append('tagedUsers', JSON.stringify(this.$refs.emojiInput.tagedUserList))
+        this.$refs.emojiInput.tagedUserList = {}
         return this.$store.dispatch(
           'commentAbout/submitComment',
           contentsToSubmit
@@ -89,6 +92,9 @@ export default {
       // * home page reply post
       if (this.source.modalType === 'replyPost') {
         contentsToSubmit.append('postId', this.source.id)
+        contentsToSubmit.append('tagedUsers', JSON.stringify(this.$refs.emojiInput.tagedUserList))
+        this.$refs.emojiInput.tagedUserList = {}
+        
         return this.$store.dispatch(
           'commentAbout/submitComment',
           contentsToSubmit

@@ -1,6 +1,7 @@
 <template>
   <div class="notif" :class="{ read: notif.isRead }" @click="direct(notif)">
-    <img class="notif__avatar"
+    <img
+      class="notif__avatar"
       :src="notif.informer.avatarUrl"
       @error="useFallbackImg"
     />
@@ -21,6 +22,7 @@ export default {
     async direct(notif) {
       this.read(notif)
       let chatSocket = this.$store.state.chatSocket
+
       switch (notif.notifType) {
         case 'follow':
           this.$router.push({
@@ -111,33 +113,52 @@ export default {
           break
         case 'replyPost':
         case 'likePost': {
-          const { data } = await this.$store.dispatch(
-            'postAbout/getPost',
-            notif.targetPostId
-          )
-          this.$router.push({
-            name: 'post-detail',
-            params: { post: data }
-          })
+          await this.routePush('post', notif.targetPostId)
+          // const { data } = await this.$store.dispatch(
+          //   'postAbout/getPost',
+          //   notif.targetPostId
+          // )
+          // this.$router.push({
+          //   name: 'post-detail',
+          //   params: { post: data }
+          // })
           break
         }
         case 'replyComment':
         case 'likeComment': {
-          const comment = await this.$store.dispatch(
-            'commentAbout/getComment',
-            notif.targetCommentId
-          )
+          await this.routePush('comment', notif.targetCommentId)
+          // const comment = await this.$store.dispatch(
+          //   'commentAbout/getComment',
+          //   notif.targetCommentId
+          // )
 
-          const attachComments = await this.$store.dispatch(
-            'commentAbout/getAttachComments',
-            notif.targetCommentId
-          )
+          // const attachComments = await this.$store.dispatch(
+          //   'commentAbout/getAttachComments',
+          //   notif.targetCommentId
+          // )
 
-          this.$router.push({
-            name: 'comment-detail',
-            params: { comment, attachComments }
-          })
+          // this.$router.push({
+          //   name: 'comment-detail',
+          //   params: { comment, attachComments }
+          // })
           break
+        }
+        case 'mention': {
+          const { targetPostId, targetCommentId } = notif
+          if (targetPostId) {
+            // const { data } = await this.$store.dispatch(
+            //   'postAbout/getPost',
+            //   notif.targetPostId
+            // )
+            // this.$router.push({
+            //   name: 'post-detail',
+            //   params: { post: data }
+            // })
+            await this.routePush('post', targetPostId)
+          } else {
+            console.log('go to mention Comment', targetCommentId)
+            await this.routePush('comment', targetCommentId)
+          }
         }
       }
     },
@@ -147,7 +168,34 @@ export default {
     useFallbackImg(event) {
       event.target.src = require('@/assets/images/default_avatar1.png')
     },
+    async routePush (targetType, targetContentId) {
+      if (targetType === 'post') {
+        const { data } = await this.$store.dispatch(
+          'postAbout/getPost',
+          targetContentId
+        )
+        this.$router.push({
+          name: 'post-detail',
+          params: { post: data }
+        })
+      } else {
+        const comment = await this.$store.dispatch(
+          'commentAbout/getComment',
+          targetContentId
+        )
+
+        const attachComments = await this.$store.dispatch(
+          'commentAbout/getAttachComments',
+          targetContentId
+        )
+        this.$router.push({
+          name: 'comment-detail',
+          params: { comment, attachComments }
+        })
+      }
+    }
   },
+  
   computed: {
     description() {
       const notif = this.notif
@@ -165,7 +213,8 @@ export default {
         case 'likeComment':
           return `${notif.informer.name} 喜歡你的評論`
         case 'mention':
-          return `${notif.informer.name} 提到了你`
+          if (notif.targetPostId) return `${notif.informer.name} 在一則貼文中提到了你`
+          return `${notif.informer.name} 在一則評論中提到了你`
         default:
           return ''
       }
@@ -176,7 +225,7 @@ export default {
         'yyyy-MM-dd HH:mm:ss',
         { locale: this.$zhTW }
       )
-    },
+    }
   }
 }
 </script>

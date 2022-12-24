@@ -92,9 +92,15 @@ svg {
 
 .toast-container {
   position: absolute;
-  top: 20%;
-  right: 0;
+  top: 10%;
+  right: 50%;
   overflow: hidden;
+
+  @include respond($bp-mobile){
+    width: 100%;
+    top: 80%;
+    right: 0;
+  }
 }
 
 .toast {

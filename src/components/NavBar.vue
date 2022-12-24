@@ -1,31 +1,20 @@
 <template>
   <div class="nav">
     <img class="brand-logo" src="./../assets/images/logo.svg" />
-
     <ul>
       <li>
-        <router-link
-          :to="isAdmin ? '/post-list' : '/home'"
-          active-class="active"
-        >
+        <router-link :to="isAdmin ? '/post-list' : '/home'" active-class="active">
           <svg>
-            <use
-              xlink:href="./../assets/images/symbol-defs.svg#icon-home"
-            ></use>
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-home"></use>
           </svg>
-          <span>{{ isAdmin ? '推文列表' : '首頁' }}</span>
+          <span>{{ isAdmin ? '貼文列表' : '首頁' }}</span>
         </router-link>
       </li>
 
       <li>
-        <router-link
-          :to="isAdmin ? '/user-list' : '/profile/posts'"
-          active-class="active"
-        >
+        <router-link :to="isAdmin ? '/user-list' : '/profile/posts'" active-class="active">
           <svg>
-            <use
-              xlink:href="./../assets/images/symbol-defs.svg#icon-user"
-            ></use>
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-user"></use>
           </svg>
           <span>{{ isAdmin ? '使用者列表' : '個人資料' }}</span>
         </router-link>
@@ -34,20 +23,18 @@
       <li v-if="isAdmin">
         <router-link to="/stats" active-class="active">
           <svg>
-            <use
-              xlink:href="./../assets/images/symbol-defs.svg#icon-stats"
-            ></use></svg
-          ><span>統計</span>
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-stats"></use>
+          </svg><span>統計</span>
         </router-link>
       </li>
 
       <li v-if="!isAdmin">
         <router-link to="/notifications" active-class="active" class="unread">
-          <span class="unread-dot">{{ unreadCounts }}</span>
+          <span v-if="unreadCounts" class="unread-dot">
+            <b v-if="$store.state.viewport > 576">{{ unreadCounts }}</b>
+          </span>
           <svg>
-            <use
-              xlink:href="./../assets/images/symbol-defs.svg#icon-notifications"
-            ></use>
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-notifications"></use>
           </svg>
           <span>通知</span>
         </router-link>
@@ -56,19 +43,15 @@
       <li v-if="!isAdmin">
         <router-link to="/setting" active-class="active">
           <svg>
-            <use
-              xlink:href="./../assets/images/symbol-defs.svg#icon-setting"
-            ></use></svg
-          ><span>設定</span>
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-setting"></use>
+          </svg><span>設定</span>
         </router-link>
       </li>
 
       <li v-if="!isAdmin && this.$store.state.viewport < 576">
         <router-link to="/followship" active-class="active">
           <svg>
-            <use
-              xlink:href="./../assets/images/symbol-defs.svg#icon-search"
-            ></use>
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-search"></use>
           </svg>
         </router-link>
       </li>
@@ -76,30 +59,21 @@
       <li v-if="!isAdmin">
         <router-link to="/sponsor" active-class="active">
           <svg>
-            <use
-              xlink:href="./../assets/images/symbol-defs.svg#icon-medal"
-            ></use>
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-medal"></use>
           </svg>
-          <span>會員升級</span>
+          <span>帳號升級</span>
         </router-link>
       </li>
 
       <button @click="triggerChat">
-        <svg
-          class="chat-icon"
-          :class="{ active: $store.state.isChatActivated }"
-        >
+        <svg class="chat-icon" :class="{ active: $store.state.isChatActivated }">
           <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
         </svg>
       </button>
 
       <button v-if="!isAdmin" @click="post">
-        <span>推文</span>
-        <svg
-          class="post-icon"
-          :class="{ active: $store.state.isModalOpened }"
-          v-if="matchTablet"
-        >
+        <span>貼文</span>
+        <svg class="post-icon" :class="{ active: $store.state.isModalOpened }" v-if="matchTablet">
           <use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use>
         </svg>
       </button>
@@ -129,11 +103,16 @@ export default {
   },
   methods: {
     post() {
-      // this.$refs.iconPost.classList.toggle('active')
       this.$store.commit('TOGGLE_MODAL')
     },
     triggerChat() {
-      // this.$refs.iconChat.classList.toggle('active')
+      if (!this.$store.state.chatTargetList.length && !this.$store.state.isChatActivated) {
+        return this.$store.commit('TRIGGER_TOAST', {
+          type: 'info',
+          detail: '沒有已開啟的聊天'
+        })
+      }
+
       if (!this.$store.state.isChatActivated) {
         this.$store.commit('TRIGGER_CHAT')
       } else {
@@ -188,13 +167,14 @@ div.nav {
 
   @include respond($bp-mobile) {
     height: 5.5rem;
+
     .brand-logo,
     .logout {
       display: none;
     }
 
     border-top: 1px solid $color-gray-200;
-    background-color: blue;
+    background-color: $color-gray-400;
 
     position: fixed;
     z-index: 999;
@@ -208,6 +188,7 @@ ul {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
   @include respond($bp-tablet) {
     align-items: center;
   }
@@ -223,7 +204,7 @@ ul {
   cursor: pointer;
 }
 
-li > a,
+li>a,
 .logout {
   display: flex;
   align-items: center;
@@ -244,9 +225,11 @@ svg {
     width: 5rem;
     height: 5rem;
   }
+
   &.post-icon {
     fill: $color-gray-100;
   }
+
   &.chat-icon {
     width: 2rem;
     height: 2rem;
@@ -257,6 +240,7 @@ svg {
 
 .unread {
   position: relative;
+
   &-dot {
     position: absolute;
     top: 0;
@@ -278,6 +262,7 @@ svg {
   span {
     display: none;
   }
+
   button {
     width: 4rem;
     height: 4rem;
@@ -287,6 +272,7 @@ svg {
     justify-content: center;
     align-items: center;
   }
+
   svg.post-icon {
     margin: 0;
     fill: $color-gray-100;
@@ -295,12 +281,14 @@ svg {
 
 @include respond($bp-mobile) {
   button {
-    background-color: blue;
+    background-color: $color-gray-400;
   }
+
   svg.chat-icon {
     stroke: $color-gray-900;
     scale: 2.5;
   }
+
   svg.chat-icon.active {
     stroke: $color-brand;
   }
@@ -308,8 +296,16 @@ svg {
   svg.post-icon {
     fill: $color-gray-900;
   }
+
   svg.post-icon.active {
     fill: $color-brand;
+  }
+
+  .unread-dot {
+    width: .5rem;
+    height: .5rem;
+    right: 1rem;
+    background-color: red;
   }
 }
 </style>

@@ -11,6 +11,5 @@ export default {
   name: 'UserPosts',
   components: { PostItem },
   props: ['userPosts'],
-  
 }
 </script>

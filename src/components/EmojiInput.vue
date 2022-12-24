@@ -89,7 +89,6 @@ export default {
   watch: {
     input(newVal) {
       if (/@/.exec(newVal)) {
-        console.log('@@!')
         this.tagUserPicker = true
       } else {
         this.tagUserPicker = false
@@ -115,7 +114,6 @@ export default {
       const allUsers = this.$store.getters.users
       const atIndex = this.input.indexOf('@') + 1
       const keyword = this.input.substring(atIndex, this.input.length)
-      console.log(keyword)
       const keywordRegExp = new RegExp(keyword, 'i')
       const filteredUsers = allUsers.filter(user => keywordRegExp.exec(user.alias))
       return filteredUsers
@@ -149,7 +147,6 @@ export default {
       const fileList = this.$refs.fileInput.files
       this.fileToUpload = fileList[0]
 
-      console.log(this.fileToUpload.name)
       if (!this.allowedExtensions.exec(this.fileToUpload.name)) {
         this.$store.commit('TRIGGER_TOAST', {
           type: 'info',
@@ -175,7 +172,6 @@ export default {
     },
     togglePlay(event) {
       const video = event.target
-      console.log(video)
       if (video.paused || video.ended) {
         video.play()
       } else {
@@ -286,7 +282,8 @@ export default {
   border: 1px solid #ccc;
   width: 30rem;
   height: 20rem;
-  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: scroll;
   padding: 1rem;
   box-sizing: border-box;
   border-radius: 0.5rem;

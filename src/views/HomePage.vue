@@ -95,7 +95,6 @@ export default {
   },
   mounted() {
     let notificationSocket = this.$store.state.notifSocket
-    console.log(notificationSocket)
     if (!notificationSocket) {
       notificationSocket = this.$io(`${this.$store.state.API_URL}/notification`)
       notificationSocket.on('connect', ()=> {
@@ -133,6 +132,10 @@ export default {
 .post-list {
   height: 73vh;
   overflow-y: auto;
+
+  @include respond($bp-mobile) {
+    height: 62vh;
+  }
 }
 
 .post-input-group {

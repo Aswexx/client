@@ -35,6 +35,7 @@ const routes = [
     beforeEnter: async (_to, _from, next) => {
       try {
         const API_URL = store.state.API_URL
+        // * 直接檢查 token + 拿登入者資料(自動登入)，進到 catch 則使用者需要輸入帳密
         const { data } = await axios.get(`${API_URL}/auth`)
         store.commit('userAbout/SAVE_USER_DATA', data)
         store.state.isAuthenticated = true
@@ -48,8 +49,28 @@ const routes = [
         // }
         next()
       } catch (err) {
+        if (store.state.userAbout.isAuthenticated) {
+          alert('authenticted!')
+          next()
+        }
+        // alert('plz login')
         next('/login')
       }
+      // ****
+              // const API_URL = store.state.API_URL
+              // const { data } = await axios.get(`${API_URL}/auth`)
+              // store.commit('userAbout/SAVE_USER_DATA', data)
+              // store.state.isAuthenticated = true
+              // await store.dispatch('userAbout/getUsers')
+              // console.log(data)
+              // // alert(`next to mainview, userRole: ${data.userRole}`)
+              // // if (data.userRole === 'normal') {
+              // //   next()
+              // // } else {
+              // //   next('/post-list')
+              // // }
+              // next()
+              
     },
     children: [
       {

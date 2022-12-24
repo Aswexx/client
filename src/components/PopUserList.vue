@@ -352,7 +352,7 @@ export default {
 }
 
 .user-card-wraper {
-  height: 85%;
+  height: 87.5%;
   padding: 0 1rem 0 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -416,6 +416,17 @@ export default {
 
       &:hover {
         transform: scale(1.3);
+      }
+    }
+
+    @include respond($bp-mobile) {
+      flex-direction: row;
+      justify-content: space-between;
+      width: 11rem;
+
+      .chat-icon {
+        width: 3.5rem;
+        height: 3.5rem;
       }
     }
   }

@@ -10,7 +10,7 @@
           xlink:href="./../assets/images/symbol-defs.svg#icon-arrow-left2"
         ></use>
       </svg>
-      <h3>推文</h3>
+      <h3>貼文</h3>
     </div>
 
     <div
@@ -71,7 +71,7 @@ export default {
     },
     adminPageTitle() {
       return this.currentPage === 'post-list'
-        ? '推文列表'
+        ? '貼文列表'
         : this.currentPage === 'user-list'
         ? '使用者列表'
         : '統計圖表'

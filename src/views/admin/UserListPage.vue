@@ -6,7 +6,7 @@
       <select id="order-rule" v-model="orderRule">
         <option value="createdAt">註冊時間</option>
         <option value="mostPosts">總發文數</option>
-        <option value="mostPostLikeds">總推文被喜歡數</option>
+        <option value="mostPostLikeds">總貼文被喜歡數</option>
         <option value="follows">追蹤數</option>
         <option value="followeds">被追蹤數</option>
       </select>

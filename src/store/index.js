@@ -201,8 +201,9 @@ const state = {
   notifications: [],
   notifSocket: '',
   onlineUsers: new Set(),
-  HOST_URL: 'http://localhost:8080',
-  API_URL: 'http://localhost:4000'
+  // HOST_URL: 'http://localhost:8080',
+  // API_URL: 'http://localhost:4000',
+  API_URL: 'http://192.168.1.106:4000'
 }
 
 export default new Vuex.Store({

@@ -7,6 +7,7 @@
       :src="post.author.avatarUrl"
       @error="setAltImg"
     />
+
     <div class="interact">
       <template v-if="post.author">
         <span
@@ -20,6 +21,14 @@
         </svg>
       </span>
     </div>
+
+    <div class="taged-users" v-if="post.mention && post.mention.length">
+      <span 
+        v-for="(mention, index) in post.mention" :key="index"
+        @click.stop="toUserProfile(mention.mentionedUserId)"
+      >@{{ mention.mentionedUser.alias }}</span>
+    </div>
+
     <p class="post-contents">
       {{ post.contents }}
     </p>
@@ -44,7 +53,9 @@
       </div>
     </template>
 
-    <div class="count" v-if="$route.name !== 'post-detail'">
+    <div class="count"
+      v-if="$route.name !== 'post-detail' && $route.name !== 'comment-detail'"
+    >
       <button @click.stop="showReplyModal(post)">
         <svg>
           <use
@@ -121,12 +132,12 @@ export default {
       const isLike = !this.isLike
       this.isLike = !this.isLike
       this.$store.dispatch('postAbout/togglePostLike', {
+        authorId: post.author.id,
         postId: post.id,
         isLike
       })
     },
     deletePost() {
-      // TODO:optimize notification
       if (!confirm('確定刪除?')) return
       this.$store.dispatch('postAbout/deletePost', this.post.id)
     },
@@ -137,9 +148,15 @@ export default {
         params: { post }
       })
     },
+    toUserProfile(userId) {
+      this.$router.push({
+        name: 'posts',
+        params: { userId }
+      })
+    }
   },
   mounted() {
-    if (this.post) {
+    if (this.post && this.post.liked) {
       this.isLike = this.post.liked.some(
         (like) => like.userId === this.$store.getters.loginedUserId
       )
@@ -221,6 +238,18 @@ p.home-page {
     width: 1.2rem;
     height: 1.2rem;
     cursor: pointer;
+  }
+}
+
+.taged-users {
+  color: $color-primary;
+
+  span {
+    padding-right: .5rem;
+  }
+
+  span:hover {
+    text-decoration: underline;
   }
 }
 

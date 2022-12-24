@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <span>搜尋用戶</span>
+    <span v-if="$store.state.viewport > 576">搜尋用戶</span>
     <div class="box">
       <input type="text" class="input" :class="{active: keyword.length}" v-model="keyword">
       <svg class="search" v-show="!keyword.length">

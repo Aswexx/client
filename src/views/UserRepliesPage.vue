@@ -1,6 +1,9 @@
 <template>
   <div class="post-list">
-    <CommentItem v-for="comment in comments" :key="comment.id" :comment="comment">
+    <CommentItem 
+      v-for="comment in $store.state.commentAbout.userRecentComments"
+      :key="comment.id" 
+      :comment="comment">
     </CommentItem>
   </div>
 </template>
@@ -9,23 +12,12 @@
 import CommentItem from '../components/CommentItem.vue'
 export default {
   name: 'userRepliesPage',
-  data(){
-    return {
-      comments: []
-    }
-  },
   components: { CommentItem },
-  async mounted(){
+  async beforeCreate(){
     const userId = this.$store.state.userAbout.otherUserData.id || this.$store.getters.loginedUserId
     if (userId) {
-      const { data } = await this.$axios.get(`${this.$store.state.API_URL}/comments/recent/${userId}`)
-      console.log('@@@',data)
-      this.comments = data
-      return
+      await this.$store.dispatch('commentAbout/getUserRecentComments', userId)
     }
-    const { data } = await this.$axios.get(`${this.$store.state.API_URL}/comments/recent/${userId}`)
-
-    this.comments = data
   }
 }
 </script>

@@ -1,6 +1,18 @@
 <template>
   <div>
     <PageInfoBar />
+    <div class="comment-target">
+      <div class="source-post" v-if="Object.hasOwn(sourcePost, 'id')">
+        <h3>來源貼文:</h3>
+        <PostItem :post="sourcePost"/>
+      </div>
+      <PostItem :post="commentTarget"/>
+        <!-- v-if="comment.postId || comment.onPost" -->
+      <!-- <CommentItem
+        v-else
+        :comment="commentTarget"
+      /> -->
+    </div>
     <CommentItem class="comment" :comment="comment" />
     <div class="info">
       <span>發表於 {{ formattedTime }}</span>
@@ -45,6 +57,7 @@
 
 <script>
 import PageInfoBar from './../components/PageInfoBar'
+import PostItem from './../components/PostItem'
 import CommentItem from './../components/CommentItem'
 import ContentPoster from './../components/ContentPoster'
 export default {
@@ -53,7 +66,9 @@ export default {
     return {
       comment: {},
       attachComments: this.$store.getters.attachComments[this.$store.getters.topicComment.id],
-      isLike: ''
+      isLike: '',
+      commentTarget: {},
+      sourcePost: {}
     }
   },
   computed: {
@@ -68,7 +83,7 @@ export default {
       )
     }
   },
-  components: { PageInfoBar, CommentItem, ContentPoster },
+  components: { PageInfoBar, PostItem, CommentItem, ContentPoster },
   methods: {
     showModal(comment) {
       this.$refs.comment.showReplyModal(comment)
@@ -92,7 +107,7 @@ export default {
   beforeCreate() {
     this.$store.commit('commentAbout/RESET_ATTACH_COMMENTS')
   },
-  beforeMount() {
+  async beforeMount() {
     const topicComment =
       this.$route.params.comment ||
       JSON.parse(sessionStorage.getItem('storeData')).commentAbout.topicComment
@@ -113,6 +128,23 @@ export default {
     this.isLike = topicComment.liked.some(
       (like) => like.userId === this.$store.getters.loginedUserId
     )
+
+    const targetPostId = this.comment.postId || this.comment.onPost?.id
+
+    if (!targetPostId) {
+      const onCommentId = this.comment.onCommentId
+      const { data } = await this.$axios.get(`${this.$store.state.API_URL}/comments/${onCommentId}`)
+      this.commentTarget = data
+
+      if (data.postId) {
+        const sourcePost = this.$store.getters.showingPosts.find(post => post.id === data.postId)
+        this.sourcePost = sourcePost
+      }
+      return
+    }
+
+    const targetPost = this.$store.getters.showingPosts.find(post => post.id === targetPostId)
+    this.commentTarget = targetPost
   },
   beforeDestroy() {
     this.$store.commit('commentAbout/RESET_TOPIC_COMMENT')
@@ -134,6 +166,16 @@ svg {
   width: 2rem;
   height: 2rem;
   cursor: pointer;
+}
+
+.comment-target {
+  padding: 0 3rem;
+  // &__post {
+  //   background-color: gold;
+  // }
+  div {
+    background-color: gold;
+  }
 }
 
 .info {
