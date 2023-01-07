@@ -28,6 +28,7 @@ export const commentOptions = {
       }
 
       context.commit('ADD_COMMENT_ON_ATTACH_COMMENT', result.data)
+      return result.data
     },
     async getComment(context, commentId) {
       const { data } = await axios.get(
@@ -109,9 +110,8 @@ export const commentOptions = {
       const key = newComment.onCommentId
       if (!state.attachComments[key]) {
         state.attachComments[key] = []
-      } else {
-        state.attachComments[key].unshift(newComment)
       }
+      state.attachComments[key].unshift(newComment)
     },
     RESET_ATTACH_COMMENTS(state) {
       state.attachComments = {}
@@ -124,6 +124,17 @@ export const commentOptions = {
     },
     SAVE_TEMP_COMMENT(state, comment) {
       state.tempComment = comment
+    },
+    TRACE_PARENT_COMMENTS(state, comment) {
+      const index = state.parentComments.indexOf(comment)
+      if (index === -1) {
+        state.parentComments.push(comment)
+      } else {
+        state.parentComments = state.parentComments.slice(0, index + 1)
+      }
+    },
+    RESET_PARENT_COMMENTS(state) {
+      state.parentComments = []
     },
     UPDATE_COMMENT_LIKE_OF_COMMENT(state, updatedComment) {
       const topicCommentId = state.topicComment.id
@@ -155,6 +166,7 @@ export const commentOptions = {
   state: {
     topicComment: {},
     attachComments: {},
+    parentComments: [],
     tempComment: {},
     userRecentComments: []
   }

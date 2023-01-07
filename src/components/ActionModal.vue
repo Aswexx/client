@@ -2,7 +2,9 @@
   <transition name="modal-fade">
     <div class="modal" v-show="isActivated">
       <transition name="modal-inner-offset">
-        <div class="post-input-group">
+        <div class="post-input-group"
+          v-show="$store.state.modalType !== 'photo'"
+        >
           <div class="post-input-title">
             <svg v-if="$store.state.viewport < 576" @click="closeModal()">
               <use
@@ -16,10 +18,24 @@
               ></use>
             </svg>
           </div>
-          <ContentPoster class="content-poster" :source="source" />
+          <ContentPoster class="content-poster"
+            :source="source"
+          />
         </div>
       </transition>
 
+      <transition name="modal-inner-offset">
+        <div class="photo-taking">
+          <video playsinline ref="video" width="500" height="500"></video>
+          <div class="photo-taking__controls">
+            <span @click="switchCam">切換前後</span>
+            <span @click="snapShot">拍照</span>
+            <span @click="cancelPhotoTaking">取消</span>
+          </div>
+        </div>
+      </transition>
+      <canvas class="snapToUpload" ref="canvas"></canvas>
+      
       <transition name="modal-inner-offset">
         <div class="profile-card" v-show="modalType === 'editProfile'">
           <div class="title">
@@ -102,7 +118,8 @@ export default {
       typingContents: '',
       validationErrMsg: '',
       editNameContent: '',
-      editIntroContent: ''
+      editIntroContent: '',
+      camMode: ''
     }
   },
   computed: {
@@ -120,6 +137,12 @@ export default {
         id: this.$store.state.sourcePostOrComment.id,
         modalType: this.$store.state.sourcePostOrComment.modalType
       }
+    },
+    videoStream() {
+      return this.$store.state.videoStream
+    },
+    isTakingPhoto() {
+      return this.$store.state.videoStream ? true : false
     }
   },
   watch: {
@@ -131,10 +154,18 @@ export default {
       } else {
         this.validationErrMsg = ''
       }
+    },
+    isTakingPhoto(newVal) {
+      if (newVal) {
+        this.camMode = 'environment'
+        this.$refs.video.srcObject = this.videoStream
+        this.$refs.video.play()
+      }
     }
   },
   methods: {
     saveProfile() {
+      // TODO: 
       alert('hi')
     },
     closeModal() {
@@ -143,16 +174,50 @@ export default {
     focusInput() {
       this.$refs.txtarea.focus()
     },
-    // submitContents() {
-    //   const contentsInfo = {
-    //     authorId: this.$store.getters.loginedUserId,
-    //     postId: '2222ttses',
-    //     commentId: this.sourcePostOrComment.id,
-    //     contents: this.typingContents
-    //   }
-    //   this.typingContents = ''
-    //   this.$store.dispatch('commentAbout/submitComment', contentsInfo)
-    // }
+    snapShot() {
+      // * save generated canvas dataUrl and converted File
+      // to Vuex then turn off the modal
+      const ctx = this.$refs.canvas.getContext('2d')
+      this.$refs.canvas.width = this.$refs.video.width
+      this.$refs.canvas.height = this.$refs.video.height
+      ctx.drawImage(this.$refs.video, 0, 0, this.$refs.video.width, this.$refs.video.height)
+      
+      const imgUrl = this.$refs.canvas.toDataURL('image/jpeg')
+      this.$store.state.snapUrl = imgUrl
+
+      this.$refs.canvas.toBlob((blob) => {
+        this.$store.state.snapFile = new File([blob], 'fileToUpload.jpg', { type: 'image/jpeg' })
+      }, 'image/jpeg')
+
+      this.cancelPhotoTaking()
+    },
+    async switchCam() {
+      // * stop webcam first
+      const videoStream = this.$store.state.videoStream
+      const tracks = videoStream.getTracks()
+      tracks.forEach(track => track.stop())
+
+      const modeToSwitch = this.camMode === 'environment' ? 'user' : 'environment'
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { exact: modeToSwitch }
+        },
+        audio: false
+      })
+      this.camMode = modeToSwitch
+      this.$store.state.videoStream = stream
+      this.$refs.video.srcObject = this.videoStream
+      this.$refs.video.play()
+    },
+    cancelPhotoTaking() {
+      // * stop webcam
+      const videoStream = this.$store.state.videoStream
+      const tracks = videoStream.getTracks()
+      tracks.forEach(track => track.stop())
+
+      this.$store.state.videoStream = ''
+      this.closeModal()
+    }
   }
 }
 </script>
@@ -445,6 +510,27 @@ textarea {
 
   span {
     align-self: flex-end;
+  }
+}
+
+.photo-taking {
+  width: 100%;
+  height: 100%;
+
+  video {
+    width: 100%;
+    height: 80%;
+    border: 1px solid red;
+  }
+
+
+  &__controls {
+    border: 1px solid green;
+    width: 50%;
+    display: flex;
+    justify-content: space-around;
+
+    margin: 3rem auto;
   }
 }
 

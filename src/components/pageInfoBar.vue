@@ -16,8 +16,10 @@
     <div
       class="personal"
       v-else-if="
-        $route.name === 'home' || ($route.name === 'posts' && !matchMobile)
-      "
+        $route.name === 'home' ||
+        ($route.name === 'posts' && !matchMobile) ||
+        $route.name === 'replies' ||
+        $route.name === 'likes'"
     >
       <svg @click="goPreviousRoute">
         <use

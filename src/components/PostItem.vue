@@ -86,7 +86,7 @@ export default {
   name: 'PostItem',
   data() {
     return {
-      isLike: false,
+      // isLike: false,
       isVideoPaused: true
     }
   },
@@ -99,6 +99,12 @@ export default {
     }
   },
   computed: {
+    isLike() {
+      const loginedUserId = this.$store.getters.loginedUserId
+      const likeRelation = this.post.liked.find(like => like.userId === loginedUserId)
+      if (!likeRelation) return false
+      return true
+    },
     timeRelativeToNow() {
       return this.$toNow(this.$parseISO(this.post.createdAt), {
         addSuffix: true,
@@ -130,10 +136,17 @@ export default {
     },
     togglePostLike(post) {
       const isLike = !this.isLike
-      this.isLike = !this.isLike
+      // this.isLike = !this.isLike
+      if (!isLike) {
+        alert('gg')
+        this.$emit('cancelLike', this.post.id)
+      }
+
+
       this.$store.dispatch('postAbout/togglePostLike', {
         authorId: post.author.id,
         postId: post.id,
+        currentRouteName: this.$route.name,
         isLike
       })
     },
@@ -156,11 +169,11 @@ export default {
     }
   },
   mounted() {
-    if (this.post && this.post.liked) {
-      this.isLike = this.post.liked.some(
-        (like) => like.userId === this.$store.getters.loginedUserId
-      )
-    }
+    // if (this.post && this.post.liked) {
+    //   this.isLike = this.post.liked.some(
+    //     (like) => like.userId === this.$store.getters.loginedUserId
+    //   )
+    // }
   }
 }
 </script>
@@ -185,10 +198,9 @@ export default {
   }
 
   .post-img {
-    width: 90%;
+    margin: 0 auto;
+    width: 50%;
     height: unset;
-    aspect-ratio: 16/9;
-    object-fit: cover;
     border-radius: 10px;
   }
 

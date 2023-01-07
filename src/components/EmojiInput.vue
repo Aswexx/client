@@ -8,7 +8,7 @@
     <textarea
       class="regular-input"
       :placeholder="placeholder"
-      v-model="input"
+      v-model.trim="input"
       ref="input"
     >
     </textarea>
@@ -28,7 +28,9 @@
 
     <div class="fileToUpload-wrapper" v-show="fileURL">
       <svg @click="cancelUpload"><use href="@/assets/images/symbol-defs.svg#icon-cross"></use></svg>
+
       <img class="fileToUpload" v-if="fileType === 'image'" :src="fileURL" />
+
       <div class="video-container" v-else>
         <video @click="togglePlay" :src="fileURL"></video>
       </div>
@@ -103,6 +105,11 @@ export default {
         targetEl.scrollTop + targetEl.scrollHeight
       )
       this.cursorPosition = targetEl.selectionStart
+    },
+    snapFile(newVal) {
+      this.fileURL = this.$store.state.snapUrl
+      this.fileToUpload = newVal
+      this.fileType = 'image'
     }
   },
   computed:{
@@ -117,6 +124,9 @@ export default {
       const keywordRegExp = new RegExp(keyword, 'i')
       const filteredUsers = allUsers.filter(user => keywordRegExp.exec(user.alias))
       return filteredUsers
+    },
+    snapFile() {
+      return this.$store.state.snapFile
     }
   },
   components: { EmojiPicker },
@@ -327,10 +337,8 @@ export default {
 }
 
 img {
-  width: 100%;
+  width: 90%;
   height: unset;
-  aspect-ratio: 16/9;
-  object-fit: cover;
   border-radius: 10px;
 }
 </style>

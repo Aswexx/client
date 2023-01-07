@@ -112,7 +112,6 @@ export default {
         console.log(notification)
         this.$store.commit('ADD_NOTIFICATION', notification)
       })
-
     }
   }
 }

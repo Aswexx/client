@@ -1,4 +1,6 @@
 const { defineConfig } = require('@vue/cli-service')
+const fs = require('fs')
+
 module.exports = defineConfig({
   transpileDependencies: true,
   // outputDir: './../server/public',
@@ -17,5 +19,18 @@ module.exports = defineConfig({
         `
       }
     }
+  },
+  devServer: {
+    https: {
+      key: fs.readFileSync('./192.168.0.103-key.pem'),
+      cert: fs.readFileSync('./192.168.0.103.pem')
+    },
+    // server: {
+    //   type: 'https',
+    //   options: {
+    //     key: fs.readFileSync('./192.168.0.103-key.pem'),
+    //     cert: fs.readFileSync('./192.168.0.103.pem')
+    //   }
+    // }
   }
 })

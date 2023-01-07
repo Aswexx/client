@@ -17,6 +17,9 @@
       <svg class="upload-film" @click="showFilePicker('video/mp4,video/x-m4v')">
         <use xlink:href="./../assets/images/symbol-defs.svg#icon-film"></use>
       </svg>
+      <svg class="take-photo" @click="triggerCam">
+        <use xlink:href="./../assets/images/symbol-defs.svg#icon-camera"></use>
+      </svg>
       <button @click="submitContents">
         {{
           $store.state.modalType === 'replyPost' ||
@@ -48,6 +51,9 @@ export default {
     async submitContents() {
       // await this.notifTagedUsers()
       const emojiInput = this.$refs.emojiInput
+      if (!emojiInput.input) {
+        return alert('不能為空')
+      }
       const contentsToSubmit = new FormData()
 
       contentsToSubmit.append('authorId', this.$store.getters.loginedUserId)
@@ -69,10 +75,13 @@ export default {
 
         contentsToSubmit.append('tagedUsers', JSON.stringify(this.$refs.emojiInput.tagedUserList))
         this.$refs.emojiInput.tagedUserList = {}
-        return this.$store.dispatch(
+        const newComment = await this.$store.dispatch(
           'commentAbout/submitComment',
           contentsToSubmit
         )
+        console.log(newComment)
+        this.$emit('submitNewComment', newComment)
+        return
       }
 
       // * submit post
@@ -132,8 +141,34 @@ export default {
         //   notifData
         // )
       })
+    },
+    async triggerCam() {
+      try {
+        //TODO: 區分是否有前後鏡頭的設備
+        // const stream = await navigator.mediaDevices.getUserMedia({
+        //   video: {
+        //     facingMode: { exact: 'environment' } // or 'user'
+        //   },
+        //   audio: false
+        // })
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        })
+
+        this.$store.commit('TOGGLE_MODAL', {
+          modalType: 'photo'
+        })
+
+        this.$store.state.videoStream = stream
+      } catch (err) {
+        alert('無法開啟設備鏡頭')
+        console.log(err)
+        this.$store.state.videoStream = ''
+      }
     }
-  }
+  },
 }
 </script>
 

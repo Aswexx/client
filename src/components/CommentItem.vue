@@ -1,11 +1,12 @@
 <template>
-  <div class="comment" @click="toCommentDetail(comment, attachComments)">
+  <div class="comment" @click="toCommentDetail(comment, attachComments, parentComments)">
     <img class="comment__avatar"
       :src="comment.author.avatarUrl"
       @error="setAltImg"
     />
 
       <svg class="comment__delete-icon"
+        v-if="comment.authorId === $store.getters.loginedUserId"
         @click.stop="deleteComment(comment.id)"
       >
         <use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use>
@@ -24,6 +25,10 @@
         >@{{ mention.mentionedUser.alias }}</span>
       </div>
 
+      <i v-if="this.$route.name === 'replies'">
+        對<span>{{ authorAlias }}</span>{{ comment.onPost ? '貼文': '評論' }}的評論
+      </i>
+
       <div>{{ comment.contents }}</div>
       <template v-if="comment.media">
         <img
@@ -39,17 +44,18 @@
         </div>
       </template>
     </div>
+
     <div
       class="comment__interact"
-      v-if="comment.onCommentId || this.$route.name === 'post-detail'"
-    >
+        v-if="this.$route.name !== 'replies' && !isTopicComment"
+      >
       <a @click.stop="triggerModal(comment)">
         <svg>
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"
           ></use>
         </svg>
-        <span>{{ attachComments.length }}</span>
+        <span>{{ comment._count.commentByComments }}</span>
       </a>
       <a @click.stop="toggleCommentLike(comment)">
         <svg v-if="!isLike">
@@ -74,9 +80,9 @@ export default {
   data() {
     return {
       isLike: false,
-      likesNum: this.comment.liked.length,
+      likesNum: this.comment.liked.length || 0,
+      parentComments: [],
       attachComments: [],
-      isTitleComment: false
     }
   },
   props: {
@@ -96,6 +102,18 @@ export default {
         addSuffix: true,
         locale: this.$zhTW
       })
+    },
+    authorAlias() {
+      if (this.comment.onPost) {
+        return this.comment.onPost.author.alias
+      }
+      return this.comment.onComment.author.alias
+    },
+    isTopicComment() {
+      return this.comment.id === this.$store.getters.topicComment.id
+    },
+    isFirstLevelComment() {
+      return Object.hasOwn(this.comment, 'onPost')
     }
   },
   methods: {
@@ -107,8 +125,11 @@ export default {
       event.target.src = require('@/assets/images/default_avatar1.png')
     },
     deleteComment(commentId) {
-      alert(commentId)
-      this.$store.dispatch('commentAbout/deleteComment', commentId)
+      if (confirm('確定刪除?')) {
+        this.$store.dispatch('commentAbout/deleteComment', commentId)
+      }
+
+      this.$emit('removeComment', commentId)
     },
     toggleCommentLike(comment) {
       const isLike = !this.isLike
@@ -135,11 +156,13 @@ export default {
       comment = { ...comment, modalType: 'replyComment' }
       this.$store.commit('TOGGLE_MODAL', comment)
     },
-    toCommentDetail(comment, attachComments) {
+    toCommentDetail(comment, attachComments, parentComments) {
+      this.$store.commit('commentAbout/TRACE_PARENT_COMMENTS', comment)
+      console.log('before push', attachComments)
       this.$router
         .push({
           name: 'comment-detail',
-          params: { comment, attachComments }
+          params: { comment, attachComments, parentComments }
         })
         .catch(() => {
           this.$emit('setAsTopicComment', comment, attachComments)
@@ -180,6 +203,10 @@ export default {
         return userId === this.$store.getters.loginedUserId
       }
     )
+
+    if (this.isFirstLevelComment) {
+      this.attachComments = this.$store.getters.attachComments[this.comment.id] || []
+    }
   }
 }
 </script>
@@ -220,11 +247,11 @@ export default {
   }
 
   &__delete-icon {
-    fill: red;
     width: 1.25rem;
     height: 1.25rem;
 
     position: absolute;
+    top: .5rem;
     right: 1rem;
   }
 }
@@ -266,6 +293,9 @@ export default {
   }
 }
 
+.heart-icon {
+  fill: crimson;
+}
 
 
 </style>

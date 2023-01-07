@@ -4,8 +4,19 @@
     <PostItem class="post" :post="post" ref="post" />
     <div class="info">
       <span>{{ formattedTime }} 發布 </span>
-      <span v-if="post.liked">有 {{ post.liked.length }} 個人喜歡</span>
-      <a @click="likePost(post)">
+      <span v-if="post.liked">
+        有<b class="info__num-of-like" 
+            @click="showUserLikeList"
+            >{{ post.liked.length }}</b>個人喜歡
+      </span>
+
+      <UserLikeList
+        v-show="isListActivated"
+        :likes="post.liked"
+        v-on:closeList="closeList"
+      />
+      
+      <a @click="togglePostLike(post)">
         <svg v-if="!isLike">
           <use
             xlink:href="./../assets/images/symbol-defs.svg#icon-heart-normal"
@@ -37,12 +48,14 @@ import PageInfoBar from './../components/PageInfoBar'
 import PostItem from './../components/PostItem'
 import CommentItem from './../components/CommentItem'
 import ContentPoster from './../components/ContentPoster'
+import UserLikeList from './../components/UserLikeList'
 export default {
   name: 'PostDetailPage',
   data() {
     return {
       post: {},
-      isLike: ''
+      isLike: '',
+      isListActivated: false
     }
   },
   computed: {
@@ -53,18 +66,32 @@ export default {
       })
     }
   },
-  components: { PageInfoBar, PostItem, CommentItem, ContentPoster },
+  components: { PageInfoBar, PostItem, CommentItem, ContentPoster, UserLikeList },
   methods: {
     showModal(post) {
       this.$refs.post.showReplyModal(post)
     },
-    likePost(post) {
+    showUserLikeList() {
+      this.isListActivated = true
+    },
+    closeList() {
+      this.isListActivated = false
+    },
+    togglePostLike(post) {
       const isLike = !this.isLike
       this.isLike = isLike
       this.$store.dispatch('postAbout/togglePostLike', {
         postId: post.id,
         isLike
       })
+
+      if (isLike) {
+        this.post.liked.push({ userId: this.$store.getters.loginedUserId })
+      } else {
+        const like = this.post.liked.find(like => like.userId === this.$store.getters.loginedUserId)
+        const likeIndex = this.post.liked.indexOf(like)
+        this.post.liked.splice(likeIndex, 1)
+      }
     }
   },
   beforeCreate() {
@@ -102,6 +129,10 @@ svg {
   cursor: pointer;
 }
 
+.heart-icon {
+  fill: crimson;
+}
+
 .info {
   display: flex;
   border-bottom: 1px solid $color-gray-400;
@@ -111,6 +142,14 @@ svg {
 
   a {
     margin-left: auto;
+  }
+
+  &__num-of-like {
+    color: $color-primary;
+    padding: 0 1rem;
+    text-decoration: underline;
+    text-underline-offset: .5rem;
+    cursor: pointer;
   }
 }
 

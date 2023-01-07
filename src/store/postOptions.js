@@ -2,7 +2,7 @@ import axios from 'axios'
 
 function directToLoginPageAndResetSocket (context) {
   // window.location.href = 'http://localhost:8080/#/login'
-  window.location.href = 'http://192.168.1.106:8080/#/login'
+  window.location.href = 'https://192.168.0.103:8080/#/login'
   context.rootState.notifSocket.disconnect()
   context.rootState.notifSocket = ''
 }
@@ -33,6 +33,18 @@ export const postOptions = {
           `${context.rootState.API_URL}/posts/recent/${userId}`
         )
         context.commit('SAVE_USER_POSTS', data)
+      } catch (err) {
+        alert('請嘗試重新登入')
+        directToLoginPageAndResetSocket(context)
+      }
+    },
+
+    async getUserLikePosts(context, userId) {
+      try {
+        const { data } = await axios.get(
+          `${context.rootState.API_URL}/posts/likes/${userId}`
+        )
+        context.commit('SAVE_USER_LIKE_POSTS', data)
       } catch (err) {
         alert('請嘗試重新登入')
         directToLoginPageAndResetSocket(context)
@@ -130,6 +142,9 @@ export const postOptions = {
     SAVE_USER_POSTS(state, posts) {
       state.userPosts = [...posts]
     },
+    SAVE_USER_LIKE_POSTS(state, posts) {
+      state.userLikePosts = posts.map(obj => obj.post)
+    },
     CONVERT_AVATAR_URL(state, avatarUrl) {
       console.log(avatarUrl)
       state.userPosts.forEach((post) => {
@@ -184,42 +199,40 @@ export const postOptions = {
       }
     },
     UPDATE_POST_LIKE_STATE(state, likePostInfo) {
-      console.log({ likePostInfo })
-      // * update home posts
-      if (!likePostInfo.isLike) {
-        for (const post of state.showingPosts) {
+      function mutatePostsLike(targetPosts) {
+        if (!likePostInfo.isLike) {
+          for (const post of targetPosts) {
+            if (post.id === likePostInfo.postId) {
+              const like = post.liked.find(
+                (like) => like.userId === likePostInfo.userId
+              )
+              const likeIndex = post.liked.indexOf(like)
+              post.liked.splice(likeIndex, 1)
+              return
+            }
+          }
+        }
+        for (const post of targetPosts) {
           if (post.id === likePostInfo.postId) {
-            const index = post.liked.indexOf(likePostInfo)
-            post.liked.splice(index, 1)
+            post.liked.push(likePostInfo)
             break
           }
         }
-        // * update posts at profile page
-        for (const post of state.userPosts) {
-          if (post.id === likePostInfo.postId) {
-            const index = post.liked.indexOf(likePostInfo)
-            post.liked.splice(index, 1)
-            return
-          }
-        }
       }
-      for (const post of state.showingPosts) {
-        if (post.id === likePostInfo.postId) {
-          post.liked.push(likePostInfo)
+
+      switch (likePostInfo.currentRouteName) {
+        case 'home':
+          mutatePostsLike(state.showingPosts)
           break
-        }
+        case 'posts':
+          mutatePostsLike(state.userPosts)
+          break
+        case 'likes':
+          mutatePostsLike(state.userLikePosts)
       }
-      // * update posts at profile page
-      for (const post of state.userPosts) {
-        if (post.id === likePostInfo.postId) {
-          post.liked.push(likePostInfo)
-          return
-        }
-      }
+      
     },
     UPDATE_COMMENT_LIKE_OF_POST(state, likeCommentInfo) {
-      console.log({ likeCommentInfo })
-      // TODO: optimize the code below
       if (!likeCommentInfo.isLike) {
         for (const post of state.showingPosts) {
           if (post.id === likeCommentInfo.postId) {
@@ -247,6 +260,7 @@ export const postOptions = {
   },
   state: {
     userPosts: [],
+    userLikePosts: [],
     showingPosts: [],
     showingSearchedPosts: [],
     tempPost: {},

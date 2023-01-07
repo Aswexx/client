@@ -40,7 +40,6 @@ const routes = [
         store.commit('userAbout/SAVE_USER_DATA', data)
         store.state.isAuthenticated = true
         await store.dispatch('userAbout/getUsers')
-        console.log(data)
         // alert(`next to mainview, userRole: ${data.userRole}`)
         // if (data.userRole === 'normal') {
         //   next()

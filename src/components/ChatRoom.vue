@@ -204,6 +204,7 @@ export default {
 <style lang="scss" scoped>
 @import './../assets/scss/base.scss';
 
+
 .chat-room-wrapper.active {
   position: absolute;
   right: 40%;
@@ -218,6 +219,15 @@ export default {
   height: 70vh;
   border-radius: 2rem;
   background-color: rgba($color: $color-gray-700, $alpha: 0.9);
+
+  @include respond($bp-mobile) {
+    width: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+    height: 95%;
+  }
+
 
   .opened-chat-list {
     padding: 0 0.3rem;
@@ -257,11 +267,6 @@ export default {
     width: 2.5rem;
     height: 2.5rem;
     cursor: pointer;
-  }
-
-  @include respond($bp-mobile) {
-    width: 80%;
-    right: 10%;
   }
 }
 

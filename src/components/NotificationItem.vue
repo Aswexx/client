@@ -31,11 +31,6 @@ export default {
           })
           break
         case 'inviteChat':
-          // this.$store.commit('TRIGGER_CHAT', notif.informerId)
-          // * if trigger has been offline
-          // * ............
-
-          // * if trigger is online
           if (!chatSocket) {
             chatSocket = await this.$io(`${this.$store.state.API_URL}/chat`)
             this.$store.commit('SET_CHAT_SOCKET', chatSocket)
@@ -112,48 +107,19 @@ export default {
 
           break
         case 'replyPost':
-        case 'likePost': {
+        case 'likePost':
+        case 'followNewPost': {
           await this.routePush('post', notif.targetPostId)
-          // const { data } = await this.$store.dispatch(
-          //   'postAbout/getPost',
-          //   notif.targetPostId
-          // )
-          // this.$router.push({
-          //   name: 'post-detail',
-          //   params: { post: data }
-          // })
           break
         }
         case 'replyComment':
         case 'likeComment': {
           await this.routePush('comment', notif.targetCommentId)
-          // const comment = await this.$store.dispatch(
-          //   'commentAbout/getComment',
-          //   notif.targetCommentId
-          // )
-
-          // const attachComments = await this.$store.dispatch(
-          //   'commentAbout/getAttachComments',
-          //   notif.targetCommentId
-          // )
-
-          // this.$router.push({
-          //   name: 'comment-detail',
-          //   params: { comment, attachComments }
-          // })
           break
         }
         case 'mention': {
           const { targetPostId, targetCommentId } = notif
           if (targetPostId) {
-            // const { data } = await this.$store.dispatch(
-            //   'postAbout/getPost',
-            //   notif.targetPostId
-            // )
-            // this.$router.push({
-            //   name: 'post-detail',
-            //   params: { post: data }
-            // })
             await this.routePush('post', targetPostId)
           } else {
             console.log('go to mention Comment', targetCommentId)
@@ -212,6 +178,8 @@ export default {
           return `${notif.informer.name} 喜歡你的貼文`
         case 'likeComment':
           return `${notif.informer.name} 喜歡你的評論`
+        case 'followNewPost':
+          return `${notif.informer.name} 發表了新的貼文`
         case 'mention':
           if (notif.targetPostId) return `${notif.informer.name} 在一則貼文中提到了你`
           return `${notif.informer.name} 在一則評論中提到了你`

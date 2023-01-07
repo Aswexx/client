@@ -81,6 +81,11 @@ const mutations = {
       state.modalType = ''
       state.sourcePostOrComment = {}
       return //* contents null represents try to close modal or trigger post modal
+    } else if (contents.modalType === 'photo') {
+      // * taking photo
+      state.modalType = contents.modalType
+      state.sourcePostOrComment = {}
+      return
     }
     state.sourcePostOrComment = contents
     state.modalType = contents.modalType
@@ -202,8 +207,12 @@ const state = {
   notifSocket: '',
   onlineUsers: new Set(),
   // HOST_URL: 'http://localhost:8080',
-  // API_URL: 'http://localhost:4000',
-  API_URL: 'http://192.168.1.106:4000'
+  // API_URL: 'https://localhost:4000',
+  API_URL: 'https://192.168.0.103:4000',
+
+  videoStream: '',
+  snapUrl: '',
+  snapFile: null
 }
 
 export default new Vuex.Store({

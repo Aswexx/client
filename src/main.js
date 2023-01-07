@@ -25,7 +25,7 @@ Vue.prototype.$zhTW = zhTW
 Vue.prototype.$uuid = uuidv4
 
 // Vue.prototype.$API_URL = 'http://localhost:4000'
-Vue.prototype.$API_URL = 'http://192.168.1.106:4000'
+Vue.prototype.$API_URL = 'https://192.168.0.103:4000'
 
 new Vue({
   router,
