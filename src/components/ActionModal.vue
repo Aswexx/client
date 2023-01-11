@@ -28,9 +28,9 @@
         <div class="photo-taking">
           <video playsinline ref="video" width="500" height="500"></video>
           <div class="photo-taking__controls">
-            <span @click="switchCam">切換前後</span>
-            <span @click="snapShot">拍照</span>
-            <span @click="cancelPhotoTaking">取消</span>
+            <span @click="switchCam"><svg><use xlink:href="../assets/images/symbol-defs.svg#icon-switch"></use></svg></span>
+            <span @click="snapShot"><svg><use xlink:href="../assets/images/symbol-defs.svg#icon-concentric-circle"></use></svg></span>
+            <span @click="cancelPhotoTaking"><svg><use xlink:href="../assets/images/symbol-defs.svg#icon-cross"></use></svg></span>
           </div>
         </div>
       </transition>
@@ -514,23 +514,40 @@ textarea {
 }
 
 .photo-taking {
-  width: 100%;
-  height: 100%;
+  width: 80%;
+  max-width: 50rem;
+  height: 80%;
+  margin: 0 auto;
+
+  position: relative;
+  z-index: 999;
 
   video {
     width: 100%;
-    height: 80%;
-    border: 1px solid red;
   }
 
 
   &__controls {
-    border: 1px solid green;
-    width: 50%;
+    width: 100%;
     display: flex;
     justify-content: space-around;
 
     margin: 3rem auto;
+
+    svg {
+      fill: $color-brand;
+      width: 5rem;
+      height: 5rem;
+      cursor: pointer;
+
+      transition: transform .2s;
+
+      &:hover,
+      &:active {
+        fill: $color-brand-deep;
+        transform: scale(1.2 , 1.2);
+      }
+    }
   }
 }
 

@@ -22,6 +22,12 @@ export default {
     window.addEventListener('beforeunload', () => {
       sessionStorage.setItem('storeData', JSON.stringify(this.$store.state))
     })
+
+    // * watch user change OS color theme
+    const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)")
+    mediaQueryList.addEventListener('change', (event) => {
+      this.$store.state.useDarkTheme = event.target.matches
+    })
   }
 }
 </script>

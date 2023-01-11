@@ -6,16 +6,30 @@
   box-sizing: border-box;
 }
 
+// :root {
+//   color-scheme: light;
+// }
+
 html {
   font-family: "Noto Sans TC", sans-serif;
   font-size: 62.5%;
 }
+
 
 body {
   font-size: 1.6rem;
   line-height: 1.5;
   height: 100%;
 }
+
+.dark-mode{
+  background-color: $color-bg-darkmode;
+  div.post-item {
+      background-color: $color-bg-darkmode;
+    }
+  color: white
+}
+
 
 h1 {
   font-size: 6.8rem;

@@ -23,6 +23,20 @@ Vue.prototype.$parseISO = parseISO
 Vue.prototype.$format = format
 Vue.prototype.$zhTW = zhTW
 Vue.prototype.$uuid = uuidv4
+Vue.prototype.$device = {
+  isMobile: (() => {
+    const mobileDevice = [
+      'Android',
+      'webOS',
+      'iPhone',
+      'iPad',
+      'iPod',
+      'BlackBerry',
+      'Windows Phone'
+    ]
+    return mobileDevice.some((e) => navigator.userAgent.includes(e))
+  })()
+}
 
 // Vue.prototype.$API_URL = 'http://localhost:4000'
 Vue.prototype.$API_URL = 'https://192.168.0.103:4000'

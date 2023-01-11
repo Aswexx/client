@@ -1,6 +1,7 @@
 <template>
   <div class="stats">
     <PageInfoBar/>
+    
 
     <div class="chart">
       <div class="selector">
@@ -39,17 +40,22 @@
             </template>
           </multiselect>
         </div>
+        <button @click="downloadUserStats">導出.csv檔</button>
+        
       </div>
       <HorizontalBar :chartData="barData" :options="barOptions"/>
+
     </div>
 
     <div class="chart">
       <div class="date-picker">
         <label>選擇觀察期間</label>
         <date-picker v-model="dateRange" range></date-picker>
+        <button @click="downloadPeriodStats">導出.csv檔</button>
       </div>
       <LineChart :chartData="chartData" :options="options"/>
     </div>
+
 
   </div>
 </template>
@@ -64,10 +70,11 @@ import Multiselect from 'vue-multiselect'
 import axios from 'axios'
 
 export default {
+  name: 'StatsPage',
   data() {
     return {
       dateRange: null,
-      allPostsCreatedAt: [],
+      periodStats: [],
 
       // * horizontal bar
       barData: {
@@ -118,6 +125,8 @@ export default {
 
       // * multiselector
       multiSelectValues: [],
+
+      csvURL: ''
     }
   },
   components: { PageInfoBar, DatePicker, LineChart, HorizontalBar, Multiselect },
@@ -135,19 +144,22 @@ export default {
   watch:{
     async dateRange(newVal){
       if (!newVal[0]) return
-      const { data } = await axios.get(
-        `${this.$store.state.API_URL}/posts/createdTime`
-      )
+      const { data } = await axios.post(
+        `${this.$store.state.API_URL}/posts/createdTime`, {
+            startDate: newVal[0],
+            endDate: newVal[1]
+          }
+        )
+
       const mappedData = data.map((e) => {
         return new Date(e.createdAt)
       })
-      const result = mappedData.filter(
-        (date) => date >= this.dateRange[0] && date <= this.dateRange[1]
-      )
+
+      this.periodStats = mappedData
 
       // * index of chartData represents hours
       const dataSet = Array.from({ length: 24 }, () => 0)
-      result.forEach((date) => {
+      mappedData.forEach((date) => {
         dataSet[date.getHours()]++
       })
 
@@ -183,6 +195,53 @@ export default {
       this.barData = { ...this.barData }
     }
   },
+  methods: {
+    downloadUserStats() {
+      const users = this.$store.getters.users
+      const columnTitles = '名字,追蹤人數,被追蹤數,發文數,評論數\n'
+      let csvContents = columnTitles
+      users.forEach(user => {
+        csvContents += user.name + ',' + Object.values(user._count).toString() + '\n'
+      })
+
+      this.triggerDownload(csvContents, '使用者操作次數.csv')
+    },
+    downloadPeriodStats() {
+      const daily = new Map()
+      const columnTitles = Array.from({ length: 24 }, (value, key) => {
+        return `${key}時至${key+1}時`
+      })
+      let csvContents = '日期,' + columnTitles + '\n'
+
+      this.periodStats.forEach(date => {
+        daily.set(
+          `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+          Array.from({ length: 24 }, () => 0))
+      })
+
+      this.periodStats.forEach(date => {
+        const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+        const recordArr = daily.get(dateString)
+
+        recordArr[date.getHours()]++
+      })
+
+      daily.forEach((value, key) => {
+        csvContents = csvContents + `${key},${value.toString()}\n`
+      })
+
+      this.triggerDownload(csvContents, '發文頻率資料.csv')
+    },
+    triggerDownload(csvContents, fileName) {
+      const anchorTag = document.createElement('a')
+      const blob = new Blob(['\uFEFF' + csvContents], { type: 'text/csv;charset=utf-8,' })
+      const csvUrl = URL.createObjectURL(blob)
+
+      anchorTag.href = csvUrl
+      anchorTag.download = fileName
+      anchorTag.click()
+    }
+  },
   beforeCreate(){
     this.$store.dispatch('userAbout/getUsers')
   },
@@ -206,6 +265,10 @@ export default {
 
   .date-picker {
     width: 20rem;
+  }
+
+  button {
+    margin-top: 2rem;
   }
 
 </style>

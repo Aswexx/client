@@ -42,7 +42,7 @@ const getters = {
     return state.notifications.reduce((preVal, notif) => {
       return preVal + !notif.isRead
     }, 0)
-  }
+  },
 }
 
 const actions = {
@@ -186,7 +186,9 @@ const mutations = {
 
 const state = {
   viewport: window.innerWidth,
-
+  useDarkTheme: localStorage.getItem('preferDark') === null ?
+    window.matchMedia('(prefers-color-scheme: dark)').matches :
+    localStorage.getItem('preferDark') === 'true',
   isModalOpened: '',
   modalType: '',
 

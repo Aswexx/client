@@ -79,6 +79,13 @@
       </button>
     </ul>
 
+    <SwitchButton
+      :label="'light/dark'"
+      :defaultVal="$store.state.useDarkTheme"
+      @toggle="toggleDarkMode"
+      ref="modeSwitcher"
+    />
+
     <div class="logout" @click="logout">
       <svg class="">
         <use xlink:href="./../assets/images/symbol-defs.svg#icon-logout"></use>
@@ -89,7 +96,10 @@
 </template>
 
 <script>
+import SwitchButton from './../components/SwitchButton'
+
 export default {
+  components: { SwitchButton },
   data() {
     return {
       matchTablet: window.matchMedia('(max-width: 768px)').matches,
@@ -99,7 +109,29 @@ export default {
   computed: {
     unreadCounts() {
       return this.$store.getters.unreadNotifs
+    },
+    isDarkMode() {
+      return this.$store.state.useDarkTheme
     }
+  },
+  watch: {
+    isDarkMode: {
+      immediate: true,
+      handler(newVal) {
+        const body = document.querySelector('body')
+        const modeSwitcher = this.$refs.modeSwitcher
+
+        if (newVal) {
+          body.classList.add('dark-mode')
+          if (modeSwitcher) modeSwitcher.isTriggered = true
+        } else {
+          body.classList.remove('dark-mode')
+          if (modeSwitcher) modeSwitcher.isTriggered = false
+        }
+
+        localStorage.setItem('preferDark', newVal)
+      }
+    },
   },
   methods: {
     post() {
@@ -118,6 +150,9 @@ export default {
       } else {
         this.$store.commit('MINIMIZE_CHAT_SECTION')
       }
+    },
+    toggleDarkMode(newState) {
+      this.$store.state.useDarkTheme = newState
     },
     async logout() {
       await this.$axios.get(`${this.$store.state.API_URL}/users/logout`)

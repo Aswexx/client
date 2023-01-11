@@ -151,6 +151,7 @@ export default {
         //   },
         //   audio: false
         // })
+        alert(this.$device.isMobile)
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,

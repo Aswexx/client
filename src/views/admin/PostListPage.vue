@@ -40,6 +40,8 @@
           <span class="slider"></span>
         </label>
       </div>
+      <!-- TODO: modulize SwitchButton -->
+      <!-- <SwitchButton :label="'顯示圖片與短片'"/> -->
 
       <div class="toggle-search-mode">
         <label>以內文查詢</label>
@@ -87,6 +89,8 @@
 <script>
 import PageInfoBar from '../../components/PageInfoBar.vue'
 import PostItem from '../../components/PostItem.vue'
+// import SwitchButton from '../../components/SwitchButton'
+
 // import SearchBar from '../../components/SearchBar.vue'
 export default {
   name: 'PostListPage',
@@ -193,6 +197,7 @@ export default {
 <style lang="scss" scoped>
 .controls {
   position: relative;
+  z-index: 99;
   height: 15rem;
   display: flex;
   flex-direction: column;
