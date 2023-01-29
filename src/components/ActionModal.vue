@@ -25,7 +25,7 @@
       </transition>
 
       <transition name="modal-inner-offset">
-        <div class="photo-taking">
+        <div class="photo-taking" v-show="$store.state.modalType === 'photo'">
           <video playsinline ref="video" width="500" height="500"></video>
           <div class="photo-taking__controls">
             <span @click="switchCam"><svg><use xlink:href="../assets/images/symbol-defs.svg#icon-switch"></use></svg></span>

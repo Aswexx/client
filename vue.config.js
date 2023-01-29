@@ -5,12 +5,12 @@ module.exports = defineConfig({
   transpileDependencies: true,
   // outputDir: './../server/public',
   publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
-  pwa: {
-    workboxPluginMode: 'InjectManifest',
-    workboxOptions: {
-      swSrc: './src/service-worker.js'
-    }
-  },
+  // pwa: {
+  //   workboxPluginMode: 'InjectManifest',
+  //   workboxOptions: {
+  //     swSrc: './src/service-worker.js'
+  //   }
+  // },
   css: {
     loaderOptions: {
       sass: {

@@ -1,14 +1,13 @@
 <template>
   <div class="user-login">
-    <img class="brand-logo" src="./../assets/images/logo.svg">
+    <!-- <img class="brand-logo" src="@/assets/images/logo.svg"> -->
+    <img class="brand-logo" src="@/assets/images/logo-light-theme.png">
     <h3 v-if="currentPage === 'login'">歡迎使用 Posquare</h3>
 
     <h3 v-else-if="currentPage === 'admin-login'">後台登入</h3>
 
     <form>
-      <HollowInput 
-        :labelName="$route.name ==='login' ? '登入Email': '管理者帳號'" 
-        forAttr="account">
+      <HollowInput forAttr="account" :labelName="accountTypeLabelName">
         <input
           id="account"
           name="account"
@@ -32,23 +31,27 @@
       <GoogleSignInButton v-if="currentPage === 'login'"></GoogleSignInButton>
 
       <div class="non-login">
-        <router-link v-show="currentPage === 'login'" to="/register"
+        <router-link class="non-login-option" v-show="currentPage === 'login'" to="/register"
           >註冊</router-link
         >
         <!-- <span v-if="currentPage === 'login'">·</span> -->
-        <router-link v-if="currentPage === 'login'" to="/admin-login"
+        <router-link class="non-login-option" v-if="currentPage === 'login'" to="/admin-login"
           >後台登入</router-link
         >
-        <router-link v-else to="/login">前台登入</router-link>
+        <router-link class="non-login-option" v-else to="/login">前台登入</router-link>
       </div>
 
     </div>
+
+    <ThemeSwitcher/>
+
   </div>
 </template>
 
 <script>
 import GoogleSignInButton from './GoogleSignInButton.vue'
 import HollowInput from './HollowInput.vue'
+import ThemeSwitcher from './ThemeSwitcher.vue'
 export default {
   data() {
     return {
@@ -57,7 +60,12 @@ export default {
       password: ''
     }
   },
-  components: { GoogleSignInButton, HollowInput },
+  computed: {
+    accountTypeLabelName() {
+      return this.$route.name ==='login' ? '登入Email': '管理者帳號'
+    },
+  },
+  components: { GoogleSignInButton, HollowInput, ThemeSwitcher },
   methods: {
     async login() {
       const loginInfo = {
@@ -87,7 +95,7 @@ export default {
           detail: '輸入格式不正確或資料有誤'
         })
       }
-    }
+    },
   },
 }
 </script>
@@ -131,6 +139,19 @@ form {
   justify-content: space-between;
   align-items: center;
 
+
+  button {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(45deg, $color-brand-deep, $color-brand);
+    transition: all .2s ease-in-out;
+
+    &:hover {
+      transform: scaleX(1.05) scaleY(1.1);
+    }
+  }
+}
+
   .non-login {
     width: 100%;
 
@@ -151,17 +172,6 @@ form {
     }
   }
 
-  button {
-    position: relative;
-    width: 100%;
-    background: linear-gradient(45deg, $color-brand-deep, $color-brand);
-    transition: all .2s ease-in-out;
-
-    &:hover {
-      transform: scaleX(1.05) scaleY(1.1);
-    }
-  }
-}
 
 .other.cms-login {
   height: 7rem;

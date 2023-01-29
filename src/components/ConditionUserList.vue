@@ -6,14 +6,16 @@
           <use href="@/assets/images/symbol-defs.svg#icon-cross"></use>
         </svg>
       </span>
-      <div class="user-card"
-        v-for="user in likedByUsers" :key="user.id"
-        @click="toUserProfile(user.id)"
-      >
-        <img :src="user.avatarUrl"/>
-        <div>
-          <h5>{{ user.name }}</h5>
-          <span>@{{ user.alias }}</span>
+      <div class="user-card-wrapper">
+        <div class="user-card"
+          v-for="user in users" :key="user.id"
+          @click="toUserProfile(user.id)"
+        >
+          <img :src="user.avatarUrl"/>
+          <div class="name-alias">
+            <h5>{{ user.name }}</h5>
+            <span>@{{ user.alias }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -22,15 +24,14 @@
 
 <script>
 export default {
-  name: 'UserLikeList',
-  props: ['likes'],
+  name: 'ConditionUserList',
+  props: ['userIdList'],
   computed: {
-    likedByUsers() {
-      const userIds = this.likes.map(like => like.userId || like.user.id)
+    users() {
       const allUsers = this.$store.getters.users
       const results = []
 
-      userIds.forEach(id => {
+      this.userIdList.forEach(id => {
         const target = allUsers.find(user => user.id === id)
         if (target) {
           const { id, name, alias, avatarUrl } = target
@@ -47,7 +48,7 @@ export default {
   },
   methods: {
     closeList() {
-      this.$emit('closeList')
+      this.$store.state.isConditionUserListActivated = false
     },
     async toUserProfile(userId) {
       this.$router.push({
@@ -68,19 +69,26 @@ export default {
 .user-like-list {
   position: absolute;
   top: 50%;
-  width: 30%;
+  width: 60%;
+  max-width: 45rem;
   border-radius: 1rem;
   box-shadow: $box-shadow-normal;
   background-color: white;
   z-index: 999;
 
-  .user-card {
-    display: flex;
-    cursor: pointer;
+
+  .user-card-wrapper {
+    max-height: 45rem;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .user-card {
-    padding: .5rem 0rem;
+    display: flex;
+    cursor: pointer;
+    border-radius: 1rem;
+
+    padding: .5rem .5rem;
     transition: all .2s ease-in;
     &:hover {
       background-color: $color-brand;
@@ -90,14 +98,18 @@ export default {
 
 svg {
   position: absolute;
-  right: -1rem;
-  top: -1rem;
+  right: -2rem;
+  top: -2rem;
   width: 2rem;
   height: 2rem;
   padding: .3rem;
   border-radius: 50%;
   border: 2px solid $color-brand;
   cursor: pointer;
+}
+
+.name-alias {
+  margin-left: 2rem;
 }
 
 // transition

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="comment-detail">
     <PageInfoBar />
     <div class="comment-target">
       <PostItem class="post" :post="commentTarget"/>
@@ -14,19 +14,17 @@
       />
     </div>
 
-    <!-- <CommentItem class="comment" :comment="comment" /> -->
     <div class="info">
       <span>{{ formattedTime }} 發布 </span>
       <span>
         有<b class="info__num-of-like"
-            @click="showUserLikeList"
+            @click="showConditionUserList"
             >{{ comment.liked.length }}</b>個人喜歡這則評論
       </span>
 
-      <UserLikeList
+      <ConditionUserList
         v-show="isListActivated"
-        :likes="comment.liked"
-        v-on:closeList="closeList"
+        :userIdList="likedByUsers"
       />
       
       <a>
@@ -42,7 +40,6 @@
         </svg>
       </a>
     </div>
-
 
     <ContentPoster :commentId="comment.id" @submitNewComment="updateAttachComments"/>
 
@@ -63,7 +60,7 @@ import PageInfoBar from './../components/PageInfoBar'
 import PostItem from './../components/PostItem'
 import CommentItem from './../components/CommentItem'
 import ContentPoster from './../components/ContentPoster'
-import UserLikeList from './../components/UserLikeList'
+import ConditionUserList from './../components/ConditionUserList'
 
 export default {
   name: 'CommentDetailPage',
@@ -74,7 +71,7 @@ export default {
       isLike: '',
       commentTarget: {},
       sourcePost: {},
-      isListActivated: false
+      // isListActivated: false
     }
   },
   computed: {
@@ -87,16 +84,19 @@ export default {
     },
     parentComments() {
       return this.$store.state.commentAbout.parentComments
+    },
+    likedByUsers() {
+      return this.comment.liked.map(like => like.userId)
+    },
+    isListActivated() {
+      return this.$store.state.isConditionUserListActivated
     }
   },
-  components: { PageInfoBar, PostItem, CommentItem, ContentPoster, UserLikeList },
+  components: { PageInfoBar, PostItem, CommentItem, ContentPoster, ConditionUserList },
   methods: {
-    showUserLikeList() {
-      if (!this.comment.like.length) return
-      this.isListActivated = true
-    },
-    closeList() {
-      this.isListActivated = false
+    showConditionUserList() {
+      if (!this.comment.liked.length) return
+      this.$store.state.isConditionUserListActivated = true
     },
     showModal(comment) {
       this.$refs.comment.showReplyModal(comment)
@@ -128,7 +128,6 @@ export default {
     this.$store.commit('commentAbout/RESET_ATTACH_COMMENTS')
   },
   async beforeMount() {
-    console.log('receive:' ,this.$route.params)
     const topicComment =
       this.$route.params.comment ||
       JSON.parse(sessionStorage.getItem('storeData')).commentAbout.topicComment
@@ -178,8 +177,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.comment-detail {
+  height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+}
+
 .comment-list {
-  height: 53vh;
   overflow-x: auto;
 }
 

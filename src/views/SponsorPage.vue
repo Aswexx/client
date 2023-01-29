@@ -51,7 +51,7 @@ export default {
   components: { PageInfoBar },
   methods: {
     async startPay(){
-      const result = await this.$axios.post(`${this.$API_URL}/users/sponsor`, { userId: this.$store.getters.loginedUserId })
+      const result = await this.$axios.post(`${this.$store.state.API_URL}/users/sponsor`, { userId: this.$store.getters.loginedUserId })
       const linePay = result.data.linePay
       const linePayWindow = window.open(linePay)
       const notificationSocket = this.$store.state.notifSocket
@@ -118,6 +118,10 @@ export default {
     &:hover {
       background: goldenrod;
     }
+  }
+
+  @include respond($bp-mobile) {
+    width: 80%;
   }
 }
 </style>

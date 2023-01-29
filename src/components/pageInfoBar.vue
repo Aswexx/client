@@ -48,11 +48,15 @@
     <div class="setting" v-else>
       <h3>帳戶設定</h3>
     </div>
+
+    <ThemeSwitcher/>
   </div>
 </template>
 
 <script>
+import ThemeSwitcher from './ThemeSwitcher.vue'
 export default {
+  components: { ThemeSwitcher },
   data() {
     return {
       viewport: this.$store.state.viewport,
@@ -103,6 +107,10 @@ export default {
 div.page-info {
   border-bottom: 1px solid $color-gray-400;
   padding: 1rem 1rem 1rem 0rem;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .post-detail {

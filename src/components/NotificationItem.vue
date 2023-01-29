@@ -128,8 +128,8 @@ export default {
         }
       }
     },
-    read(notif) {
-      this.$store.commit('TURN_NOTIF_READ', notif.id)
+    async read(notif) {
+      await this.$store.commit('TURN_NOTIF_READ', notif.id)
     },
     useFallbackImg(event) {
       event.target.src = require('@/assets/images/default_avatar1.png')
@@ -219,6 +219,10 @@ export default {
 
   &:hover {
     background-color: rgba($color-brand, 0.4);
+  }
+
+  @include respond($bp-mobile) {
+    padding: 0.5rem 0;
   }
 }
 

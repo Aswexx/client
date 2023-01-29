@@ -13,7 +13,7 @@
             :searchable="false" 
             :close-on-select="true" 
             :show-labels="false" 
-            placeholder="Pick a value">
+            placeholder="請選擇比較基準">
           </multiselect>
         </div>
 
@@ -28,7 +28,7 @@
             :clear-on-select="false" 
             :preserve-search="true"
             :max="10"
-            placeholder="選擇使用者" label="userName" 
+            placeholder="選擇或輸入使用者別名查詢" label="userName" 
             track-by="userName" 
           >
             <template slot="selection" slot-scope="{ values, isOpen }">
@@ -94,6 +94,18 @@ export default {
           display: true,
           text: "使用者數據比較",
         },
+        scales: {
+          yAxes: [{
+            gridLines: {
+              color: 'gray'
+            }
+          }],
+          xAxes: [{
+            gridLines: {
+              color: 'gray'
+            }
+          }]
+        }
       },
 
       // * line chart
@@ -117,6 +129,18 @@ export default {
           display: true,
           text: "發文時段分佈(小時)",
         },
+        scales: {
+          yAxes: [{
+            gridLines: {
+              color: 'gray'
+            }
+          }],
+          xAxes: [{
+            gridLines: {
+              color: 'gray'
+            }
+          }]
+        }
       },
 
       // * single selector
@@ -126,7 +150,7 @@ export default {
       // * multiselector
       multiSelectValues: [],
 
-      csvURL: ''
+      csvURL: '',
     }
   },
   components: { PageInfoBar, DatePicker, LineChart, HorizontalBar, Multiselect },

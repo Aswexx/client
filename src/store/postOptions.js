@@ -98,6 +98,8 @@ export const postOptions = {
         }
       })
 
+      console.log(data)
+
       context.state.postCount = data.postCount
       context.state.showingPosts = data
       delete data.postCount
@@ -109,12 +111,7 @@ export const postOptions = {
         JSON.parse(JSON.stringify(searchedPosts))
       )
 
-      const showingSearchedPosts = parsedData.slice(
-        conditions.skipPostsCount,
-        conditions.take
-      )
-
-      context.commit('SHOW_SEARCHED_POSTS', showingSearchedPosts)
+      context.commit('SHOW_SEARCHED_POSTS', parsedData)
     },
 
     async getAllPostsCreatedTime(context, dateRange) {

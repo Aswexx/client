@@ -16,7 +16,8 @@
             v-if="toastType === 'success'"
             href="./../assets/images/symbol-defs.svg#icon-check"
           ></use>
-                    <use
+
+          <use
             v-else-if="toastType === 'info'"
             href="./../assets/images/symbol-defs.svg#icon-info"
           ></use>
@@ -32,9 +33,6 @@
           <span class="toast__message--detail">{{ detail }}</span>
         </div>
 
-        <svg class="toast__icon--close" @click="close">
-          <use xlink:href="./../assets/images/symbol-defs.svg#icon-cross"></use>
-        </svg>
       </div>
 
     </div>
@@ -43,13 +41,6 @@
 
 <script>
 export default {
-  methods: {
-    close() {
-      console.log(window.timer)
-      clearTimeout(window.timer)
-      this.$refs.toast.classList.remove('active')
-    }
-  },
   computed: {
     isTriggered() {
       return this.$store.state.isToastShow
@@ -93,13 +84,14 @@ svg {
 .toast-container {
   position: absolute;
   top: 10%;
-  right: 50%;
+  left: 5%;
   overflow: hidden;
+  z-index: -1;
 
   @include respond($bp-mobile){
     width: 100%;
     top: 80%;
-    right: 0;
+    left: 0;
   }
 }
 

@@ -72,16 +72,16 @@
       </PostItem>
     </div>
 
-    <div class="pagination">
-      <span>&#60;</span>
+    <div v-if="!isOnSearch" class="pagination">
+      <span v-if="currentPageNum > 1" @click="toPrevious">&#60;</span>
       <span
-        v-for="n in totalPages"
+        v-for="n in pageButtonCount"
         :key="n"
-        @click="switchPagination(n)"
-        :class="{ active: currentPageNum === n }"
-        >{{ n }}</span
+        @click="switchPagination(n + 5 * currentPageGroup)"
+        :class="{ active: currentPageNum === n + 5 * currentPageGroup }"
+        >{{ n + 5 * currentPageGroup }}</span
       >
-      <span>&#62;</span>
+      <span v-if="currentPageNum !== totalPages" @click="toNext">&#62;</span>
     </div>
   </div>
 </template>
@@ -100,6 +100,7 @@ export default {
       order: 'newest',
       postCountPerPage: 10,
       currentPageNum: 1,
+      currentPageGroup: 0,
       isOnSearch: false,
       keyword: '',
       searchedPostsCurrentPage: []
@@ -115,6 +116,12 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.$store.getters.postCount / this.postCountPerPage)
+    },
+    pageButtonCount() {
+      if ((this.totalPages - 4) < this.currentPageNum) {
+        return this.totalPages % 5
+      }
+      return 5
     }
   },
   watch: {
@@ -166,6 +173,24 @@ export default {
       }
       
       this.getPosts((pageToGo - 1) * this.postCountPerPage)
+    },
+    toNext() {
+      if (!(this.currentPageNum % 5)) {
+        this.currentPageGroup++
+      }
+      
+      const skipPostsCount = this.currentPageNum * this.postCountPerPage
+      this.getPosts(skipPostsCount)
+      this.currentPageNum++
+    },
+    toPrevious() {
+      if (this.currentPageNum % 5 === 1) {
+        this.currentPageGroup--
+      }
+
+      const skipPostsCount = (this.currentPageNum - 2) * this.postCountPerPage
+      this.getPosts(skipPostsCount)
+      this.currentPageNum--
     },
     getPosts(skipPostsCount) {
       this.$store.dispatch('postAbout/getAdminPagePosts', {

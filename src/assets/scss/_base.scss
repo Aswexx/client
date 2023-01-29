@@ -6,10 +6,6 @@
   box-sizing: border-box;
 }
 
-// :root {
-//   color-scheme: light;
-// }
-
 html {
   font-family: "Noto Sans TC", sans-serif;
   font-size: 62.5%;
@@ -22,14 +18,160 @@ body {
   height: 100%;
 }
 
-.dark-mode{
+.dark-mode {
   background-color: $color-bg-darkmode;
+  h3 {
+    color: $color-header-darkmode;
+  }
   div.post-item {
+    background-color: $color-bg-darkmode;
+  }
+  color: $color-text-darkmode;
+  
+  span {
+    color: $color-text-darkmode;
+  }
+
+  div.toast {
+    background-color: $color-bg-darkmode;
+  }
+
+  .profile-info {
+    div.follows {
+      span {
+        color: $color-text-darkmode
+      }
+    }
+  }
+
+  a.active {
+    svg {
+      fill: $color-brand
+    }
+    span {
+      color: $color-brand
+    }
+  }
+
+  svg {
+    fill: $color-text-darkmode
+  }
+
+  svg.heart-icon {
+    fill: crimson
+  }
+
+  textarea {
+    background-color: $color-bg-darkmode;
+
+    &.regular-input:focus {
+      color: $color-text-darkmode;
+    }
+  }
+
+  .modal {
+    textarea {
+      background-color: unset;
+
+      &.regular-input:focus {
+        color: $color-gray-800;
+      }
+    }
+  }
+
+  input {
+    color: $color-text-darkmode;
+  }
+
+  .input-item, .input-wraper, .search {
+    label {
       background-color: $color-bg-darkmode;
     }
-  color: white
+
+    input {
+      background-color: $color-bg-darkmode;
+      color: $color-text-darkmode
+    }
+  }
+
+  #google-sign-in-button {    
+    span {
+      color: unset;
+    }
+  }
+
+  .non-login {
+    a.non-login-option {
+      color: $color-brand;
+      border: 1px solid $color-brand;
+    }
+  }
+
+  div.user-like-list {
+    background-color: $color-bg-darkmode;
+  }
+
+  div.tag-user-picker {
+    background-color: $color-bg-darkmode;
+  }
+
+  div.profile-card:hover {
+    p {
+      background-color: $color-bg-darkmode;
+    }
+  }
+
+  // * content management pages
+  .card-container {
+    .user-card {
+      background-color: $color-bg-darkmode;
+      border: 1px solid $color-text-darkmode;
+    }
+  }
+
+  span.multiselect__single {
+    background-color: $color-bg-darkmode;
+  }
+
+  span.multiselect__option {
+    background-color: $color-bg-darkmode;
+
+    &--highlight {
+      background: green;
+    }
+
+    &--selected {
+      background: #FC766A;
+    }
+  }
+
+  div.multiselect__tags {
+    background: $color-bg-darkmode;
+  }
+
+  input.multiselect__input {
+    background-color: $color-bg-darkmode;
+  }
+
+  // * date picker
+  .mx-input-wrapper {
+    input {
+      background-color: $color-bg-darkmode;
+    }
+    svg {
+      fill: $color-text-darkmode;
+    }
+  }
 }
 
+// * remove input background for Chrome autocomplete
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+    transition: background-color 600000s 0s, color 600000s 0s;
+}
+input[data-autocompleted] {
+    background-color: transparent !important;
+}
 
 h1 {
   font-size: 6.8rem;
@@ -75,7 +217,7 @@ button {
 
   @media (hover: hover) {
     &:hover {
-      background-color: $color-brand-deep
+      transform: scale(1.2, 1.2);
     }
   }
 }
@@ -118,9 +260,6 @@ video {
   }
 
   .multiselect__option--highlight:after {
-    // content: attr(data-select);
-    // background: $color-brand;
-    // color: white;
     content: '';
   }
 }

@@ -9,21 +9,29 @@
       class="regular-input"
       :placeholder="placeholder"
       v-model.trim="input"
+      @keyup.esc="escapeTagPicker"
       ref="input"
     >
     </textarea>
 
     <input type="file" hidden @change="readyToUpload" ref="fileInput" />
 
-    <div class="tagUserPicker" v-show="tagUserPicker">
-      <p
-        class="user" 
-        v-for="user in users" 
-        :key="user.id"
-        @click="tagUser({ userId: user.id, userAlias: user.alias })"
-      >
-        @{{ user.alias }}
-      </p>
+    <div class="tag-user-picker" v-show="tagUserPicker">
+      <div class="icon-cross" @click="escapeTagPicker">
+        <svg>
+          <use href="@/assets/images/symbol-defs.svg#icon-cross"></use>
+        </svg>
+      </div>
+      <div class="users">
+        <p
+          class="user" 
+          v-for="user in users" 
+          :key="user.id"
+          @click="tagUser({ userId: user.id, userAlias: user.alias })"
+        >
+          @{{ user.alias }}
+        </p>
+      </div>
     </div>
 
     <div class="fileToUpload-wrapper" v-show="fileURL">
@@ -122,7 +130,9 @@ export default {
       const atIndex = this.input.indexOf('@') + 1
       const keyword = this.input.substring(atIndex, this.input.length)
       const keywordRegExp = new RegExp(keyword, 'i')
-      const filteredUsers = allUsers.filter(user => keywordRegExp.exec(user.alias))
+      const loginedUserAlias = this.$store.getters.loginedUser.alias
+      const filteredUsers = allUsers.filter(user => keywordRegExp.exec(user.alias) && user.alias !== loginedUserAlias)
+      
       return filteredUsers
     },
     snapFile() {
@@ -141,6 +151,10 @@ export default {
       this.tagedUserList[userAlias] = userId
       this.tagUserPicker = false
       this.$refs.input.focus()
+    },
+    escapeTagPicker() {
+      this.input = this.input.replaceAll('@','')
+      this.tagUserPicker = false
     },
     append(emoji) {
       const targetEl = this.$refs.input
@@ -235,18 +249,34 @@ export default {
   }
 }
 
-.tagUserPicker {
+.tag-user-picker {
   background-color: $color-gray-100;
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 999;
-  height: 13rem;
-  overflow-x: hidden;
-  overflow-y: auto;
-
+  z-index: 99;
   box-shadow: 12px 9px 19px 5px $color-gray-600;
   border-radius: 1rem;
+
+  .icon-cross {
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 2px solid $color-brand;
+      border-radius: 50%;
+      padding: .2rem;
+    }
+    position: absolute;
+    left: -1rem;
+    top: -1rem;
+    cursor: pointer;
+  }
+
+  .users {
+    max-height: 13rem;
+    padding: .5rem 1rem;
+    overflow-y: auto;
+  }
 
   p {
     cursor: pointer;

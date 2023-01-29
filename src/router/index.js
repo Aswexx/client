@@ -25,6 +25,8 @@ import StatsPage from '../views/admin/StatsPage.vue'
 import store from './../store/index'
 import axios from 'axios'
 
+import 'regenerator-runtime'
+
 Vue.use(VueRouter)
 
 const routes = [

@@ -46,10 +46,6 @@ export default {
   },
   computed: {
     showingPosts() {
-      // const showingPosts = this.$store.state.postAbout.showingPosts
-      // delete showingPosts.postCount
-
-      // return showingPosts
       return this.$store.state.postAbout.showingPosts
     }
   },
@@ -90,10 +86,8 @@ export default {
   },
   beforeCreate() {
     this.$store.dispatch('postAbout/getHomePagePosts')
-    if (this.$store.getters.unreadNotifs) return
-    this.$store.dispatch('getNotifications')
   },
-  mounted() {
+  async mounted() {
     let notificationSocket = this.$store.state.notifSocket
     if (!notificationSocket) {
       notificationSocket = this.$io(`${this.$store.state.API_URL}/notification`)
@@ -109,10 +103,34 @@ export default {
       })
 
       notificationSocket.on('notification', (notification) => {
-        console.log(notification)
         this.$store.commit('ADD_NOTIFICATION', notification)
       })
+
+      notificationSocket.on('disconnect', () => {
+        //TODO: do someting when server shut down
+      })
     }
+
+    // * handle read state of notifications
+    const previousReadNotifs = JSON.parse(localStorage.getItem('previousReadNotifs'))
+    const notifications = JSON.parse(sessionStorage.getItem('previousNotifs'))
+    if (previousReadNotifs && previousReadNotifs.length) {
+      notificationSocket.emit('updateNotifsReadState', previousReadNotifs)
+    }
+
+    if (notifications && notifications.length) {
+      this.$store.commit('ADD_NOTIFICATION', notifications)
+      sessionStorage.clear()
+    } else if (!this.$store.state.notifications.length) {
+      await this.$store.dispatch('getNotifications')
+    }
+
+    window.addEventListener('unload', () => {
+      const readNotifs = this.$store.state.readNotifs
+      const notifications = this.$store.state.notifications
+      localStorage.setItem('previousReadNotifs', JSON.stringify(readNotifs))
+      sessionStorage.setItem('previousNotifs', JSON.stringify(notifications))
+    })
   }
 }
 </script>
@@ -120,8 +138,18 @@ export default {
 <style lang="scss" scoped>
 @import './../assets/scss/base.scss';
 
+.home {
+  height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+}
+
 @include respond($bp-mobile) {
   .home {
+    height: calc(100vh - 6rem);
+
+    display: flex;
+    flex-direction: column;
     .post-input-group {
       display: none;
     }
@@ -129,12 +157,7 @@ export default {
 }
 
 .post-list {
-  height: 73vh;
   overflow-y: auto;
-
-  @include respond($bp-mobile) {
-    height: 62vh;
-  }
 }
 
 .post-input-group {

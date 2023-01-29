@@ -138,7 +138,6 @@ export default {
       const isLike = !this.isLike
       // this.isLike = !this.isLike
       if (!isLike) {
-        alert('gg')
         this.$emit('cancelLike', this.post.id)
       }
 

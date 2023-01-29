@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <router-view />
-    <ToastNotification />
+    <ToastNotification/>
   </div>
 </template>
 
@@ -18,9 +18,15 @@ export default {
           JSON.parse(sessionStorage.getItem('storeData'))
         )
       )
+
+      sessionStorage.clear()
     }
+
     window.addEventListener('beforeunload', () => {
-      sessionStorage.setItem('storeData', JSON.stringify(this.$store.state))
+      delete this.$store.state.notifSocket
+      delete this.$store.state.chatSocket
+      const storeData = JSON.stringify(this.$store.state)
+      sessionStorage.setItem('storeData', storeData)
     })
 
     // * watch user change OS color theme

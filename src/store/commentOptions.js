@@ -8,7 +8,7 @@ export const commentOptions = {
     },
     loginedUserAvatarUrl(state, getters, rootState, rootGetters) {
       return rootGetters.loginedUser.avatarUrl
-    }
+    },
   },
   actions: {
     async submitComment(context, comment) {
@@ -16,6 +16,21 @@ export const commentOptions = {
         `${context.rootState.API_URL}/comments`,
         comment
       )
+
+      // * update num of attachComments
+      const showingPosts = context.rootState.postAbout.showingPosts
+      const onCommentId = result.data.onCommentId
+      if (onCommentId) {
+        showingPosts.forEach((post) => {
+          if (post.comments.length) {
+            post.comments.forEach((comment) => {
+              if (comment.id === onCommentId) {
+                comment._count.commentByComments++
+              }
+            })
+          }
+        })
+      }
 
       result.data.author.avatarUrl = this.getters.loginedUser.avatarUrl
 
@@ -63,7 +78,6 @@ export const commentOptions = {
         `${context.rootState.API_URL}/comments`,
         commentInfoToUpdate
       )
-      console.log(data)
       if (commentInfo.postId) {
         context.commit(
           'postAbout/UPDATE_COMMENT_LIKE_OF_POST',
@@ -78,11 +92,9 @@ export const commentOptions = {
       }
     },
     async deleteComment(context, commentId) {
-      const { data } = await axios.delete(
+      await axios.delete(
         `${context.rootState.API_URL}/comments/${commentId}`
       )
-
-      console.log(`${data} deleted!`)
       context.commit('DELETE_USER_RECENT_COMMENT', commentId)
     }
   },

@@ -19,7 +19,7 @@
       <img alt="img" :src="showingUserData.avatarUrl" @error="useFallbackImg" />
 
       <div class="interact" :class="{ 'not-logined-user': !isLoginedUser }">
-        <button @click="triggerChat(showingUserData)">
+        <button v-if="!isLoginedUser" @click="triggerChat(showingUserData)">
           <svg>
             <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
           </svg>
@@ -48,10 +48,15 @@
         <span>@{{ showingUserData.alias }}</span>
         <p>{{ showingUserData.bio }}</p>
         <div class="follows">
-          <span>{{ showingUserData.follow.length }} 個跟隨中</span>
-          <span>{{ showingUserData.followed.length }} 位追隨者</span>
+          <span><b @click="showUserList('following')">{{ showingUserData.follow.length }}</b>個關注中</span>
+          <span><b @click="showUserList('followedBy')">{{ showingUserData.followed.length }}</b>位關注者</span>
         </div>
       </div>
+
+      <ConditionUserList
+        v-show="isListActivated"
+        :userIdList="userIdList"
+      />
     </div>
 
     <div class="profile-nav">
@@ -72,10 +77,16 @@
 import PageInfoBar from '../components/PageInfoBar.vue'
 import VueLoadImage from 'vue-load-image'
 import LoadSpinner from '../components/LoadSpinner.vue'
+import ConditionUserList from '../components/ConditionUserList.vue'
 
 export default {
   name: 'ProfilePage',
-  components: { PageInfoBar, VueLoadImage, LoadSpinner },
+  components: { PageInfoBar, VueLoadImage, LoadSpinner, ConditionUserList },
+  data() {
+    return {
+      userIdList: []
+    }
+  },
   computed: {
     isFollowed() {
       if (!Object.hasOwn(this.$store.state.userAbout.otherUserData, 'id'))
@@ -103,13 +114,16 @@ export default {
     },
     userPosts() {
       return this.$store.state.postAbout.userPosts
+    },
+    isListActivated() {
+      return this.$store.state.isConditionUserListActivated
     }
   },
   methods: {
     async toggleFollow() {
       if (!this.isFollowed) {
         const newFollowship = await this.$axios.post(
-          `${this.$API_URL}/users/follow`,
+          `${this.$store.state.API_URL}/users/follow`,
           {
             followerId: this.$store.getters.loginedUserId,
             followedId: this.showingUserData.id
@@ -118,7 +132,7 @@ export default {
         this.$store.commit('userAbout/UPDATE_FOLLOWSHIP', newFollowship.data)
       } else {
         const followshipToRemove = this.showingUserData.followed.find(e => e.followerId === this.$store.getters.loginedUserId)
-        await this.$axios.delete(`${this.$API_URL}/users/follow/${followshipToRemove.id}`)
+        await this.$axios.delete(`${this.$store.state.API_URL}/users/follow/${followshipToRemove.id}`)
         this.$store.commit('userAbout/UPDATE_FOLLOWSHIP')
       }
     },
@@ -138,6 +152,19 @@ export default {
       } else {
         event.target.src = require('@/assets/images/default_avatar1.png')
       }
+    },
+    showUserList(listType) {
+      let userIdList
+      if (listType === 'following') {
+        userIdList = this.showingUserData.follow.map(e => e.followedId)
+      } else {
+        userIdList = this.showingUserData.followed.map(e => e.followerId)
+      }
+
+      console.log(userIdList)
+      this.userIdList = userIdList
+
+      this.$store.state.isConditionUserListActivated = true
     }
   },
   async created() {
@@ -164,18 +191,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+
 .profile-page {
+  height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+
   @include respond($bp-tablet) {
     margin-top: 1rem;
     .page-info {
       display: none;
     }
   }
+
+  @include respond($bp-mobile) {
+    height: calc(100vh - 7rem);
+  }
 }
 
 .post-list {
-  overflow-y: scroll;
-  height: 43vh;
+  overflow-y: auto;
 }
 
 .user-bg {
@@ -202,6 +238,10 @@ export default {
     transform: translate(1.5rem, -8.6rem);
     border: 5px solid $color-gray-100;
   }
+}
+
+.profile-nav {
+  display: flex;
 }
 
 .interact {
@@ -259,15 +299,18 @@ export default {
   grid-template-columns: 60% 40%;
   overflow-y: hidden;
 
-  &:hover {
-    overflow-y: unset;
-    p {
-      display: block;
-      overflow: unset;
-      box-shadow: 1rem 1rem 2rem 0 #2278a0;
-      background-color: $color-gray-100;
+  @media (hover: hover) {
+    &:hover {
+      overflow-y: unset;
+      p {
+        display: block;
+        overflow: unset;
+        box-shadow: 1rem 1rem 2rem 0 #2278a0;
+        background-color: $color-gray-100;
+      }
     }
   }
+
   span {
     color: $color-gray-400;
   }
@@ -287,9 +330,11 @@ export default {
     grid-row: 1 / 2;
     justify-self: end;
     span {
-      display: inline-block;
-      margin-right: 2rem;
       color: $color-gray-900;
+
+      @include respond($bp-mobile) {
+        display: block;
+      }
     }
   }
 }
@@ -302,6 +347,14 @@ a {
   display: inline-block;
   width: 13rem;
   padding-bottom: 1rem;
+}
+
+b {
+  color: $color-primary;
+  padding: 0 1rem;
+  text-decoration: underline;
+  text-underline-offset: .5rem;
+  cursor: pointer;
 }
 
 .active {

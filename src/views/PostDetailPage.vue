@@ -1,19 +1,18 @@
 <template>
-  <div>
+  <div class="post-detail">
     <PageInfoBar />
     <PostItem class="post" :post="post" ref="post" />
     <div class="info">
       <span>{{ formattedTime }} 發布 </span>
       <span v-if="post.liked">
         有<b class="info__num-of-like" 
-            @click="showUserLikeList"
+            @click="showConditionUserList"
             >{{ post.liked.length }}</b>個人喜歡
       </span>
 
-      <UserLikeList
+      <ConditionUserList
         v-show="isListActivated"
-        :likes="post.liked"
-        v-on:closeList="closeList"
+        :userIdList="likedByUsers"
       />
       
       <a @click="togglePostLike(post)">
@@ -48,14 +47,14 @@ import PageInfoBar from './../components/PageInfoBar'
 import PostItem from './../components/PostItem'
 import CommentItem from './../components/CommentItem'
 import ContentPoster from './../components/ContentPoster'
-import UserLikeList from './../components/UserLikeList'
+import ConditionUserList from './../components/ConditionUserList'
 export default {
   name: 'PostDetailPage',
   data() {
     return {
       post: {},
       isLike: '',
-      isListActivated: false
+      // isListActivated: false
     }
   },
   computed: {
@@ -64,19 +63,25 @@ export default {
       return this.$format(new Date(post.createdAt), 'yyyy-MM-dd HH:mm:ss', {
         locale: this.$zhTW
       })
+    },
+    likedByUsers() {
+      return this.post.liked.map(like => like.userId)
+    },
+    isListActivated() {
+      return this.$store.state.isConditionUserListActivated
     }
   },
-  components: { PageInfoBar, PostItem, CommentItem, ContentPoster, UserLikeList },
+  components: { PageInfoBar, PostItem, CommentItem, ContentPoster, ConditionUserList },
   methods: {
     showModal(post) {
       this.$refs.post.showReplyModal(post)
     },
-    showUserLikeList() {
-      this.isListActivated = true
+    showConditionUserList() {
+      this.$store.state.isConditionUserListActivated = true
     },
-    closeList() {
-      this.isListActivated = false
-    },
+    // closeList() {
+    //   this.isListActivated = false
+    // },
     togglePostLike(post) {
       const isLike = !this.isLike
       this.isLike = isLike
@@ -114,9 +119,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.post-detail {
+  height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+}
+
 .comment-list {
-  height: 53vh;
-  overflow-x: auto;
+  overflow-y: auto;
 }
 
 div {

@@ -1,6 +1,6 @@
 <template>
   <div class="post-list">
-    <CommentItem 
+    <CommentItem
       v-for="comment in $store.state.commentAbout.userRecentComments"
       :key="comment.id" 
       :comment="comment">

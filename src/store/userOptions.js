@@ -31,7 +31,6 @@ export const userOptions = {
     },
 
     async authAdmin(context, loginInfo) {
-      alert('authAdmin')
       const admin = await axios.post(
         `${context.rootState.API_URL}/users/admin`,
         loginInfo

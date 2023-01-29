@@ -19,9 +19,6 @@ export default {
     }
   },
   components: { PageInfoBar, NotificationItem },
-  beforeDestroy(){
-    sessionStorage.setItem('storeData', JSON.stringify(this.$store.state))
-  }
 }
 </script>
 

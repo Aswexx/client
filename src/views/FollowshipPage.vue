@@ -26,6 +26,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.search {
+  height: calc(100vh - 4rem);
+}
 .user-list {
   @include respond($bp-mobile) {
     display: initial;

@@ -23,7 +23,7 @@ export default {
   methods: {
     async emailVertify(){
       try {
-        await this.$axios.post(`${this.$API_URL}/users/emailVertification`, { vertifyCode: this.emailVertifyCode })
+        await this.$axios.post(`${this.$store.state.API_URL}/users/emailVertification`, { vertifyCode: this.emailVertifyCode })
 
         this.$store.commit('TRIGGER_TOAST', {
           type: 'success',

@@ -100,6 +100,7 @@ export default {
 
       // * home page reply post
       if (this.source.modalType === 'replyPost') {
+        
         contentsToSubmit.append('postId', this.source.id)
         contentsToSubmit.append('tagedUsers', JSON.stringify(this.$refs.emojiInput.tagedUserList))
         this.$refs.emojiInput.tagedUserList = {}
@@ -113,10 +114,12 @@ export default {
       // * reply comment via action modal
       if (this.source.modalType === 'replyComment') {
         contentsToSubmit.append('commentId', this.source.id)
-        return this.$store.dispatch(
+        const result = await this.$store.dispatch(
           'commentAbout/submitComment',
           contentsToSubmit
         )
+        console.log(result)
+        return
       }
     },
     showFilePicker(fileType) {
@@ -137,22 +140,13 @@ export default {
         //   notifType: 'mention'
         // }
         // this.$axios.post(
-        //   `${this.$API_URL}/notifications`,
+        //   `${this.$store.state.API_URL}/notifications`,
         //   notifData
         // )
       })
     },
     async triggerCam() {
       try {
-        //TODO: 區分是否有前後鏡頭的設備
-        // const stream = await navigator.mediaDevices.getUserMedia({
-        //   video: {
-        //     facingMode: { exact: 'environment' } // or 'user'
-        //   },
-        //   audio: false
-        // })
-        alert(this.$device.isMobile)
-
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false

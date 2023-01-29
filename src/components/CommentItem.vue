@@ -55,7 +55,7 @@
             xlink:href="./../assets/images/symbol-defs.svg#icon-msg-sm"
           ></use>
         </svg>
-        <span>{{ comment._count.commentByComments }}</span>
+        <span>{{ commentByCommentsCount }}</span>
       </a>
       <a @click.stop="toggleCommentLike(comment)">
         <svg v-if="!isLike">
@@ -114,6 +114,12 @@ export default {
     },
     isFirstLevelComment() {
       return Object.hasOwn(this.comment, 'onPost')
+    },
+    commentByCommentsCount() {
+      if (this.comment._count) {
+        return this.comment._count.commentByComments
+      }
+      return 0
     }
   },
   methods: {
@@ -253,6 +259,14 @@ export default {
     position: absolute;
     top: .5rem;
     right: 1rem;
+  }
+
+  @include respond($bp-mobile) {
+    display: flex;
+    flex-direction: column;
+    &__avatar {
+      display: none;
+    }
   }
 }
 

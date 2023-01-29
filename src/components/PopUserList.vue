@@ -102,7 +102,7 @@ export default {
       const isFollowing = this.showFollowState(user)
       if (!isFollowing) {
         const newFollowship = await this.$axios.post(
-          `${this.$API_URL}/users/follow`,
+          `${this.$store.state.API_URL}/users/follow`,
           {
             followerId: this.$store.getters.loginedUserId,
             followedId: user.id
@@ -121,7 +121,7 @@ export default {
         const followedIndex = user.followed.indexOf(followshipToRemove)
 
         await this.$axios.delete(
-          `${this.$API_URL}/users/follow/${followshipToRemove.id}`
+          `${this.$store.state.API_URL}/users/follow/${followshipToRemove.id}`
         )
         user.followed.splice(followedIndex, 1)
         this.showingUsers.forEach((showingUser) => {
@@ -309,7 +309,10 @@ export default {
 
 <style lang="scss" scoped>
 .pop-user-list {
-  height: 98vh;
+  display: flex;
+  flex-direction: column;
+
+  height: calc(100vh - 2rem);
   top: 0;
   grid-column: 3/4;
   @include respond($bp-mobile) {
@@ -352,7 +355,6 @@ export default {
 }
 
 .user-card-wraper {
-  height: 87.5%;
   padding: 0 1rem 0 0;
   overflow-x: hidden;
   overflow-y: auto;

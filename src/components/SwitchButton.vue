@@ -4,7 +4,9 @@
       v-model="isTriggered"
       @click="toggle"
     />
-    <span class="slider"></span>
+    <span ref="slider" class="slider">
+      <slot></slot>
+    </span>
   </label>
 </template>
 
@@ -12,7 +14,7 @@
 export default {
   data() {
     return {
-      isTriggered: this.defaultVal
+      isTriggered: this.defaultVal,
     }
   },
   props: ['defaultVal'],
@@ -21,13 +23,14 @@ export default {
       this.isTriggered = !this.isTriggered
       this.$emit('toggle', this.isTriggered)
     }
-  }
+  },
 }
 </script>
 
 <style lang="scss" scoped>
 .switch {
   position: relative;
+  display: block;
   width: 5rem;
   height: 2.4rem;
 
@@ -58,7 +61,9 @@ export default {
   background-color: $color-gray-100;
   transition: 0.4s;
   border-radius: 50%;
+
 }
+
 
 input:checked + .slider {
   background-color: $color-brand;

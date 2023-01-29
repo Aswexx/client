@@ -91,17 +91,21 @@ const mutations = {
     state.modalType = contents.modalType
   },
   TRIGGER_TOAST(state, toast) {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId)
+    }
     if (state.isChatActivated) return
-    state.toastType = ''
-    state.toastDetail = ''
     state.toastType = toast.type
     state.toastDetail = toast.detail
     state.isToastShow = true
 
-    window.timer = setTimeout(() => {
+    this.timeoutId = setTimeout(() => {
       state.isToastShow = false
-    }, 5300)
-    console.log(window.timer)
+      setTimeout(() => {
+        state.toastType = ''
+        state.toastDetail = ''
+      }, 1000)
+    }, 3300)
   },
   TRIGGER_CHAT(state, info) {
     if (!state.isChatActivated) state.isChatActivated = true
@@ -127,12 +131,7 @@ const mutations = {
     state.currentChatTarget = targetUser
   },
   SAVE_MESSAGE(state, msgInfo) {
-    
-        // { isSenderMsg: false, contents: 'wow', createdTime: Date.now() },
-        // { isSenderMsg: true, contents: 'hey', createdTime: Date.now() },
-      //
     // * load msg recieved while user havent login yet
-
     // * convert message
     const msgToAdd = {
       isSenderMsg: false,
@@ -167,7 +166,6 @@ const mutations = {
     state.notifSocket = notifSocket
   },
   UPDATE_ONLINE_USERS(state, users) {
-    // state.onlineUsers = new Set(users)
     state.onlineUsers = users
   },
   ADD_NOTIFICATION(state, notification) {
@@ -180,16 +178,19 @@ const mutations = {
       (notif) => notif.id === notifId
     )
     targetNotif.isRead = true
+    state.readNotifs.push(targetNotif.id)
     // TODO: DB 同步待處理，不要一次次 request，決定個時間點一次性同步
   }
 }
 
 const state = {
   viewport: window.innerWidth,
-  useDarkTheme: localStorage.getItem('preferDark') === null ?
-    window.matchMedia('(prefers-color-scheme: dark)').matches :
-    localStorage.getItem('preferDark') === 'true',
+  useDarkTheme:
+    localStorage.getItem('preferDark') === null
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      : localStorage.getItem('preferDark') === 'true',
   isModalOpened: '',
+  isConditionUserListActivated: false,
   modalType: '',
 
   isToastShow: false,
@@ -206,11 +207,13 @@ const state = {
 
   sourcePostOrComment: {},
   notifications: [],
+  readNotifs: [],
   notifSocket: '',
   onlineUsers: new Set(),
   // HOST_URL: 'http://localhost:8080',
-  // API_URL: 'https://localhost:4000',
+  // API_URL: 'http://localhost:4000',
   API_URL: 'https://192.168.0.103:4000',
+  // API_URL: 'https://joeln-api.fun',
 
   videoStream: '',
   snapUrl: '',

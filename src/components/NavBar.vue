@@ -16,7 +16,7 @@
           <svg>
             <use xlink:href="./../assets/images/symbol-defs.svg#icon-user"></use>
           </svg>
-          <span>{{ isAdmin ? '使用者列表' : '個人資料' }}</span>
+          <span>{{ isAdmin ? '使用者列表' : '個人詳情' }}</span>
         </router-link>
       </li>
 
@@ -71,20 +71,13 @@
         </svg>
       </button>
 
-      <button v-if="!isAdmin" @click="post">
+      <button v-if="!isAdmin && $store.state.viewport >= 576" @click="post">
         <span>貼文</span>
         <svg class="post-icon" :class="{ active: $store.state.isModalOpened }" v-if="matchTablet">
           <use xlink:href="./../assets/images/symbol-defs.svg#post-icon"></use>
         </svg>
       </button>
     </ul>
-
-    <SwitchButton
-      :label="'light/dark'"
-      :defaultVal="$store.state.useDarkTheme"
-      @toggle="toggleDarkMode"
-      ref="modeSwitcher"
-    />
 
     <div class="logout" @click="logout">
       <svg class="">
@@ -96,10 +89,7 @@
 </template>
 
 <script>
-import SwitchButton from './../components/SwitchButton'
-
 export default {
-  components: { SwitchButton },
   data() {
     return {
       matchTablet: window.matchMedia('(max-width: 768px)').matches,
@@ -109,28 +99,6 @@ export default {
   computed: {
     unreadCounts() {
       return this.$store.getters.unreadNotifs
-    },
-    isDarkMode() {
-      return this.$store.state.useDarkTheme
-    }
-  },
-  watch: {
-    isDarkMode: {
-      immediate: true,
-      handler(newVal) {
-        const body = document.querySelector('body')
-        const modeSwitcher = this.$refs.modeSwitcher
-
-        if (newVal) {
-          body.classList.add('dark-mode')
-          if (modeSwitcher) modeSwitcher.isTriggered = true
-        } else {
-          body.classList.remove('dark-mode')
-          if (modeSwitcher) modeSwitcher.isTriggered = false
-        }
-
-        localStorage.setItem('preferDark', newVal)
-      }
     },
   },
   methods: {
@@ -150,9 +118,6 @@ export default {
       } else {
         this.$store.commit('MINIMIZE_CHAT_SECTION')
       }
-    },
-    toggleDarkMode(newState) {
-      this.$store.state.useDarkTheme = newState
     },
     async logout() {
       await this.$axios.get(`${this.$store.state.API_URL}/users/logout`)
@@ -219,7 +184,8 @@ div.nav {
 }
 
 ul {
-  height: 24.4rem;
+  height: 100%;
+  max-height: 28rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -271,7 +237,9 @@ svg {
     stroke: $color-gray-100;
     stroke-width: 1.5;
   }
+
 }
+
 
 .unread {
   position: relative;
@@ -292,6 +260,7 @@ svg {
     font-size: 0.1rem;
   }
 }
+
 
 @include respond($bp-tablet) {
   span {
@@ -337,8 +306,9 @@ svg {
   }
 
   .unread-dot {
-    width: .5rem;
-    height: .5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    top: -.75rem;
     right: 1rem;
     background-color: red;
   }
