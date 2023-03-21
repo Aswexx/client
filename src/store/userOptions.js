@@ -11,25 +11,36 @@ export const userOptions = {
     async googleOauth(context, token) {
       const { data } = await axios.post(
         `${context.rootState.API_URL}/users/google`,
-        { token }
+        {
+          token,
+          isIOSdevice: context.rootState.isIOSdevice
+        }
       )
+
+      console.log('🐶🐶🐶', data)
 
       context.commit('SAVE_USER_DATA', data)
       context.state.isAuthenticated = true
     },
 
     async auth(context, loginInfo) {
-      const loginedUserData = await axios.post(
+      const { data } = await axios.post(
         `${context.rootState.API_URL}/users/normal`,
         loginInfo
       )
-      if (!loginedUserData.data) {
+      
+      if (!data) {
         throw new Error()
       }
-      context.commit('SAVE_USER_DATA', loginedUserData.data)
+
+      if (context.rootState.isIOSdevice) {
+        context.commit('SAVE_USER_DATA', data.user)
+        context.rootState.accessToken = data.accessToken
+      } else {
+        context.commit('SAVE_USER_DATA', data)
+      }
       context.state.isAuthenticated = true
     },
-
     async authAdmin(context, loginInfo) {
       const admin = await axios.post(
         `${context.rootState.API_URL}/users/admin`,
@@ -78,12 +89,20 @@ export const userOptions = {
           throw new Error()
         }
         context.commit('SAVE_USER_DATA', data)
+        context.commit(
+          'TRIGGER_TOAST',
+          {
+            type: 'success',
+            detail: '個人資料已更新'
+          },
+          { root: true }
+        )
       } catch (err) {
         context.commit(
           'TRIGGER_TOAST',
           {
             type: 'error',
-            detail: '別名已存在'
+            detail: '別名重複或上傳圖檔超過1MB，請重新操作'
           },
           { root: true }
         )
@@ -92,6 +111,7 @@ export const userOptions = {
   },
   mutations: {
     SAVE_USER_DATA(state, userInfo) {
+      console.log('saving user data...', userInfo)
       if (
         Object.hasOwn(state.loginedUserData, 'id') &&
         userInfo.id !== state.loginedUserData.id
@@ -141,7 +161,31 @@ export const userOptions = {
       }
     },
     UPDATE_FOLLOWSHIP(state, followship) {
+      // * check if user is on other's profile page first
       // * followship param not passed in means remove exist followship
+      const isOnOtherUserProfile = state.otherUserData.id ? true : false
+      const loginedUserData = state.loginedUserData
+      if (!isOnOtherUserProfile) {
+        if (followship) {
+          for (const user of state.users) {
+            if (user.id === followship.followedId) {
+              user.follow.unshift(followship)
+              loginedUserData.follow.unshift(followship)
+              return
+            }
+          }
+        }
+        for (const user of state.users) {
+          const targetFollowship = user.follow.find(
+            (f) => f.followerId === this.getters.loginedUserId
+          )
+          const targetFollowshipIndex = user.follow.indexOf(targetFollowship)
+          user.follow.splice(targetFollowshipIndex, 1)
+          loginedUserData.follow.splice(targetFollowshipIndex, 1)
+          return
+        }
+      }
+
       if (followship) {
         for (const user of state.users) {
           if (user.id === followship.followedId) {
@@ -165,7 +209,6 @@ export const userOptions = {
       }
     },
     UPDATE_SPONSOR_STATE(state) {
-      console.log('ready to mutate')
       state.loginedUserData.isSponsor = true
     }
   },

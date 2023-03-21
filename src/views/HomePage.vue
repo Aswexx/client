@@ -57,30 +57,32 @@ export default {
     async loadMorePosts(event) {
       const { scrollTop, scrollHeight, clientHeight } = event.target
 
-      if (scrollTop + clientHeight >= scrollHeight) {
+      if (scrollTop + clientHeight >= scrollHeight - 5) {
         //* exclude loadSpinner
         if (this.postCount === event.target.children.length - 1) {
-          console.log('scroll event canceled')
           return
         }
         this.postCount = event.target.children.length - 1
         this.showLoader = true
 
         // * get more posts base on current posts
-        const { data } = await axios.get(
-          `${this.$store.state.API_URL}/posts/home-page`,
-          {
-            params: { skipPostsCount: this.postCount, take: 10 }
-          }
-        )
-
-        // * modify data structure recieved from backend
-        delete data.postCount
-
-        setTimeout(() => {
-          this.showLoader = false
-          this.$store.state.postAbout.showingPosts.push(...Object.values(data))
-        }, 2000)
+        try {
+          const { data } = await axios.get(
+            `${this.$store.state.API_URL}/posts/home-page`,
+            {
+              params: { skipPostsCount: this.postCount, take: 10, order: 'newest' }
+            }
+          )
+          delete data.postCount
+          setTimeout(() => {
+            this.showLoader = false
+            this.$store.state.postAbout.showingPosts.push(...Object.values(data))
+          }, 2000)
+        } catch {
+          window.location.href = process.env.VUE_APP_HOST_URL
+          this.$store.state.notifSocket.disconnect()
+          this.$store.state.notifSocket = ''
+        }
       }
     }
   },
@@ -107,30 +109,14 @@ export default {
       })
 
       notificationSocket.on('disconnect', () => {
-        //TODO: do someting when server shut down
+        // * Upon server restart, prompt the user to log in again.
+        this.$router.push({ name: 'login' })
       })
     }
 
-    // * handle read state of notifications
-    const previousReadNotifs = JSON.parse(localStorage.getItem('previousReadNotifs'))
-    const notifications = JSON.parse(sessionStorage.getItem('previousNotifs'))
-    if (previousReadNotifs && previousReadNotifs.length) {
-      notificationSocket.emit('updateNotifsReadState', previousReadNotifs)
+    if (!this.$store.state.notifications.length) {
+      this.$store.dispatch('getNotifications')
     }
-
-    if (notifications && notifications.length) {
-      this.$store.commit('ADD_NOTIFICATION', notifications)
-      sessionStorage.clear()
-    } else if (!this.$store.state.notifications.length) {
-      await this.$store.dispatch('getNotifications')
-    }
-
-    window.addEventListener('unload', () => {
-      const readNotifs = this.$store.state.readNotifs
-      const notifications = this.$store.state.notifications
-      localStorage.setItem('previousReadNotifs', JSON.stringify(readNotifs))
-      sessionStorage.setItem('previousNotifs', JSON.stringify(notifications))
-    })
   }
 }
 </script>

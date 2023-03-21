@@ -53,12 +53,9 @@ export default {
     async startPay(){
       const result = await this.$axios.post(`${this.$store.state.API_URL}/users/sponsor`, { userId: this.$store.getters.loginedUserId })
       const linePay = result.data.linePay
-      const linePayWindow = window.open(linePay)
+      window.open(linePay)
       const notificationSocket = this.$store.state.notifSocket
       const updateSponsorState = () => {
-        setTimeout(()=> {
-          linePayWindow.close()
-        }, 5000)
         this.$store.commit('userAbout/UPDATE_SPONSOR_STATE')
         notificationSocket.off('paid', updateSponsorState)
       }

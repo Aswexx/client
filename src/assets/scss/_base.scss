@@ -153,6 +153,12 @@ body {
     background-color: $color-bg-darkmode;
   }
 
+  .taged-users {
+    span {
+      color: $color-primary;
+    }
+  }
+
   // * date picker
   .mx-input-wrapper {
     input {

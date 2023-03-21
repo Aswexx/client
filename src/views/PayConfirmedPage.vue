@@ -22,6 +22,10 @@ export default {
       }
     }
     const timer = setInterval(cb, 1000)
+
+    setTimeout(() => {
+      window.close()
+    },5000)
   }
 }
 </script>

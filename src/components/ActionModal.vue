@@ -26,7 +26,7 @@
 
       <transition name="modal-inner-offset">
         <div class="photo-taking" v-show="$store.state.modalType === 'photo'">
-          <video playsinline ref="video" width="500" height="500"></video>
+          <video playsinline ref="video" width="500" height="375"></video>
           <div class="photo-taking__controls">
             <span @click="switchCam"><svg><use xlink:href="../assets/images/symbol-defs.svg#icon-switch"></use></svg></span>
             <span @click="snapShot"><svg><use xlink:href="../assets/images/symbol-defs.svg#icon-concentric-circle"></use></svg></span>
@@ -514,6 +514,7 @@ textarea {
 }
 
 .photo-taking {
+  position: ralative;
   width: 80%;
   max-width: 50rem;
   height: 80%;
@@ -528,6 +529,8 @@ textarea {
 
 
   &__controls {
+    position: absolute;
+    bottom: 2%;
     width: 100%;
     display: flex;
     justify-content: space-around;

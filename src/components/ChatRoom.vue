@@ -107,7 +107,6 @@ export default {
       deep: true,
       handler(newVal) {
         const chatRoomWrapper = this.$refs.chatRoomWrapper
-        console.log(newVal.top)
         chatRoomWrapper.style.top = newVal.top + 'px'
         chatRoomWrapper.style.left = newVal.left + 'px'
       }
@@ -137,7 +136,7 @@ export default {
     switchChatTo(target) {
       this.$store.commit('SWITCH_CHAT_TARGET', target)
       this.$store.commit('RESET_CHAT_STATE')
-      // * update current chat roomId
+      //** update current chat roomId
       this.$store.state.chatSocket.emit('changeRoom', {
         triggerUser: this.$store.getters.loginedUserId,
         targetUser: this.$store.state.currentChatTarget.id
@@ -191,11 +190,6 @@ export default {
       })
 
       this.message = ''
-
-      // const chatBody = this.$refs.chatBody
-      // this.$nextTick(() => {
-      //   chatBody.scrollTop = chatBody.scrollHeight - chatBody.clientHeight
-      // })
     }
   }
 }
@@ -324,6 +318,7 @@ export default {
       outline: none;
       padding-left: 0.5rem;
       font-size: 1.6rem;
+      color: $color-gray-900;
     }
 
     button {

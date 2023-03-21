@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     async direct(notif) {
-      this.read(notif)
+      this.$store.dispatch('updateNotifReadState', notif.id)
       let chatSocket = this.$store.state.chatSocket
 
       switch (notif.notifType) {
@@ -87,7 +87,6 @@ export default {
 
             // * listening the message target user sends
             chatSocket.on('newMsg', (msg) => {
-              console.log(msg)
               msg.createdTime = this.$format(
                 new Date(msg.createdTime),
                 'yyyy-MM-dd HH:mm:ss',
@@ -122,14 +121,10 @@ export default {
           if (targetPostId) {
             await this.routePush('post', targetPostId)
           } else {
-            console.log('go to mention Comment', targetCommentId)
             await this.routePush('comment', targetCommentId)
           }
         }
       }
-    },
-    async read(notif) {
-      await this.$store.commit('TURN_NOTIF_READ', notif.id)
     },
     useFallbackImg(event) {
       event.target.src = require('@/assets/images/default_avatar1.png')
@@ -140,6 +135,7 @@ export default {
           'postAbout/getPost',
           targetContentId
         )
+        data.comments = data.comments.reverse()
         this.$router.push({
           name: 'post-detail',
           params: { post: data }
@@ -161,7 +157,6 @@ export default {
       }
     }
   },
-  
   computed: {
     description() {
       const notif = this.notif

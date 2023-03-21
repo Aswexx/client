@@ -1,8 +1,7 @@
 import axios from 'axios'
 
 function directToLoginPageAndResetSocket (context) {
-  // window.location.href = 'http://localhost:8080/#/login'
-  window.location.href = 'https://192.168.0.103:8080/#/login'
+  window.location.href = process.env.VUE_APP_HOST_URL
   context.rootState.notifSocket.disconnect()
   context.rootState.notifSocket = ''
 }
@@ -14,10 +13,11 @@ export const postOptions = {
       try {
         const { data } = await axios.get(
           `${context.rootState.API_URL}/posts/home-page`,
-          { params: { skipPostsCount: 0, take: 10, order: 'newest' } }
+          {
+            params: { skipPostsCount: 0, take: 10, order: 'newest' }
+          }
         )
 
-        // * modify data structure recieved from backend
         delete data.postCount
         context.state.showingPosts = Object.values(data)
       } catch (err) {
@@ -98,8 +98,6 @@ export const postOptions = {
         }
       })
 
-      console.log(data)
-
       context.state.postCount = data.postCount
       context.state.showingPosts = data
       delete data.postCount
@@ -131,7 +129,6 @@ export const postOptions = {
         chartData[date.getHours()]++
       })
 
-      console.log(chartData)
       context.state.allPostsCreatedAt = chartData
     }
   },
@@ -143,7 +140,6 @@ export const postOptions = {
       state.userLikePosts = posts.map(obj => obj.post)
     },
     CONVERT_AVATAR_URL(state, avatarUrl) {
-      console.log(avatarUrl)
       state.userPosts.forEach((post) => {
         post.avatarUrl = avatarUrl
       })

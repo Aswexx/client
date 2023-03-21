@@ -84,7 +84,7 @@ export default {
   components: { PageInfoBar, VueLoadImage, LoadSpinner, ConditionUserList },
   data() {
     return {
-      userIdList: []
+      userIdList: [],
     }
   },
   computed: {
@@ -117,7 +117,7 @@ export default {
     },
     isListActivated() {
       return this.$store.state.isConditionUserListActivated
-    }
+    },
   },
   methods: {
     async toggleFollow() {
@@ -160,26 +160,23 @@ export default {
       } else {
         userIdList = this.showingUserData.followed.map(e => e.followerId)
       }
-
-      console.log(userIdList)
       this.userIdList = userIdList
-
       this.$store.state.isConditionUserListActivated = true
     }
   },
-  async created() {
-    // * no route params means user try to see own profile
-    let userId
-    try {
-      userId =
-        this.$route.params.userId ||
-        // * load session data if unload on profile page
-        JSON.parse(sessionStorage.getItem('storeData')).postAbout.userPosts[0]
-          .author.id ||
-        this.$store.getters.loginedUserId
-    } catch {
-      userId = this.$store.getters.loginedUserId
+  beforeRouteLeave(to, __from, next) {
+    if (!to.path.includes('detail')) {
+      this.$store.state.lastUserDetail = ''
+    } else {
+      this.$store.state.lastUserDetail = this.showingUserData.id
     }
+    next()
+  },
+  async created() {
+    const userId =
+        this.$route.params.userId ||
+        this.$store.state.lastUserDetail ||
+        this.$store.getters.loginedUserId
 
     await this.$store.dispatch('postAbout/getUserPosts', userId)
     await this.$store.dispatch('userAbout/getUser', userId)

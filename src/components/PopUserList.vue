@@ -100,6 +100,7 @@ export default {
     },
     async toggleFollow(user) {
       const isFollowing = this.showFollowState(user)
+      // * add follow
       if (!isFollowing) {
         const newFollowship = await this.$axios.post(
           `${this.$store.state.API_URL}/users/follow`,
@@ -110,10 +111,12 @@ export default {
         )
         user.followed.unshift(newFollowship.data)
         this.showingUsers.forEach((showingUser) => {
-          if (showingUser.id === user.id) {
+        if (showingUser.id === user.id) {
             showingUser.followed = user.followed
           }
         })
+        this.$store.commit('userAbout/UPDATE_FOLLOWSHIP', newFollowship.data)
+      // * remove follow
       } else {
         const followshipToRemove = user.followed.find((followship) => {
           return followship.followerId === this.$store.getters.loginedUserId
@@ -129,6 +132,7 @@ export default {
             showingUser.followed = user.followed
           }
         })
+        this.$store.commit('userAbout/UPDATE_FOLLOWSHIP')
       }
     },
     showFollowState(user) {
@@ -143,6 +147,7 @@ export default {
       )
     },
     async toUserProfile(userId) {
+      this.$store.state.lastUserDetail = userId
       // //* implement state mutations directly
       // //* if current route is NOT 'profile/posts'、'profile/replies' or 'profile/likes'
       switch (this.$route.name) {
@@ -251,7 +256,6 @@ export default {
             }
             const timeValue = parsedMsg.createdTime || parsedMsg.createdAt
             const formattedCreatedTime = timeFormat(timeValue)
-            console.log({ timeValue, formattedCreatedTime })
             return {
               contents: parsedMsg.message || parsedMsg.contents,
               createdTime: formattedCreatedTime,
@@ -458,6 +462,7 @@ export default {
 }
 
 h5,
+a,
 span {
   overflow: hidden;
   white-space: nowrap;

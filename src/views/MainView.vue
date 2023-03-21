@@ -32,7 +32,7 @@ export default {
       }
     }
   },
-  components: { NavBar, PopUserList, ActionModal, ChatRoom },
+  components: {NavBar, ActionModal, PopUserList, ChatRoom},
   methods: {
     drop(e){
       this.dropPosition.top = e.clientY

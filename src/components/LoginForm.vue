@@ -70,10 +70,12 @@ export default {
     async login() {
       const loginInfo = {
         account: this.account,
-        password: this.password
+        password: this.password,
+        isIOSdevice: this.$store.state.isIOSdevice
       }
+
       try {
-        if (!loginInfo.account || 
+        if (!loginInfo.account ||
             !loginInfo.password ||
             !/@/.exec(loginInfo.account)) {
           throw new Error
@@ -81,7 +83,7 @@ export default {
 
         if (this.currentPage === 'login') {
           await this.$store.dispatch('userAbout/auth', loginInfo)
-          await this.$store.dispatch('userAbout/getUsers')
+          // await this.$store.dispatch('userAbout/getUsers')
           this.$router.push({ name: 'home' })
           return
         }

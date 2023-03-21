@@ -35,6 +35,7 @@
           class="comment__img"
           v-if="comment.media.type !== 'video/mp4'"
           :src="comment.media.url"
+          @click="showImgInNewTab(comment.media.url)"
         />
         <div v-else class="comment__video" @click.stop="">
           <video
@@ -164,7 +165,6 @@ export default {
     },
     toCommentDetail(comment, attachComments, parentComments) {
       this.$store.commit('commentAbout/TRACE_PARENT_COMMENTS', comment)
-      console.log('before push', attachComments)
       this.$router
         .push({
           name: 'comment-detail',
@@ -187,6 +187,9 @@ export default {
         name: 'posts',
         params: { userId }
       })
+    },
+    showImgInNewTab(imgUrl) {
+      window.open(imgUrl)
     }
   },
   async created() {
@@ -209,7 +212,7 @@ export default {
         return userId === this.$store.getters.loginedUserId
       }
     )
-
+    
     if (this.isFirstLevelComment) {
       this.attachComments = this.$store.getters.attachComments[this.comment.id] || []
     }
@@ -266,6 +269,11 @@ export default {
     flex-direction: column;
     &__avatar {
       display: none;
+    }
+
+    &__contents {
+      display: flex;
+      flex-direction: column;
     }
   }
 }

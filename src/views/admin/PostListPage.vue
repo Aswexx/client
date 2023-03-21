@@ -40,8 +40,6 @@
           <span class="slider"></span>
         </label>
       </div>
-      <!-- TODO: modulize SwitchButton -->
-      <!-- <SwitchButton :label="'顯示圖片與短片'"/> -->
 
       <div class="toggle-search-mode">
         <label>以內文查詢</label>

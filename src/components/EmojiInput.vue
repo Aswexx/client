@@ -1,9 +1,14 @@
 <template>
   <div class="wrapper">
-    <div class="tagedUserList">
-      <a href="" v-for="(user,key) in tagedUserList" :key="key">
-        @{{ key }}
-      </a>
+    <div class="taged-user-list">
+      <div class="taged-user" v-for="(user,key) in tagedUserList" :key="key">
+        <a>
+          @{{ key }}
+        </a>
+        <svg @click="removeTagedUser(key)">
+          <use href="@/assets/images/symbol-defs.svg#icon-cross"></use>
+        </svg>
+      </div>
     </div>
     <textarea
       class="regular-input"
@@ -152,6 +157,9 @@ export default {
       this.tagUserPicker = false
       this.$refs.input.focus()
     },
+    removeTagedUser(key) {
+      this.$delete(this.tagedUserList, key)
+    },
     escapeTagPicker() {
       this.input = this.input.replaceAll('@','')
       this.tagUserPicker = false
@@ -288,9 +296,22 @@ export default {
   }
 }
 
-.tagedUserList {
-  a {
-    color: $color-primary;
+.taged-user-list {
+
+  .taged-user {
+    display: inline-block;
+    a {
+      color: $color-primary;
+    }
+
+    svg {
+      cursor: pointer;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 2px solid $color-brand;
+      border-radius: 50%;
+      padding: .2rem;
+    }
   }
 }
 

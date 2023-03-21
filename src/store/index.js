@@ -52,15 +52,16 @@ const actions = {
 
     if (lastNotifTime && Date.now() - lastNotifTime <= 1000 * 60 * 30) return
     recentChatNotifTargets.set(receiverId, Date.now())
-    console.log({ recentChatNotifTargets })
 
     const notifData = {
       informerId: context.state.userAbout.loginedUserData.id,
       receiverId,
       notifType: 'inviteChat'
     }
-    const notif = await axios.post(`${context.state.API_URL}/notifications`, notifData)
-    console.log('notiffff', notif)
+    await axios.post(
+      `${context.state.API_URL}/notifications`,
+      notifData
+    )
   },
   async getNotifications(context) {
     const userId = context.getters.loginedUserId
@@ -68,6 +69,13 @@ const actions = {
       `${context.state.API_URL}/notifications/${userId}`
     )
     context.commit('ADD_NOTIFICATION', data)
+  },
+  updateNotifReadState(context, notifId) {
+    axios.put(`${context.state.API_URL}/notifications/${notifId}`)
+    context.commit('TURN_NOTIF_READ', notifId)
+  },
+  async handleIOScors(context) {
+    await axios.get(`${context.state.API_URL}/redirect`)
   }
 }
 
@@ -178,8 +186,6 @@ const mutations = {
       (notif) => notif.id === notifId
     )
     targetNotif.isRead = true
-    state.readNotifs.push(targetNotif.id)
-    // TODO: DB 同步待處理，不要一次次 request，決定個時間點一次性同步
   }
 }
 
@@ -197,6 +203,10 @@ const state = {
   toastType: '',
   toastDetail: '',
 
+  lastUserDetail: '',
+
+  isIOSdevice: false,
+
   isChatActivated: false,
   chatRoomId: '',
   currentChatTarget: '',
@@ -207,13 +217,8 @@ const state = {
 
   sourcePostOrComment: {},
   notifications: [],
-  readNotifs: [],
   notifSocket: '',
   onlineUsers: new Set(),
-  // HOST_URL: 'http://localhost:8080',
-  // API_URL: 'http://localhost:4000',
-  API_URL: 'https://192.168.0.103:4000',
-  // API_URL: 'https://joeln-api.fun',
 
   videoStream: '',
   snapUrl: '',

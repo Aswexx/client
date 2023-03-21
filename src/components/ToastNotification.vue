@@ -1,5 +1,5 @@
 <template>
-  <div class="toast-container">
+  <div class="toast-container" ref="toastContainer">
     <div
       class="toast"
       :class="{
@@ -65,6 +65,17 @@ export default {
       return ''
     }
   },
+  watch: {
+    isTriggered(newVal) {
+      if (newVal) {
+        const toastContainer = this.$refs.toastContainer
+        toastContainer.classList.add('prompt')
+        setTimeout(() => {
+          toastContainer.classList.remove("prompt")
+        },4300)
+      }
+    }
+  }
 }
 </script>
 
@@ -88,9 +99,13 @@ svg {
   overflow: hidden;
   z-index: -1;
 
+  &.prompt {
+    z-index: 10;
+  }
+
   @include respond($bp-mobile){
     width: 100%;
-    top: 80%;
+    top: 30%;
     left: 0;
   }
 }

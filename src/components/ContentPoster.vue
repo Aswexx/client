@@ -51,8 +51,11 @@ export default {
     async submitContents() {
       // await this.notifTagedUsers()
       const emojiInput = this.$refs.emojiInput
-      if (!emojiInput.input) {
-        return alert('不能為空')
+      if (!emojiInput.input && !emojiInput.fileToUpload) {
+        return this.$store.commit('TRIGGER_TOAST', {
+          type: 'info',
+          detail: '不能為空'
+        })
       }
       const contentsToSubmit = new FormData()
 
@@ -79,7 +82,6 @@ export default {
           'commentAbout/submitComment',
           contentsToSubmit
         )
-        console.log(newComment)
         this.$emit('submitNewComment', newComment)
         return
       }
@@ -114,11 +116,10 @@ export default {
       // * reply comment via action modal
       if (this.source.modalType === 'replyComment') {
         contentsToSubmit.append('commentId', this.source.id)
-        const result = await this.$store.dispatch(
+        await this.$store.dispatch(
           'commentAbout/submitComment',
           contentsToSubmit
         )
-        console.log(result)
         return
       }
     },
@@ -131,24 +132,13 @@ export default {
     async notifTagedUsers() {
       const tagedUsers = this.$refs.emojiInput.tagedUserList
       if (!tagedUsers.size) return
-      alert(`taged ${tagedUsers.size} users!`)
-      tagedUsers.forEach(user => {
-        console.log(user)
-        // const notifData = {
-        //   informerId: this.$store.getters.loginedUserId,
-        //   receiverId: user,
-        //   notifType: 'mention'
-        // }
-        // this.$axios.post(
-        //   `${this.$store.state.API_URL}/notifications`,
-        //   notifData
-        // )
-      })
     },
     async triggerCam() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: {
+            facingMode: { exact: 'environment' }
+          },
           audio: false
         })
 
@@ -159,7 +149,6 @@ export default {
         this.$store.state.videoStream = stream
       } catch (err) {
         alert('無法開啟設備鏡頭')
-        console.log(err)
         this.$store.state.videoStream = ''
       }
     }

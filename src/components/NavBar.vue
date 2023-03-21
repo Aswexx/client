@@ -12,7 +12,9 @@
       </li>
 
       <li>
-        <router-link :to="isAdmin ? '/user-list' : '/profile/posts'" active-class="active">
+        <router-link
+          :to="isAdmin ? '/user-list' : '/profile/posts'" active-class="active"
+        >
           <svg>
             <use xlink:href="./../assets/images/symbol-defs.svg#icon-user"></use>
           </svg>
@@ -31,7 +33,7 @@
       <li v-if="!isAdmin">
         <router-link to="/notifications" active-class="active" class="unread">
           <span v-if="unreadCounts" class="unread-dot">
-            <b v-if="$store.state.viewport > 576">{{ unreadCounts }}</b>
+            {{ unreadCounts }}
           </span>
           <svg>
             <use xlink:href="./../assets/images/symbol-defs.svg#icon-notifications"></use>
@@ -40,7 +42,7 @@
         </router-link>
       </li>
 
-      <li v-if="!isAdmin">
+      <li v-if="!isAdmin && this.$store.state.viewport >= 576">
         <router-link to="/setting" active-class="active">
           <svg>
             <use xlink:href="./../assets/images/symbol-defs.svg#icon-setting"></use>
@@ -70,6 +72,15 @@
           <use xlink:href="../assets/images/symbol-defs.svg#icon-chat"></use>
         </svg>
       </button>
+
+      <li v-if="!isAdmin && this.$store.state.viewport < 576" @click="logout">
+        <a>
+          <svg class="">
+            <use xlink:href="./../assets/images/symbol-defs.svg#icon-logout"></use>
+          </svg>
+          <span>登出</span>
+        </a>
+      </li>
 
       <button v-if="!isAdmin && $store.state.viewport >= 576" @click="post">
         <span>貼文</span>
@@ -126,8 +137,10 @@ export default {
       } else {
         this.$router.push({ name: 'login' })
       }
-      window.location.reload()
       sessionStorage.clear()
+      this.$store.state.userAbout.loginedUserData = {}
+      this.$store.state.notifications = []
+      window.location.reload()
     }
   },
   mounted() {
@@ -148,7 +161,6 @@ export default {
 }
 
 div.nav {
-  height: 98vh;
 
   display: flex;
   flex-direction: column;

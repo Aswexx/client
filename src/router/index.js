@@ -34,6 +34,7 @@ const routes = [
     path: '/',
     name: 'primary',
     component: MainView,
+    redirect: '/home',
     beforeEnter: async (_to, _from, next) => {
       try {
         const API_URL = store.state.API_URL
@@ -42,36 +43,10 @@ const routes = [
         store.commit('userAbout/SAVE_USER_DATA', data)
         store.state.isAuthenticated = true
         await store.dispatch('userAbout/getUsers')
-        // alert(`next to mainview, userRole: ${data.userRole}`)
-        // if (data.userRole === 'normal') {
-        //   next()
-        // } else {
-        //   next('/post-list')
-        // }
         next()
       } catch (err) {
-        if (store.state.userAbout.isAuthenticated) {
-          alert('authenticted!')
-          next()
-        }
-        // alert('plz login')
         next('/login')
       }
-      // ****
-              // const API_URL = store.state.API_URL
-              // const { data } = await axios.get(`${API_URL}/auth`)
-              // store.commit('userAbout/SAVE_USER_DATA', data)
-              // store.state.isAuthenticated = true
-              // await store.dispatch('userAbout/getUsers')
-              // console.log(data)
-              // // alert(`next to mainview, userRole: ${data.userRole}`)
-              // // if (data.userRole === 'normal') {
-              // //   next()
-              // // } else {
-              // //   next('/post-list')
-              // // }
-              // next()
-              
     },
     children: [
       {
@@ -180,28 +155,11 @@ const routes = [
     name: 'not-found',
     component: NotFound
   }
-  // {
-  //   path: '/about',
-  //   name: 'about',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  // }
 ]
 
 const router = new VueRouter({
   mode: 'hash',
   routes
 })
-
-// router.beforeEach((to,_from,next) => {
-//   if (to.name !== 'login' && to.name !== 'admin-login' && !store.state.userAbout.isAuthenticated) {
-//     alert('請先登入')
-//     next('/login')
-//   } else {
-//     next()
-//   }
-// })
 
 export default router

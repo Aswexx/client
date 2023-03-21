@@ -40,6 +40,7 @@
         v-if="/image\//.exec(post.media.type)"
         :src="post.media.url"
         :hidden="!isShowMedia && $store.getters.loginedUser.role === 'admin'"
+        @click.stop="showImgInNewTab(post.media.url)"
       />
       <div v-else class="video-wrapper">
         <video
@@ -165,6 +166,9 @@ export default {
         name: 'posts',
         params: { userId }
       })
+    },
+    showImgInNewTab(imgUrl) {
+      window.open(imgUrl)
     }
   },
   mounted() {
@@ -192,15 +196,20 @@ export default {
   grid-row-gap: 0.5rem;
 
   border-bottom: 1px solid $color-gray-400;
+
+  overflow-y: auto;
   .avatar {
     grid-row: 1/4;
   }
 
   .post-img {
     margin: 0 auto;
-    width: 50%;
-    height: unset;
+    width: 70%;
+    height: auto;
     border-radius: 10px;
+
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
   }
 
   background-color: $color-gray-100;

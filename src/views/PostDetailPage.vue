@@ -54,7 +54,6 @@ export default {
     return {
       post: {},
       isLike: '',
-      // isListActivated: false
     }
   },
   computed: {
@@ -79,9 +78,6 @@ export default {
     showConditionUserList() {
       this.$store.state.isConditionUserListActivated = true
     },
-    // closeList() {
-    //   this.isListActivated = false
-    // },
     togglePostLike(post) {
       const isLike = !this.isLike
       this.isLike = isLike

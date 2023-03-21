@@ -120,8 +120,9 @@ export default {
       this.attachComments = this.attachComments.filter(comment => comment.id !== commentId)
     },
     updateAttachComments(newComment) {
-      if (this.attachComments.find(newComment)) return
       this.attachComments.unshift(newComment)
+      // if (this.attachComments.find(newComment)) return
+      // this.attachComments.unshift(newComment)
     }
   },
   beforeCreate() {

@@ -25,6 +25,14 @@ export default {
     window.addEventListener('beforeunload', () => {
       delete this.$store.state.notifSocket
       delete this.$store.state.chatSocket
+      delete this.$store.state.isIOSdevice
+      delete this.$store.state.viewport
+      delete this.$store.state.isChatActivated
+      delete this.$store.state.chatRoomId
+      delete this.$store.state.currentChatTarget
+      delete this.$store.state.currentMsgCollection
+      delete this.$store.state.chatTargetList
+
       const storeData = JSON.stringify(this.$store.state)
       sessionStorage.setItem('storeData', storeData)
     })

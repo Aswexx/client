@@ -41,4 +41,8 @@ input {
   }
 }
 
+input:focus {
+  outline: none;
+}
+
 </style>
