@@ -18,7 +18,7 @@ export default {
   mounted() {
     window.google.accounts.id.initialize({
       client_id:
-        '326616019329-u0hi8ovuvnohflrk2bpgju6v4u4bp0ct.apps.googleusercontent.com',
+        `${process.env.VUE_APP_GOOGLE_ID}`,
       callback: this.handleToken
     })
 
