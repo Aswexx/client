@@ -84,11 +84,11 @@ Login methods:
 2. Register a new account using a non-gmail email address and login (verification email required)
 3. Directly use any of the following test account credentials to log in:
 
-- 帳號: test1@example.com
-密碼: 123
-- 帳號: test2@example.com
-密碼: 123
-- 帳號: test3@example.com
-密碼: 123
-- 帳號: test4@example.com
-密碼: 123
+- Username: test1@example.com
+Password: 123
+- Username: test2@example.com
+Password: 123
+- Username: test3@example.com
+Password: 123
+- Username: test4@example.com
+Password: 123
